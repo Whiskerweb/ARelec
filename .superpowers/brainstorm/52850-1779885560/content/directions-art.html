@@ -1,0 +1,144 @@
+<div class="da-wrap">
+<style>
+  .da-wrap { --r: 18px; }
+  .da-wrap .intro { text-align:center; max-width:760px; margin:0 auto 30px; }
+  .da-wrap .grid { display:grid; grid-template-columns:1fr 1fr; gap:26px; max-width:1100px; margin:0 auto; }
+  .da-wrap .card { border-radius:var(--r); overflow:hidden; cursor:pointer; background:#0e0e12;
+      border:1px solid rgba(255,255,255,.08); transition:transform .25s, box-shadow .25s, border-color .25s; }
+  .da-wrap .card:hover { transform:translateY(-4px); box-shadow:0 24px 60px rgba(0,0,0,.45); border-color:rgba(255,255,255,.25); }
+  .da-wrap .card.selected { outline:3px solid #5b9bff; outline-offset:2px; }
+  .da-wrap .hero { position:relative; aspect-ratio:16/10; padding:16px; display:flex; flex-direction:column;
+      justify-content:flex-end; overflow:hidden; }
+  .da-wrap .pill { position:absolute; top:14px; left:50%; transform:translateX(-50%);
+      display:flex; align-items:center; gap:14px; padding:7px 16px; border-radius:999px;
+      background:rgba(255,255,255,.08); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,.22); font-size:9px; letter-spacing:.04em; white-space:nowrap; }
+  .da-wrap .pill .logo { font-weight:800; letter-spacing:.12em; }
+  .da-wrap .pill .nav { opacity:.85; }
+  .da-wrap .kicker { font-size:9px; letter-spacing:.28em; text-transform:uppercase; opacity:.7; margin-bottom:8px; }
+  .da-wrap .hl { font-size:30px; line-height:1.02; font-weight:600; letter-spacing:-.02em; margin:0 0 8px; }
+  .da-wrap .sub { font-size:12px; opacity:.78; margin:0 0 14px; max-width:78%; line-height:1.4; }
+  .da-wrap .cta { display:inline-flex; gap:10px; }
+  .da-wrap .btn { padding:8px 16px; border-radius:999px; font-size:11px; backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px); border:1px solid rgba(255,255,255,.25);
+      background:rgba(255,255,255,.10); }
+  .da-wrap .btn.solid { background:#fff; color:#111; border-color:#fff; font-weight:600; }
+  .da-wrap .card-body { padding:18px 20px 22px; }
+  .da-wrap .card-body .name { font-size:18px; font-weight:700; margin:0 0 4px; display:flex; align-items:center; gap:10px;}
+  .da-wrap .card-body .tag { font-size:10px; padding:3px 9px; border-radius:999px; background:rgba(91,155,255,.16); color:#9cc0ff; letter-spacing:.04em;}
+  .da-wrap .card-body .soul { font-size:13px; opacity:.72; line-height:1.5; margin:0; }
+
+  /* World 1 — Le Courant */
+  .w-courant { background:radial-gradient(120% 90% at 65% 35%, #11407e 0%, #0a1f3f 40%, #03060e 100%); color:#eaf2ff;}
+  .w-courant::before { content:""; position:absolute; inset:0;
+      background:
+        linear-gradient(115deg, transparent 46%, rgba(90,180,255,.55) 49%, transparent 52%),
+        linear-gradient(100deg, transparent 60%, rgba(120,200,255,.35) 63%, transparent 66%);
+      filter:blur(1px); mix-blend-mode:screen; }
+
+  /* World 2 — L'Etincelle */
+  .w-spark { background:radial-gradient(80% 70% at 50% 62%, #4a2c12 0%, #1a1009 45%, #060403 100%); color:#fbeede;}
+  .w-spark::before { content:""; position:absolute; width:80px; height:80px; left:50%; top:55%; transform:translate(-50%,-50%);
+      border-radius:50%; background:radial-gradient(circle, #ffd9a0 0%, rgba(255,170,70,.5) 35%, transparent 70%);
+      box-shadow:0 0 60px 20px rgba(255,170,60,.35); }
+
+  /* World 3 — Le Phare / Finistere */
+  .w-phare { background:linear-gradient(165deg, #21314f 0%, #14233e 45%, #0a1322 100%); color:#eef3fb;}
+  .w-phare::before { content:""; position:absolute; inset:0;
+      background:conic-gradient(from 200deg at 78% 22%, transparent 0deg, rgba(255,224,160,.28) 14deg, transparent 30deg);
+      mix-blend-mode:screen;}
+  .w-phare::after { content:""; position:absolute; width:10px; height:10px; right:20%; top:20%; border-radius:50%;
+      background:#ffe6b0; box-shadow:0 0 30px 10px rgba(255,220,150,.6);}
+
+  /* World 4 — Le Reseau */
+  .w-reseau { background:linear-gradient(165deg, #f2f7ff 0%, #d8e6ff 55%, #bcd4ff 100%); color:#0f1f3a;}
+  .w-reseau .pill { background:rgba(255,255,255,.55); border-color:rgba(20,60,140,.18); color:#0f1f3a;}
+  .w-reseau .btn { background:rgba(255,255,255,.6); border-color:rgba(20,60,140,.2); color:#0f1f3a;}
+  .w-reseau .btn.solid { background:#1457ff; color:#fff; border-color:#1457ff;}
+  .w-reseau .kicker { opacity:.55;}
+  .w-reseau .sub { opacity:.65;}
+  .da-wrap .glasscard { position:absolute; right:14px; top:46px; width:150px; padding:10px 12px; border-radius:14px;
+      background:rgba(255,255,255,.55); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+      border:1px solid rgba(255,255,255,.7); box-shadow:0 14px 30px rgba(20,60,140,.18); font-size:9px; color:#0f1f3a;}
+  .da-wrap .glasscard b{ display:block; font-size:10px;}
+</style>
+
+  <div class="intro">
+    <h2>Quelle âme pour ARélec&nbsp;?</h2>
+    <p class="subtitle">4 mondes possibles. Chacun = un positionnement + une ambiance + un ton de message. Survole, et clique sur celui qui te parle le plus (tu peux en commenter plusieurs).</p>
+  </div>
+
+  <div class="cards grid" data-multiselect>
+
+    <!-- 1 -->
+    <div class="card" data-choice="courant" onclick="toggleSelect(this)">
+      <div class="hero w-courant">
+        <div class="pill"><span class="logo">ARELEC</span><span class="nav">Expertise · Réalisations · Contact</span></div>
+        <div>
+          <div class="kicker">Maîtres de l'énergie</div>
+          <h3 class="hl">L'énergie,<br>domptée.</h3>
+          <p class="sub">Électricité, chauffage, plomberie. Le courant qui circule, sous contrôle.</p>
+          <div class="cta"><span class="btn solid">Demander un devis</span><span class="btn">Nos réalisations</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="name">Le Courant <span class="tag">Bleu électrique · sombre</span></p>
+        <p class="soul">Cinématique, profond, premium. Des filaments de lumière qui parcourent le noir. Mystérieux et puissant — l'électricien qui maîtrise une force invisible.</p>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="card" data-choice="spark" onclick="toggleSelect(this)">
+      <div class="hero w-spark">
+        <div class="pill"><span class="logo">ARELEC</span><span class="nav">Savoir-faire · Projets · Contact</span></div>
+        <div>
+          <div class="kicker">On apporte la lumière</div>
+          <h3 class="hl">Tout part<br>d'une étincelle.</h3>
+          <p class="sub">L'artisan qui remet vos espaces en lumière, avec exigence.</p>
+          <div class="cta"><span class="btn solid">Parler à un expert</span><span class="btn">Le studio</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="name">L'Étincelle <span class="tag">Noir · ambre chaud</span></p>
+        <p class="soul">Noir profond, une seule source de lumière chaude (cuivre, filament). Artisanal et haut de gamme — la « haute couture » de l'installation. Chaleureux et rare.</p>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="card" data-choice="phare" onclick="toggleSelect(this)">
+      <div class="hero w-phare">
+        <div class="pill"><span class="logo">ARELEC</span><span class="nav">Métiers · Chantiers · Contact</span></div>
+        <div>
+          <div class="kicker">Finistère · depuis 2010</div>
+          <h3 class="hl">L'électricien<br>du bout du monde.</h3>
+          <p class="sub">Le repère du bassin brestois. Ancré, fiable, lumineux.</p>
+          <div class="cta"><span class="btn solid">Nous appeler</span><span class="btn">Notre histoire</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="name">Le Phare <span class="tag">Heure bleue · territoire</span></p>
+        <p class="soul">Bretagne à l'heure bleue, faisceau de phare. Identité locale très forte (Finistère = bout du monde) + métaphore de la lumière. Émotionnel et incontournable.</p>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="card" data-choice="reseau" onclick="toggleSelect(this)">
+      <div class="hero w-reseau">
+        <div class="pill"><span class="logo">ARELEC</span><span class="nav">Solutions · Maison connectée · Contact</span></div>
+        <div class="glasscard"><b>Tableau électrique</b>Conforme · OK ✓</div>
+        <div class="glasscard" style="top:96px; right:28px; width:140px;"><b>Chauffage</b>21°C · piloté 📲</div>
+        <div>
+          <div class="kicker">Le futur de l'installation</div>
+          <h3 class="hl">La maison<br>qui pense.</h3>
+          <p class="sub">Électricité, domotique, énergie. On modernise un métier resté figé.</p>
+          <div class="cta"><span class="btn solid">Démarrer un projet</span><span class="btn">Découvrir</span></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p class="name">Le Réseau <span class="tag">Clair · tech lumineux</span></p>
+        <p class="soul">Clair, lumineux, futuriste. Cartes en verre façon notifications (maison connectée). Innovant et leader — celui qui amène l'électricien dans le futur.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
