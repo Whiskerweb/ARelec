@@ -136,6 +136,24 @@ h1 b{font-weight:700}
 .accordion:hover .acc.is-open:not(:hover):not(:focus-visible) .acc-open{opacity:0;transition-delay:0s;pointer-events:none}
 .accordion:hover .acc.is-open:not(:hover):not(:focus-visible) .acc-open>*{opacity:0;transition-delay:0s}
 .accordion:hover .acc.is-open:not(:hover):not(:focus-visible) img{transform:none;filter:brightness(.86) saturate(1.05)}
+/* === Section réalisations (BounceCards vanilla) === */
+.band-real{scroll-snap-align:none;padding:clamp(36px,5vh,64px) clamp(20px,4vw,48px);background:radial-gradient(60% 80% at 50% 0%,rgba(20,87,255,.06),transparent 60%),linear-gradient(180deg,#fff,#f6f9ff);color:var(--ink);border-top:1px solid rgba(20,87,255,.06);position:relative;overflow:hidden}
+.sec-real{max-width:1080px;margin:auto;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:clamp(16px,2.2vw,26px)}
+.real-head{max-width:600px}
+.real-head .eyebrow{margin-bottom:12px}
+.real-head h2{font-size:clamp(26px,3.6vw,40px);font-weight:800;letter-spacing:-.035em;line-height:1.04}
+.real-head h2 em{font-style:normal;background:linear-gradient(110deg,var(--blue),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.real-head .sub{margin:10px auto 0;font-size:clamp(14px,1.5vw,15.5px);color:var(--ink-soft);max-width:480px;line-height:1.5}
+.bc-stage{width:100%;display:flex;justify-content:center;align-items:center;padding:clamp(6px,1.4vw,16px) 0}
+.bc-cards{position:relative;width:clamp(300px,70vw,560px);height:clamp(150px,20vw,200px);display:flex;justify-content:center;align-items:center}
+.bc-card{position:absolute;width:clamp(110px,14vw,160px);aspect-ratio:1;border:4px solid #fff;border-radius:20px;overflow:hidden;box-shadow:0 12px 26px rgba(20,60,140,.20),0 2px 6px rgba(20,60,140,.08);will-change:transform;transform-origin:center;cursor:pointer}
+.bc-card img{width:100%;height:100%;object-fit:cover;display:block}
+.bc-card.bc-init{transform:scale(0) !important}
+.real-cta{display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.real-cta .btn{min-height:46px;font-size:14.5px;padding:11px 22px}
+@media (max-width:760px){.bc-cards{width:88vw;height:38vw;max-height:170px}.bc-card{width:26vw;max-width:130px;border-width:3px;border-radius:16px}.real-cta .btn{width:100%;justify-content:center}}
+@media (max-width:480px){.bc-card{width:28vw;max-width:100px}}
+@media (prefers-reduced-motion:reduce){.bc-card.bc-init{transform:none !important}}
 /* === Carrousel avis Google (compact, hors snap) === */
 .band-reviews{scroll-snap-align:none;padding:clamp(36px,5vh,64px) clamp(18px,4vw,48px);background:radial-gradient(60% 100% at 50% 0%,rgba(20,87,255,.06),transparent 60%),linear-gradient(180deg,#fff,#f5f9ff);color:var(--ink);border-top:1px solid rgba(20,87,255,.06);border-bottom:1px solid rgba(20,87,255,.06)}
 .sec-reviews{max-width:1080px;margin:auto;width:100%;text-align:center}
@@ -476,6 +494,30 @@ def trades_panel(heading_em, sub):
             f'<a class="btn solid" href="/estimation">Faire une estimation →</a>'
             f'</div></div>'
             f'<div class="accordion reveal d2">{c}</div></div></section>')
+
+REAL_IMGS=[
+ ("escalier-led.jpg",     "rotate(7deg) translate(-150px)"),
+ ("douche-marbre.jpg",    "rotate(3deg) translate(-75px)"),
+ ("sdb-bleue.jpg",        "rotate(-2deg)"),
+ ("confort.jpg",          "rotate(-7deg) translate(75px)"),
+ ("chantier-plouider.jpg","rotate(4deg) translate(150px)"),
+]
+def realisations_panel():
+    cards=""
+    for i,(img,tf) in enumerate(REAL_IMGS):
+        cards+=(f'<div class="bc-card bc-card-{i}" data-tf="{tf}" style="transform:{tf}">'
+                f'<img src="/assets/img/{img}" alt="Réalisation ARÉLEC" loading="lazy"/></div>')
+    return ('<section class="band-real"><div class="sec sec-real">'
+            '<div class="real-head">'
+            '<div class="eyebrow">Nos réalisations</div>'
+            '<h2>Le travail bien fait,<br><em>en vrai.</em></h2>'
+            '<p class="sub">Chantiers réalisés par ARélec : rénovations complètes, salles de bain, tableaux électriques, éclairage soigné.</p>'
+            '</div>'
+            f'<div class="bc-stage"><div class="bc-cards" id="bcCards" data-stagger="0.08" data-delay="0.2" data-ease="elastic.out(1, 0.55)">{cards}</div></div>'
+            '<div class="real-cta">'
+            '<a class="btn solid" href="/realisations">Voir nos réalisations →</a>'
+            '<a class="btn line" href="/contact">Nous contacter</a>'
+            '</div></div></section>')
 REVS=[("Intervention de très bonne qualité. Chantier propre et rapide. Je recommande ARÉLEC.","Philippe C.","Rénovation électrique"),
  ("Super entreprise, travail de qualité et toujours dans la bonne humeur. Merci pour la rénovation de notre maison&nbsp;!","Mélanie Hautecoeur","Rénovation complète"),
  ("Très pro, Arnaud et son collègue font du bon travail, propre, et en plus ils sont sympas.","Yvon Riou","Installation électrique"),
@@ -649,6 +691,51 @@ ps.forEach(p=>io.observe(p));ds.forEach(d=>d.addEventListener("click",()=>{const
  const io3=new IntersectionObserver(es=>{let best=null;es.forEach(e=>{if(e.isIntersecting&&(!best||e.intersectionRatio>best.intersectionRatio))best=e;});if(best){const i=cards.indexOf(best.target);if(i>=0)setActive(i);}},{root:track,threshold:[.5,.7,.9]});
  cards.forEach(c=>io3.observe(c));
  setActive(0);
+})();
+(function(){
+ const wrap=document.getElementById("bcCards");if(!wrap)return;
+ const cards=[...wrap.querySelectorAll(".bc-card")];if(!cards.length)return;
+ cards.forEach(c=>c.classList.add("bc-init"));
+ const stagger=parseFloat(wrap.dataset.stagger||"0.08");
+ const delay=parseFloat(wrap.dataset.delay||"0.2");
+ const ease=wrap.dataset.ease||"elastic.out(1, 0.55)";
+ const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+ function loadJS(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
+ function getNoRot(t){if(/rotate\([^)]*\)/.test(t))return t.replace(/rotate\([^)]*\)/,"rotate(0deg)");return t==="none"?"rotate(0deg)":t+" rotate(0deg)";}
+ function getPushed(t,off){const re=/translate\(([-0-9.]+)px\)/;const m=t.match(re);if(m){return t.replace(re,`translate(${parseFloat(m[1])+off}px)`);}return t==="none"?`translate(${off}px)`:`${t} translate(${off}px)`;}
+ function fallbackAnim(){
+  cards.forEach((c,i)=>{
+   c.style.transition=`transform .9s cubic-bezier(.34,1.56,.64,1) ${delay+i*stagger}s`;
+   requestAnimationFrame(()=>c.classList.remove("bc-init"));
+  });
+ }
+ function bindHover(gsap){
+  cards.forEach((c,i)=>{
+   c.addEventListener("mouseenter",()=>{
+    cards.forEach((c2,j)=>{
+     const base=c2.dataset.tf||"none";
+     gsap.killTweensOf(c2);
+     if(j===i){gsap.to(c2,{transform:getNoRot(base),duration:.4,ease:"back.out(1.4)",overwrite:"auto"});}
+     else{const off=j<i?-160:160;const dist=Math.abs(i-j);gsap.to(c2,{transform:getPushed(base,off),duration:.4,delay:dist*0.05,ease:"back.out(1.4)",overwrite:"auto"});}
+    });
+   });
+   c.addEventListener("mouseleave",()=>{
+    cards.forEach(c2=>{const base=c2.dataset.tf||"none";gsap.killTweensOf(c2);gsap.to(c2,{transform:base,duration:.4,ease:"back.out(1.4)",overwrite:"auto"});});
+   });
+  });
+ }
+ async function init(){
+  if(reduce){cards.forEach(c=>c.classList.remove("bc-init"));return;}
+  try{
+   if(typeof window.gsap==="undefined"){await loadJS("https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js");}
+   if(typeof window.gsap==="undefined"){fallbackAnim();return;}
+   cards.forEach(c=>c.classList.remove("bc-init"));
+   window.gsap.fromTo(cards,{scale:0},{scale:1,stagger,ease,delay});
+   bindHover(window.gsap);
+  }catch(e){fallbackAnim();}
+ }
+ const ioBC=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>=0.25){init();ioBC.disconnect();}}),{threshold:[.25,.4]});
+ ioBC.observe(wrap);
 })();
 </script>'''
 
@@ -861,7 +948,7 @@ def head_common(path,title,desc,jl):
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{t_esc}</title><meta name="description" content="{d_esc}">'
             f'<link rel="canonical" href="{canon}">{og}{icons}{jl}'
-            '<link rel="stylesheet" href="/assets/css/styles.css?v=41"></head>')
+            '<link rel="stylesheet" href="/assets/css/styles.css?v=43"></head>')
 
 def shell_home(path,title,desc,body,jl,dots=4):
     dotbtns="".join(f'<button{" class=\"on\"" if i==0 else ""} data-go="{i}"></button>' for i in range(dots))
@@ -962,7 +1049,7 @@ pages=[]
 # HOME
 home_body=(hero_home("Électricité · Chauffage · Plomberie — Finistère, depuis 2010","Une maison bien câblée,<br><b>bien chauffée.</b>",
   "À Plouzané et dans tout le bassin brestois depuis 2010 : électricité, chauffage et plomberie, en neuf comme en rénovation.<br><b>Faites une estimation en ligne</b> ou contactez-nous — devis gratuit.")
- +trades_panel("Trois métiers, <em>un seul interlocuteur.</em>",SECT_HOME)+avis_panel(AVIS_HOME)
+ +trades_panel("Trois métiers, <em>un seul interlocuteur.</em>",SECT_HOME)+avis_panel(AVIS_HOME)+realisations_panel()
  +faq_section(FAQ_HOME, h2="Vos questions, nos réponses.")+falling_panel()+FOOTER)
 pages.append(("","ARélec — Électricien, chauffagiste & plombier à Plouzané (29)",
   "Électricité, chauffage et plomberie dans le bassin brestois depuis 2010. Devis gratuit, travail soigné. Estimez votre projet en ligne.",
