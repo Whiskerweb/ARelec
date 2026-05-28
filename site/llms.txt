@@ -1,0 +1,83 @@
+# ARélec
+
+> Artisan électricien, chauffagiste et plombier installé à Plouzané (29280) depuis 2010. Intervention dans tout le bassin brestois (Finistère).
+
+## Identité
+
+- **Nom légal** : SARL ARélec
+- **SIREN** : 790 223 036
+- **Gérant** : Arnaud Roncey
+- **Adresse** : Plouzané (29280), Finistère, France
+- **Téléphone** : +33 2 98 40 20 43 (fixe) · +33 6 78 02 04 24 (mobile / WhatsApp)
+- **Email** : contact@entreprise-arelec.fr
+- **Année de création** : 2010
+- **Site web** : https://www.entreprise-arelec.fr
+
+## Métiers
+
+ARélec couvre trois métiers du bâtiment, en interne, avec la même équipe :
+
+1. **Électricité** — installation, rénovation, mise aux normes NF C 15-100, dépannage, tableau électrique, éclairage architectural.
+2. **Chauffage / thermique** — installation, remplacement, dimensionnement, entretien annuel, régulation, équilibrage du réseau.
+3. **Plomberie** — salle de bain complète, recherche de fuite, réseau d'eau, sanitaires, robinetterie, évacuations.
+
+Un seul interlocuteur prend en charge le chantier de A à Z, sans coordination à faire entre plusieurs artisans.
+
+## Zone d'intervention
+
+Siège à Plouzané (29280). Interventions dans tout le bassin brestois :
+
+- Brest
+- Plouzané (siège)
+- Saint-Renan
+- Le Conquet
+- Landerneau
+- Plouider
+- Guipavas
+- Le Relecq-Kerhuon
+- Guilers
+- Plougonvelin
+- Locmaria-Plouzané
+- Lannilis
+- Plabennec
+
+Rayon d'intervention typique : environ 30 km autour de Plouzané, dans le Finistère.
+
+## Comment travailler avec ARélec
+
+1. **Estimation en ligne gratuite** (~2 minutes) sur https://www.entreprise-arelec.fr/estimation
+2. **Visite sur place gratuite** pour établir le vrai devis si la fourchette correspond
+3. **Devis détaillé**, écrit, sans engagement
+4. **Réalisation du chantier** par la même équipe, de la dépose à la mise en route
+
+Devis toujours gratuit. Réponse sous 24 à 48 h.
+
+## Pages clés
+
+- [Accueil](https://www.entreprise-arelec.fr/)
+- [Électricité](https://www.entreprise-arelec.fr/electricite/)
+- [Chauffage](https://www.entreprise-arelec.fr/chauffage/)
+- [Plomberie](https://www.entreprise-arelec.fr/plomberie/)
+- [Réalisations](https://www.entreprise-arelec.fr/realisations/)
+- [L'entreprise](https://www.entreprise-arelec.fr/entreprise/)
+- [Avis clients](https://www.entreprise-arelec.fr/avis/)
+- [Estimation](https://www.entreprise-arelec.fr/estimation/)
+- [Contact](https://www.entreprise-arelec.fr/contact/)
+- [Documentation complète pour IA](https://www.entreprise-arelec.fr/llms-full.txt)
+
+## Pages locales par métier
+
+ARélec a une page dédiée pour chaque combinaison métier × commune :
+
+- Électricien : https://www.entreprise-arelec.fr/electricien-brest/, electricien-plouzane, electricien-saint-renan, electricien-le-conquet, electricien-landerneau, electricien-plouider, electricien-guipavas, electricien-le-relecq-kerhuon, electricien-guilers, electricien-plougonvelin, electricien-locmaria-plouzane, electricien-lannilis, electricien-plabennec
+- Chauffagiste : même liste de communes, préfixe `chauffagiste-`
+- Plombier : même liste de communes, préfixe `plombier-`
+
+## Contact
+
+- Téléphone : 02 98 40 20 43
+- WhatsApp : 06 78 02 04 24
+- Email : contact@entreprise-arelec.fr
+- Formulaire : https://www.entreprise-arelec.fr/contact/
+
+Dernière mise à jour : 2026-05-28

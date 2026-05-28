@@ -3,7 +3,7 @@
 # HOME = scroll-snap (hero photo + metiers + avis + footer).
 # SUBPAGES (metier + locales) = layout inspire de traaaction.com/portal :
 #   subnav claire sticky, hero 2 colonnes, trust strip, 3 sections numerotees, recap CTA, footer.
-import os, html, pathlib, datetime
+import os, html, pathlib, datetime, json
 from PIL import Image, ImageOps
 
 ROOT = pathlib.Path("/Users/lucasroncey/Desktop/Projet Saas/Arelec")
@@ -37,6 +37,7 @@ alpha = wl.split()[3]; dark = Image.new("RGBA", wl.size, (12,28,58,255)); dark.p
 CSS_TXT = r"""@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 :root{--ink:#0c1c3a;--ink-soft:#46587a;--blue:#1457ff;--cyan:#0bb0ff;--paper:#fbfcfe;--r:28px;--glass-d:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.08))}
 *{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
+html,body{overflow-x:clip}img,video,svg{max-width:100%}
 body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--paper);color:var(--ink)}
 a{color:inherit}
 .snap{height:100vh;height:100svh;overflow-y:scroll;scroll-snap-type:y proximity;scroll-behavior:smooth;scrollbar-width:none}
@@ -59,8 +60,14 @@ a{color:inherit}
 .btn.solid::after{display:none}
 .btn.line{color:#0c2a5e;background:rgba(255,255,255,.85);border:1px solid rgba(20,60,140,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 .btn.line::after{display:none}
-.burger{display:none;width:46px;height:46px;border-radius:14px;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:var(--glass-d);border:1px solid rgba(255,255,255,.4)}
-.burger span{display:block;width:18px;height:2px;background:#fff;border-radius:2px;box-shadow:0 5px 0 #fff,0 -5px 0 #fff}
+.burger{display:none;width:46px;height:46px;border-radius:14px;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:var(--glass-d);border:1px solid rgba(255,255,255,.4);padding:0;font:inherit;color:inherit}
+.burger span{display:block;width:18px;height:2px;background:#fff;border-radius:2px;box-shadow:0 5px 0 #fff,0 -5px 0 #fff;transition:transform .25s,box-shadow .25s,background .25s}
+.burger[aria-expanded="true"] span{background:transparent;box-shadow:none;transform:rotate(45deg)}
+.burger[aria-expanded="true"] span::before,.burger[aria-expanded="true"] span::after{content:""}
+.subnav .burger,.topnav .burger{display:none}
+.subnav .burger span,.topnav .burger span{background:#0c1c3a;box-shadow:0 5px 0 #0c1c3a,0 -5px 0 #0c1c3a}
+.subnav .burger,.topnav .burger{background:rgba(255,255,255,.6);border-color:rgba(15,40,90,.12)}
+.subnav .burger[aria-expanded="true"] span,.topnav .burger[aria-expanded="true"] span{background:transparent;box-shadow:none}
 #hero{color:#fff;background:#0a1322}
 .spacer{flex:1;min-height:24px;position:relative;z-index:2}.content{position:relative;z-index:2}
 .topline{display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(20px,4vw,40px);flex-wrap:wrap}
@@ -71,7 +78,7 @@ h1 b{font-weight:700}
 .hr{height:1px;background:linear-gradient(to right,rgba(255,255,255,.05),rgba(255,255,255,.45),rgba(255,255,255,.05));margin:clamp(20px,3vw,28px) 0 20px}
 .bottom{display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(20px,4vw,40px);flex-wrap:wrap}
 .meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.chip{font-size:13px;font-weight:500;padding:8px 14px;border-radius:999px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);display:inline-flex;gap:7px;align-items:center;color:#fff;text-decoration:none}
+.chip{font-size:13.5px;font-weight:500;padding:11px 14px;min-height:44px;border-radius:999px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);display:inline-flex;gap:7px;align-items:center;color:#fff;text-decoration:none}
 .desc{max-width:440px;font-size:clamp(14px,1.8vw,15px);line-height:1.55;color:rgba(255,255,255,.94);text-align:right;text-shadow:0 1px 10px rgba(0,0,0,.5)}
 .scrollhint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:3;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:#fff;opacity:.85;display:flex;flex-direction:column;align-items:center;gap:6px;animation:bob 2s ease-in-out infinite}
 .scrollhint .arr{width:20px;height:20px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg)}
@@ -146,7 +153,7 @@ h1 b{font-weight:700}
 .g-sub{font-size:11.5px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .g-stars-small{color:#FBBC05;font-size:13px;letter-spacing:2px;margin-bottom:6px;line-height:1}
 .g-card blockquote{margin:0;font-size:13px;line-height:1.5;color:var(--ink)}
-.g-nav{position:absolute;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:#fff;border:1px solid rgba(15,40,90,.1);color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:20px;line-height:1;box-shadow:0 6px 14px rgba(20,60,140,.12);transition:.2s;z-index:5;font-family:inherit;padding:0 0 3px}
+.g-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid rgba(15,40,90,.1);color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:22px;line-height:1;box-shadow:0 6px 14px rgba(20,60,140,.12);transition:.2s;z-index:5;font-family:inherit;padding:0 0 3px}
 .g-nav:hover{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 8px 18px rgba(20,87,255,.28)}
 .g-prev{left:-2px}.g-next{right:-2px}
 .g-dots{display:flex;gap:7px;justify-content:center;margin-top:10px}
@@ -168,7 +175,7 @@ footer.site ul{list-style:none;display:flex;flex-direction:column;gap:11px}
 footer.site .fcol a{color:#bccbe4;text-decoration:none;font-size:14px;min-height:24px;display:inline-flex;align-items:center;transition:.2s}
 footer.site .fcol a:hover{color:#fff}
 footer.site .soc{display:inline-flex;gap:8px;margin-top:16px}
-footer.site .soc a{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;color:#fff;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2)}
+footer.site .soc a{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;color:#fff;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2)}
 footer.site .legal{max-width:1200px;margin:clamp(30px,4vw,48px) auto 0;border-top:1px solid rgba(255,255,255,.1);padding:20px 0 26px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12.5px;color:#8ea3c6}
 footer.site .legal a{color:#a9bcd9;text-decoration:none}footer.site .legal a:hover{color:#fff}
 .dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:6px}
@@ -178,8 +185,8 @@ footer.site .legal a{color:#a9bcd9;text-decoration:none}footer.site .legal a:hov
 a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:14px}
 #hero a:focus-visible{outline-color:#fff}
 @media (max-width:980px){.sec-split{grid-template-columns:1fr;gap:32px;max-width:560px}.lead-col{max-width:100%;text-align:center;margin:0 auto}.lead-col .trade-list{text-align:center;align-items:center;font-size:clamp(46px,12vw,78px)}.lead-actions{justify-content:center}.accordion{flex-direction:column;height:auto;gap:14px}.acc{flex:none!important;height:230px}.acc .acc-rail{opacity:0!important;transform:none!important;width:100%;height:auto;flex-direction:row;justify-content:flex-start;gap:14px;padding:14px 18px;background:linear-gradient(90deg,rgba(6,18,38,.55),rgba(6,18,38,.15));border-right:none;border-bottom:1px solid rgba(255,255,255,.1)}.acc .acc-vt{writing-mode:horizontal-tb;transform:none}.acc .acc-open{left:0;right:0;padding:20px;opacity:1!important;transform:none!important}.acc .acc-open>*{opacity:1!important;transition:none}.acc img{transform:scale(1.02);filter:brightness(.72) saturate(1.12)}.reviews{grid-template-columns:1fr;max-width:520px;margin:0 auto}footer.site .fgrid{grid-template-columns:1fr 1fr}footer.site .brand{grid-column:1/-1}}
-@media (max-width:900px){.navlinks{display:none}.burger{display:flex}.nav>.btn{display:none}}
-@media (max-width:760px){.dots{display:none}}
+@media (max-width:900px){.navlinks{display:none}.burger{display:flex}.nav>.btn{display:none}.desc{text-align:left}}
+@media (max-width:760px){.dots{display:none}.scrollhint{display:none}}
 @media (max-width:560px){.topline{flex-direction:column;align-items:stretch}.topline .btn.primary{width:100%}.bottom{flex-direction:column-reverse;gap:18px}.desc{text-align:left;max-width:100%}h1{font-size:clamp(30px,9vw,46px)}.cta-band{flex-direction:column;align-items:flex-start}.cta-actions{width:100%}.cta-band .btn{flex:1}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.001ms!important;scroll-behavior:auto!important}.reveal{opacity:1!important;transform:none!important}.bg{transform:none!important;opacity:1!important}}
 
@@ -232,6 +239,19 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
 .recap h2{font-size:clamp(28px,4vw,46px);font-weight:700;letter-spacing:-.03em;line-height:1.04;max-width:780px;margin:0 auto 16px;color:var(--ink)}
 .recap p{font-size:16px;color:var(--ink-soft);max-width:560px;margin:0 auto 28px;line-height:1.55}
 .recap .actions{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.faq{padding:clamp(50px,8vh,90px) clamp(18px,5vw,80px);background:#fff;border-top:1px solid rgba(15,40,90,.06)}
+.faq .wrap-faq{max-width:860px;margin:0 auto}
+.faq .eyebrow-blue{margin-bottom:10px}
+.faq h2{font-size:clamp(26px,3.6vw,40px);font-weight:700;letter-spacing:-.028em;line-height:1.1;color:var(--ink);margin-bottom:28px}
+.faq-list{display:flex;flex-direction:column;gap:10px}
+.faq-q{border:1px solid rgba(15,40,90,.1);border-radius:14px;background:linear-gradient(180deg,#fff,#fafcff);transition:border-color .2s}
+.faq-q[open]{border-color:rgba(20,87,255,.32);box-shadow:0 4px 18px rgba(20,87,255,.06)}
+.faq-q summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 22px;font-weight:600;font-size:clamp(15.5px,1.6vw,17px);color:var(--ink);line-height:1.4;min-height:44px}
+.faq-q summary::-webkit-details-marker{display:none}
+.faq-q-icon{flex:0 0 auto;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(20,87,255,.08);color:var(--blue);font-weight:700;font-size:18px;line-height:1;transition:transform .25s}
+.faq-q[open] .faq-q-icon{transform:rotate(45deg);background:var(--blue);color:#fff}
+.faq-a{padding:0 22px 20px;font-size:15.5px;line-height:1.65;color:var(--ink-soft)}
+@media (max-width:560px){.faq-q summary{padding:16px 18px;font-size:15px}.faq-a{padding:0 18px 18px;font-size:14.5px}}
 @media (max-width:980px){.subnav nav{display:none}.subhero .wrap,.feat .wrap{grid-template-columns:1fr}.subhero .imgcard{aspect-ratio:16/11;max-width:560px;margin:0 auto}.feat .imgcard{aspect-ratio:16/11}.feat.flip .wrap > :first-child{order:0}.feat ul{grid-template-columns:1fr}.feat .num{font-size:88px}}
 @media (max-width:560px){.subhero{padding-left:18px;padding-right:18px}.recap .actions .btn{width:100%}}
 .areas{padding:clamp(50px,8vh,90px) clamp(18px,5vw,80px);background:#fff;border-top:1px solid rgba(15,40,90,.06)}
@@ -252,7 +272,8 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
 .topnav .ctas{display:flex;gap:10px;align-items:center}
 .topnav .ctas .tel{font-size:14px;font-weight:600;color:var(--ink);text-decoration:none;padding:0 10px;min-height:44px;display:inline-flex;align-items:center}
 .topnav .ctas .tel:hover{color:var(--blue)}
-@media (max-width:980px){.topnav nav{display:none}.topnav .ctas .tel{display:none}}
+@media (max-width:980px){.topnav nav{display:none}.topnav .burger{display:flex}.subnav .burger{display:flex}}
+@media (max-width:560px){.topnav .ctas .tel span.tel-label,.subnav .ctas .tel span.tel-label{display:none}.topnav .ctas .tel,.subnav .ctas .tel{min-width:44px;justify-content:center;padding:0 8px}}
 .contact-hero{padding:clamp(50px,8vh,90px) clamp(18px,5vw,80px) clamp(20px,4vh,40px);text-align:center;background:radial-gradient(42% 60% at 50% 0%,rgba(20,87,255,.06),transparent 60%),var(--paper)}
 .contact-hero .wrap-c{max-width:760px;margin:0 auto}
 .contact-hero .crumb{justify-content:center;display:flex;margin-bottom:14px}
@@ -274,6 +295,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
 .cm-icon .ic{width:26px;height:26px;display:block}
 .soc a .ic{width:18px;height:18px;display:block}
 .chip .ic,.tel .ic{width:14px;height:14px;display:inline-block}
+.btn .ic,.mca .ic,.md-tel-ic .ic{width:16px;height:16px;display:inline-block;flex:none}
 .contact-form-section{padding:clamp(40px,6vh,80px) clamp(18px,5vw,80px) clamp(60px,8vh,100px);background:linear-gradient(180deg,rgba(20,87,255,.025),transparent),var(--paper)}
 .contact-form-section .wrap-c{max-width:720px;margin:0 auto;text-align:center}
 .contact-form-section h2{font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:-.025em;line-height:1.12;margin-bottom:12px;color:var(--ink)}
@@ -281,13 +303,13 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
 .cform{display:flex;flex-direction:column;gap:16px;text-align:left}
 .cfrow{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .cform label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.02em}
-.cform input,.cform textarea{font:inherit;font-size:15px;font-weight:400;padding:13px 16px;border-radius:14px;border:1px solid rgba(15,40,90,.12);background:rgba(255,255,255,.85);color:var(--ink);transition:border .2s,box-shadow .2s,background .2s;outline:none}
+.cform input,.cform textarea{font:inherit;font-size:16px;font-weight:400;padding:13px 16px;min-height:48px;border-radius:14px;border:1px solid rgba(15,40,90,.12);background:rgba(255,255,255,.85);color:var(--ink);transition:border .2s,box-shadow .2s,background .2s;outline:none}
 .cform input:focus,.cform textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(20,87,255,.12);background:#fff}
 .cform textarea{resize:vertical;min-height:130px;line-height:1.5;font-family:inherit}
 .cform button{align-self:flex-start;margin-top:8px;font-size:15px}
 .cform-foot{font-size:12.5px;color:var(--ink-soft);text-align:center;margin-top:8px}
 @media (max-width:880px){.contact-methods .wrap-c{grid-template-columns:1fr;max-width:520px}}
-@media (max-width:560px){.cfrow{grid-template-columns:1fr}}
+@media (max-width:560px){.cfrow{grid-template-columns:1fr}.cform button{align-self:stretch;width:100%}}
 .gallery-section{position:relative;padding:clamp(40px,6vh,80px) clamp(18px,5vw,80px) clamp(60px,8vh,100px);background:var(--paper)}
 .gallery-section .wrap-g{max-width:1280px;margin:0 auto;position:relative;z-index:1}
 .gradual-blur{isolation:isolate;overflow:hidden;pointer-events:none}
@@ -320,6 +342,52 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
 .panel.falling .falling-stage.grabbing canvas{cursor:grabbing}
 @media (max-width:760px){.panel.falling{height:clamp(320px,42vh,420px)}.panel.falling .falling-text{font-size:clamp(18px,4.4vw,28px);padding:24px 20px;gap:5px 10px}}
 @media (max-width:560px){.panel.falling{height:clamp(280px,38vh,360px)}.panel.falling .falling-text{font-size:clamp(16px,5vw,22px);padding:20px 14px;gap:4px 8px}}
+
+/* ===== MOBILE DRAWER (refonte premium ARELEC) ===== */
+.mdrawer{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;gap:18px;padding:calc(18px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));background:radial-gradient(60% 40% at 90% -10%,rgba(20,87,255,.24),transparent 62%),radial-gradient(50% 40% at -10% 105%,rgba(11,176,255,.18),transparent 62%),linear-gradient(160deg,#0c2750,#0a1c39 55%,#06101f);backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%);transform:translateY(-100%);transition:transform .38s cubic-bezier(.2,.7,.2,1);overflow-y:auto;will-change:transform;color:#fff}
+.mdrawer.open{transform:translateY(0)}
+.md-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none}
+.md-logo{height:32px;width:auto;filter:drop-shadow(0 2px 12px rgba(0,0,0,.5));display:block}
+.mdrawer-close{position:static;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0 0 2px;transition:background .2s,border-color .2s}
+.mdrawer-close:hover,.mdrawer-close:focus-visible{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.32)}
+.md-tagline{font-size:11.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:9px;padding:0 4px}
+.md-tagline .pulse{width:7px;height:7px;border-radius:50%;background:#36e07f;box-shadow:0 0 0 3px rgba(54,224,127,.22);flex:none}
+.md-section{display:flex;flex-direction:column;gap:8px}
+.md-label{font-size:11px;font-weight:700;letter-spacing:.20em;text-transform:uppercase;color:#7fb0ff;padding:0 6px 4px;display:flex;align-items:center;gap:10px}
+.md-label::after{content:"";flex:1;height:1px;background:linear-gradient(to right,rgba(127,176,255,.35),transparent)}
+.md-trade{display:flex;align-items:center;gap:14px;padding:12px 14px 12px 12px;border-radius:18px;text-decoration:none;color:#fff;background:linear-gradient(165deg,rgba(255,255,255,.10),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 6px 14px rgba(0,0,0,.18);transition:transform .25s cubic-bezier(.2,.7,.2,1),background .25s,border-color .25s;min-height:64px}
+.md-trade:active{transform:scale(.985)}
+.md-trade:hover,.md-trade:focus-visible{background:linear-gradient(165deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border-color:rgba(255,255,255,.22)}
+.md-ic{width:44px;height:44px;flex:none;border-radius:13px;display:grid;place-items:center;font-size:20px;background:linear-gradient(160deg,rgba(20,87,255,.42),rgba(11,176,255,.20));border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 4px 10px rgba(20,87,255,.18)}
+.md-trade-txt{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.md-trade-name{font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.md-trade-sub{font-size:12.5px;color:rgba(255,255,255,.6);line-height:1.3;letter-spacing:.005em}
+.md-arr{font-size:18px;color:rgba(255,255,255,.45);flex:none;transition:transform .25s,color .25s;line-height:1}
+.md-trade:hover .md-arr,.md-trade:focus-visible .md-arr{transform:translateX(4px);color:#7fb0ff}
+.md-link{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 16px;border-radius:14px;text-decoration:none;color:rgba(255,255,255,.88);font-size:15px;font-weight:500;letter-spacing:-.005em;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025);transition:background .2s,color .2s,border-color .2s}
+.md-link:hover,.md-link:focus-visible{background:rgba(255,255,255,.09);color:#fff;border-color:rgba(255,255,255,.14)}
+.md-link .md-arr{font-size:15px}
+.md-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:14px;border-top:1px solid rgba(255,255,255,.10)}
+.md-cta{justify-content:center;min-height:54px;font-size:16px;letter-spacing:-.01em}
+.md-tel{display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:16px;text-decoration:none;color:#fff;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);transition:background .2s,border-color .2s;min-height:60px}
+.md-tel:hover,.md-tel:focus-visible{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.20)}
+.md-tel-ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;background:linear-gradient(160deg,rgba(54,224,127,.24),rgba(54,224,127,.06));border:1px solid rgba(54,224,127,.32);color:#52e896}
+.md-tel-txt{display:flex;flex-direction:column;gap:1px;line-height:1.15;flex:1;min-width:0}
+.md-tel-num{font-size:16.5px;font-weight:700;letter-spacing:.005em}
+.md-tel-sub{font-size:11.5px;color:rgba(255,255,255,.55);letter-spacing:.04em;margin-top:2px}
+body.menu-open{overflow:hidden;touch-action:none}
+
+/* ===== BOTTOM ACTION BAR (mobile thumb zone) ===== */
+.mobile-cta{display:none}
+@media (max-width:760px){
+  .mobile-cta{display:flex;position:fixed;left:8px;right:8px;z-index:45;bottom:calc(8px + env(safe-area-inset-bottom));gap:8px;padding:8px;border-radius:20px;background:linear-gradient(165deg,rgba(255,255,255,.94),rgba(255,255,255,.82));backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.95);box-shadow:0 18px 40px rgba(20,60,140,.22)}
+  .mca{flex:1;min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:-.01em}
+  .mca.call{color:#0c2a5e;background:rgba(20,87,255,.08);border:1px solid rgba(20,87,255,.18)}
+  .mca.quote{color:#fff;background:linear-gradient(180deg,#3a7dff,#1654d8);border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 18px rgba(20,87,255,.28)}
+  .mca .ic{width:16px;height:16px}
+  .snap{scroll-padding-bottom:80px}
+  body.menu-open .mobile-cta{display:none}
+}
 """
 (CSS/"styles.css").write_text(CSS_TXT)
 
@@ -330,7 +398,48 @@ def nav_home(active):
     links="".join(f'<a href="{u}"{" aria-current=\"page\"" if u==active else ""}>{t}</a>' for u,t in NAV_LINKS)
     return ('<nav class="nav reveal d1"><a href="/"><img class="brand-img" alt="ARELEC" src="/assets/img/logo.png"></a>'
             f'<div class="navlinks">{links}</div>'
-            '<a href="/estimation" class="btn">Faire une estimation</a><div class="burger"><span></span></div></nav>')
+            '<a href="/estimation" class="btn">Faire une estimation</a>'
+            '<button class="burger" type="button" aria-expanded="false" aria-controls="mdrawer" aria-label="Ouvrir le menu"><span></span></button></nav>')
+
+def mobile_drawer():
+    trades=[
+        ("/electricite","⚡","Électricité","Tableau, rénovation, éclairage LED"),
+        ("/chauffage","🌡️","Chauffage","Installation, remplacement, entretien"),
+        ("/plomberie","💧","Plomberie","Sanitaire, salle de bain, fuites"),
+    ]
+    trade_html="".join(
+        f'<a class="md-trade" href="{u}"><span class="md-ic" aria-hidden="true">{ic}</span>'
+        f'<span class="md-trade-txt"><span class="md-trade-name">{n}</span>'
+        f'<span class="md-trade-sub">{s}</span></span>'
+        f'<span class="md-arr" aria-hidden="true">→</span></a>'
+        for u,ic,n,s in trades
+    )
+    sec_links=[("/realisations","Réalisations"),("/entreprise","L'entreprise"),("/contact","Contact")]
+    link_html="".join(
+        f'<a class="md-link" href="{u}">{t}<span class="md-arr" aria-hidden="true">→</span></a>'
+        for u,t in sec_links
+    )
+    return ('<div class="mdrawer" id="mdrawer" hidden aria-label="Menu mobile">'
+            '<div class="md-head">'
+            '<img class="md-logo" src="/assets/img/logo.png" alt="ARELEC">'
+            '<button class="mdrawer-close" type="button" aria-label="Fermer le menu">×</button>'
+            '</div>'
+            '<div class="md-tagline"><span class="pulse" aria-hidden="true"></span>Plouzané · Bassin brestois · Devis gratuit</div>'
+            f'<div class="md-section"><div class="md-label">Nos métiers</div>{trade_html}</div>'
+            f'<div class="md-section"><div class="md-label">L\'entreprise</div>{link_html}</div>'
+            '<div class="md-foot">'
+            '<a class="btn solid md-cta" href="/estimation">Faire une estimation →</a>'
+            f'<a class="md-tel" href="tel:{PHONE_TEL}" aria-label="Appeler {PHONE_DISP}">'
+            f'<span class="md-tel-ic" aria-hidden="true">{SVG_PHONE}</span>'
+            f'<span class="md-tel-txt"><span class="md-tel-num">{PHONE_DISP}</span>'
+            '<span class="md-tel-sub">Lun–Ven · 8h–18h</span></span></a>'
+            '</div></div>')
+
+def mobile_cta_bar():
+    return ('<nav class="mobile-cta" aria-label="Actions rapides">'
+            f'<a class="mca call" href="tel:{PHONE_TEL}">{SVG_PHONE} <span>Appeler</span></a>'
+            '<a class="mca quote" href="/estimation">✏️ <span>Estimer</span></a>'
+            '</nav>')
 def trades_panel(heading_em, sub):
     cards=[("/electricite","escalier-led.jpg","⚡","Électricité","Du tableau à l'éclairage soigné — le cœur de métier ARélec.",True),
            ("/chauffage","confort.jpg","🌡️","Chauffage","Le confort toute l'année, sans faire flamber la facture.",False),
@@ -458,9 +567,23 @@ if(s){const ps=[...document.querySelectorAll(".panel")],ds=[...document.querySel
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");const i=ps.indexOf(e.target);ds.forEach((d,k)=>d.classList.toggle("on",k===i));if(tn&&e.target===hero)tn.classList.remove("visible")}else if(tn&&e.target===hero){tn.classList.add("visible")}}),{root:s,threshold:.55});
 ps.forEach(p=>io.observe(p));ds.forEach(d=>d.addEventListener("click",()=>{const i=+d.dataset.go;if(ps[i])ps[i].scrollIntoView({behavior:"smooth"})}));}
 (function(){
+ const burgers=document.querySelectorAll(".burger");
+ const drawer=document.getElementById("mdrawer");
+ if(!drawer||!burgers.length)return;
+ const closeBtn=drawer.querySelector(".mdrawer-close");
+ const open=()=>{drawer.hidden=false;requestAnimationFrame(()=>drawer.classList.add("open"));burgers.forEach(b=>b.setAttribute("aria-expanded","true"));document.body.classList.add("menu-open");};
+ const close=()=>{drawer.classList.remove("open");burgers.forEach(b=>b.setAttribute("aria-expanded","false"));document.body.classList.remove("menu-open");setTimeout(()=>{if(!drawer.classList.contains("open"))drawer.hidden=true;},350);};
+ burgers.forEach(b=>b.addEventListener("click",()=>{b.getAttribute("aria-expanded")==="true"?close():open();}));
+ closeBtn&&closeBtn.addEventListener("click",close);
+ drawer.addEventListener("click",e=>{const a=e.target.closest("a");if(a&&drawer.contains(a))close();});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
+})();
+(function(){
  const panel=document.getElementById("fallingPanel");if(!panel)return;
  const stage=document.getElementById("fallingStage");if(!stage)return;
- const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;if(reduce)return;
+ const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+ const isMobile=window.matchMedia("(max-width: 760px)").matches;
+ if(reduce||isMobile)return;
  const textEl=stage.querySelector(".falling-text");
  const text=textEl.dataset.text||"";
  const hl=(textEl.dataset.hl||"").split("|").filter(Boolean);
@@ -528,8 +651,9 @@ def subnav(active):
     nv="".join(f'<a href="{u}"{" aria-current=\"page\"" if u==active else ""}>{t}</a>' for u,t in NAV_LINKS)
     return (f'<header class="subnav"><a href="/" aria-label="ARELEC accueil"><img class="logo-dark" src="/assets/img/logo-dark.png" alt="ARELEC"></a>'
             f'<nav>{nv}</nav>'
-            f'<div class="ctas"><a class="tel" href="tel:{PHONE_TEL}">{SVG_PHONE} {PHONE_DISP}</a>'
-            '<a class="btn solid" href="/estimation">Faire une estimation</a></div></header>')
+            f'<div class="ctas"><a class="tel" href="tel:{PHONE_TEL}" aria-label="Appeler {PHONE_DISP}">{SVG_PHONE} <span class="tel-label">{PHONE_DISP}</span></a>'
+            '<a class="btn solid" href="/estimation">Faire une estimation</a>'
+            '<button class="burger" type="button" aria-expanded="false" aria-controls="mdrawer" aria-label="Ouvrir le menu"><span></span></button></div></header>')
 
 def trust_strip():
     items=[("✓","Artisan depuis 2010"),("📍","Bassin brestois"),("✓","Devis gratuit"),("★","Avis Google 5/5")]
@@ -560,6 +684,17 @@ def recap(h2, p="Estimation en ligne en quelques minutes, ou un coup de fil. Dev
             '<div class="actions"><a class="btn solid" href="/estimation">Faire une estimation →</a>'
             f'<a class="btn line" href="tel:{PHONE_TEL}">Contacter</a></div></section>')
 
+def faq_section(qa_pairs, h2="Questions fréquentes"):
+    if not qa_pairs: return ""
+    items = "".join(
+        f'<details class="faq-q"><summary><span class="faq-q-text">{html.escape(q)}</span><span class="faq-q-icon" aria-hidden="true">+</span></summary>'
+        f'<div class="faq-a">{html.escape(a)}</div></details>'
+        for q, a in qa_pairs
+    )
+    return (f'<section class="faq"><div class="wrap-faq">'
+            f'<div class="eyebrow-blue">FAQ</div><h2>{html.escape(h2)}</h2>'
+            f'<div class="faq-list">{items}</div></div></section>')
+
 def areas_section(eyebrow, h2, paragraph_html, pills=None):
     pills_html=""
     if pills:
@@ -569,29 +704,126 @@ def areas_section(eyebrow, h2, paragraph_html, pills=None):
             f'<h2>{h2}</h2><p>{paragraph_html}</p>{pills_html}</div></section>')
 
 # ---------- JSON-LD + Shells ----------
-def jsonld(path,h1_text,area,reviews=True,breadcrumb_name=None):
-    revs=""
-    if reviews:
-        items=[]
-        for q,w,_ in REVS[:3]:
-            q2=q.replace("&nbsp;"," ").replace('"','\\"')
-            items.append('{"@type":"Review","author":{"@type":"Person","name":"%s"},"reviewRating":{"@type":"Rating","ratingValue":"5","bestRating":"5"},"reviewBody":"%s"}'%(w,q2))
-        revs=',"review":['+",".join(items)+']'
-    area_s=('"%s"'%area) if area else '["Brest","Plouzané","Finistère"]'
-    lb=('{"@context":"https://schema.org","@type":"Electrician","@id":"%s/#business","name":"ARélec",'
-        '"image":"%s/assets/img/hero.jpg","url":"%s%s","telephone":"+33298402043",'
-        '"address":{"@type":"PostalAddress","addressLocality":"Plouzané","postalCode":"29280","addressCountry":"FR"},'
-        '"areaServed":%s,"founder":{"@type":"Person","name":"Arnaud Roncey"},"foundingDate":"2010"%s}'
-        %(DOMAIN,DOMAIN,DOMAIN,path,area_s,revs))
-    if path=="/" or path=="":
-        crumbs='{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"%s/"}]}'%(DOMAIN,)
+# --- Données de référence pour LocalBusiness enrichi ---
+PLOUZANE_GEO = {"lat": 48.3781, "lon": -4.6228}  # centre de Plouzané
+SAME_AS = [
+    "https://www.facebook.com/people/AR%C3%A9lec/100089481862657/",
+    "https://wa.me/33678020424",
+]
+OPENING_HOURS = [
+    {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"18:00"},
+]
+
+def _local_business(path, area, reviews=True):
+    """Construit l'objet LocalBusiness (Electrician) enrichi pour le graphe."""
+    if area:
+        area_served = area
     else:
-        if breadcrumb_name:
-            name=breadcrumb_name
-        else:
-            name=h1_text.replace("<br>"," ").replace("<b>","").replace("</b>","").strip().rstrip(".")
-        crumbs='{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"%s/"},{"@type":"ListItem","position":2,"name":"%s","item":"%s%s"}]}'%(DOMAIN,html.escape(name,quote=True),DOMAIN,path)
-    return '<script type="application/ld+json">%s</script><script type="application/ld+json">%s</script>'%(lb,crumbs)
+        area_served = ["Brest","Plouzané","Finistère"]
+    lb = {
+        "@context": "https://schema.org",
+        "@type": "Electrician",
+        "@id": f"{DOMAIN}/#business",
+        "name": "ARélec",
+        "alternateName": "SARL ARélec",
+        "legalName": "SARL ARélec",
+        "description": "Artisan électricien, chauffagiste et plombier installé à Plouzané depuis 2010. Intervention dans tout le bassin brestois (Finistère).",
+        "slogan": "Une maison bien câblée, bien chauffée.",
+        "image": f"{DOMAIN}/assets/img/hero.jpg",
+        "logo": f"{DOMAIN}/assets/img/logo.png",
+        "url": f"{DOMAIN}{path}",
+        "telephone": "+33298402043",
+        "email": "contact@entreprise-arelec.fr",
+        "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Plouzané",
+            "postalCode": "29280",
+            "addressRegion": "Finistère",
+            "addressCountry": "FR",
+        },
+        "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": PLOUZANE_GEO["lat"],
+            "longitude": PLOUZANE_GEO["lon"],
+        },
+        "areaServed": area_served,
+        "serviceArea": {
+            "@type": "GeoCircle",
+            "geoMidpoint": {"@type": "GeoCoordinates", "latitude": PLOUZANE_GEO["lat"], "longitude": PLOUZANE_GEO["lon"]},
+            "geoRadius": "30000",
+        },
+        "openingHoursSpecification": OPENING_HOURS,
+        "priceRange": "€€",
+        "paymentAccepted": "Espèces, Chèque, Virement bancaire",
+        "currenciesAccepted": "EUR",
+        "founder": {"@type": "Person", "name": "Arnaud Roncey"},
+        "foundingDate": "2010",
+        "vatID": "FR",
+        "taxID": "790223036",
+        "sameAs": SAME_AS,
+        "knowsAbout": ["Électricité", "Chauffage", "Plomberie", "Mise aux normes NF C 15-100", "Rénovation", "Dépannage"],
+    }
+    if reviews:
+        lb["review"] = [
+            {
+                "@type": "Review",
+                "author": {"@type": "Person", "name": w},
+                "reviewRating": {"@type": "Rating", "ratingValue": "5", "bestRating": "5"},
+                "reviewBody": q.replace("&nbsp;", " "),
+            }
+            for q, w, _ in REVS[:3]
+        ]
+    return lb
+
+def _faq_schema(qa_pairs):
+    return {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {"@type": "Question", "name": q,
+             "acceptedAnswer": {"@type": "Answer", "text": a}}
+            for q, a in qa_pairs
+        ],
+    }
+
+def _service_schema(name, description, service_type, area):
+    return {
+        "@context": "https://schema.org",
+        "@type": "Service",
+        "name": name,
+        "description": description,
+        "serviceType": service_type,
+        "provider": {"@id": f"{DOMAIN}/#business"},
+        "areaServed": area or ["Brest","Plouzané","Finistère"],
+    }
+
+def _dump(obj):
+    # ensure_ascii=False pour garder les accents lisibles dans le HTML
+    return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
+
+def jsonld(path,h1_text,area,reviews=True,breadcrumb_name=None,faq=None,service=None):
+    blocks = [_dump(_local_business(path, area, reviews))]
+    # Breadcrumb
+    if path=="/" or path=="":
+        crumbs = {
+            "@context": "https://schema.org", "@type": "BreadcrumbList",
+            "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Accueil", "item": f"{DOMAIN}/"}],
+        }
+    else:
+        name = breadcrumb_name or h1_text.replace("<br>"," ").replace("<b>","").replace("</b>","").strip().rstrip(".")
+        crumbs = {
+            "@context": "https://schema.org", "@type": "BreadcrumbList",
+            "itemListElement": [
+                {"@type": "ListItem", "position": 1, "name": "Accueil", "item": f"{DOMAIN}/"},
+                {"@type": "ListItem", "position": 2, "name": name, "item": f"{DOMAIN}{path}"},
+            ],
+        }
+    blocks.append(_dump(crumbs))
+    if service:
+        blocks.append(_dump(_service_schema(**service, area=area)))
+    if faq:
+        blocks.append(_dump(_faq_schema(faq)))
+    return "".join(f'<script type="application/ld+json">{b}</script>' for b in blocks)
 
 def head_common(path,title,desc,jl):
     canon=DOMAIN+("/" if path=="" else "/"+path+"/")
@@ -612,7 +844,7 @@ def head_common(path,title,desc,jl):
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{t_esc}</title><meta name="description" content="{d_esc}">'
             f'<link rel="canonical" href="{canon}">{og}{icons}{jl}'
-            '<link rel="stylesheet" href="/assets/css/styles.css?v=38"></head>')
+            '<link rel="stylesheet" href="/assets/css/styles.css?v=40"></head>')
 
 def shell_home(path,title,desc,body,jl,dots=4):
     dotbtns="".join(f'<button{" class=\"on\"" if i==0 else ""} data-go="{i}"></button>' for i in range(dots))
@@ -623,15 +855,87 @@ def shell_home(path,title,desc,body,jl,dots=4):
         topnav=('<header class="topnav">'
             '<a href="/" aria-label="ARELEC accueil"><img class="logo-dark" src="/assets/img/logo-dark.png" alt="ARELEC"></a>'
             f'<nav>{nl}</nav>'
-            f'<div class="ctas"><a class="tel" href="tel:{PHONE_TEL}">{SVG_PHONE} {PHONE_DISP}</a>'
-            '<a class="btn solid" href="/estimation">Faire une estimation</a></div></header>')
-    return head_common(path,title,desc,jl)+f'<body>{topnav}{dotsdiv}<div class="snap" id="snap">{body}</div>{JS}</body></html>'
+            f'<div class="ctas"><a class="tel" href="tel:{PHONE_TEL}" aria-label="Appeler {PHONE_DISP}">{SVG_PHONE} <span class="tel-label">{PHONE_DISP}</span></a>'
+            '<a class="btn solid" href="/estimation">Faire une estimation</a>'
+            '<button class="burger" type="button" aria-expanded="false" aria-controls="mdrawer" aria-label="Ouvrir le menu"><span></span></button></div></header>')
+    return head_common(path,title,desc,jl)+f'<body>{topnav}{mobile_drawer()}{mobile_cta_bar()}{dotsdiv}<main class="snap" id="snap" role="main">{body}</main>{JS}</body></html>'
 def shell_sub(path,title,desc,body,jl):
-    return head_common(path,title,desc,jl)+f'<body class="sub-shell">{body}</body></html>'
+    return head_common(path,title,desc,jl)+f'<body class="sub-shell">{mobile_drawer()}{mobile_cta_bar()}<main role="main">{body}</main>{JS}</body></html>'
 
 def write(path,h):
     d=SITE/(path.strip("/")); d.mkdir(parents=True,exist_ok=True)
     (d/"index.html").write_text(h)
+
+# ---------- FAQ & Services (GEO) ----------
+FAQ_HOME = [
+    ("Qui est ARélec ?",
+     "ARélec (SARL ARélec) est un artisan électricien-chauffagiste-plombier installé à Plouzané (29280) depuis 2010. Le gérant est Arnaud Roncey. La SARL intervient dans tout le bassin brestois (Finistère)."),
+    ("Sur quelle zone intervient ARélec ?",
+     "ARélec intervient à Plouzané (siège), Brest et dans les communes du bassin brestois — Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec."),
+    ("Quels métiers couvre ARélec ?",
+     "Trois métiers, par la même équipe : électricité (installation, rénovation, mise aux normes NF C 15-100, dépannage, éclairage), chauffage (installation, remplacement, entretien) et plomberie (salle de bain, recherche de fuite, réseau d'eau, sanitaires). Un seul interlocuteur pour tout le chantier."),
+    ("Le devis est-il payant ?",
+     "Non. L'estimation en ligne est gratuite (~2 minutes). Si la fourchette correspond à votre budget, ARélec se déplace ensuite gratuitement pour établir le vrai devis sur place."),
+    ("Comment contacter ARélec ?",
+     "Par téléphone au 02 98 40 20 43, par WhatsApp au 06 78 02 04 24, par email à contact@entreprise-arelec.fr, ou via le formulaire de contact du site. Réponse sous 24 à 48 h."),
+    ("ARélec fait-il du dépannage ?",
+     "Oui : disjoncteur qui claque, prise grillée, fuite, panne d'éclairage. ARélec intervient pour les dépannages dans le bassin brestois."),
+]
+
+FAQ_ELEC = [
+    ("Qu'est-ce que la norme NF C 15-100 ?",
+     "NF C 15-100 est la norme française qui définit les règles d'installation électrique des logements neufs et rénovés (tableau, différentiels, prises, protection des personnes). ARélec diagnostique et met aux normes les installations existantes."),
+    ("ARélec fait-il du dépannage électrique ?",
+     "Oui — disjoncteur qui saute, prise grillée, panne d'éclairage, court-circuit. ARélec intervient rapidement dans le bassin brestois (Brest, Plouzané, Saint-Renan, Landerneau et alentour)."),
+    ("Quand faut-il remplacer le tableau électrique ?",
+     "Quand l'installation date d'avant la norme actuelle, qu'il n'y a pas de différentiels 30 mA, que le tableau est saturé, ou en cas de rénovation lourde. ARélec fait le diagnostic et remplace le tableau sans tout casser."),
+    ("ARélec installe-t-il des éclairages LED ?",
+     "Oui — éclairage intérieur et extérieur, conception sur mesure (escaliers LED intégrées, appliques chaudes, éclairage architectural). C'est l'une des spécialités de l'entreprise."),
+    ("Faut-il un électricien certifié pour une rénovation ?",
+     "Oui, pour respecter la norme NF C 15-100 et garantir la sécurité. ARélec est artisan électricien depuis 2010 et prend en charge des rénovations complètes, en coordination avec ses autres métiers (chauffage, plomberie)."),
+]
+
+FAQ_CHAUF = [
+    ("Quel chauffage choisir en rénovation ?",
+     "Le choix dépend de l'isolation du logement, de la surface, de l'usage et du budget. ARélec dimensionne radiateurs et distribution selon votre maison, et conseille sur les solutions les plus durables (radiateurs, pompe à chaleur, eau chaude sanitaire)."),
+    ("ARélec entretient-il les chaudières ?",
+     "Oui — visite annuelle, contrôle complet, réglages, petits remplacements. Un chauffage entretenu consomme moins et tombe moins souvent en panne."),
+    ("Comment réduire sa facture de chauffage ?",
+     "Trois leviers concrets : revoir la régulation (programmation par pièce), équilibrer le réseau (chaque radiateur à la bonne température), et améliorer l'isolation si possible. ARélec règle souvent le confort sans avoir à changer l'appareil."),
+    ("ARélec installe-t-il des radiateurs neufs ?",
+     "Oui — installation, remplacement, dimensionnement et raccordement. ARélec gère l'eau chaude sanitaire et la distribution dans le bassin brestois."),
+    ("Quelle est la fréquence d'entretien d'un chauffage ?",
+     "L'entretien annuel est recommandé (et obligatoire pour la plupart des chaudières). ARélec passe une fois par an, contrôle, règle, remplace ce qui doit l'être."),
+]
+
+FAQ_PLOMB = [
+    ("ARélec rénove-t-il des salles de bain complètes ?",
+     "Oui — de la dépose à la pose : douche, baignoire, WC, robinetterie, réseau d'eau, évacuations, coordination carrelage. ARélec fait toute la plomberie et l'électricité de la pièce, sans laisser de tranchée ouverte le week-end."),
+    ("Comment détecter une fuite d'eau ?",
+     "Compteur qui tourne sans usage, traces d'humidité, baisse de pression. ARélec localise précisément la fuite avant d'ouvrir (pas de casse inutile), répare et remet en état."),
+    ("ARélec refait-il les réseaux d'eau ?",
+     "Oui — dans les rénovations, ARélec reprend les canalisations, installe les évacuations et la robinetterie, et remet l'installation aux standards actuels."),
+    ("Combien de temps pour rénover une salle de bain ?",
+     "Cela dépend de l'ampleur du chantier (réfection totale ou rafraîchissement). ARélec établit un planning précis lors de la visite de devis pour limiter la gêne au quotidien."),
+    ("ARélec installe-t-il des douches à l'italienne ?",
+     "Oui — douches italiennes, finitions marbre, vasques, robinetteries soignées. Voir les exemples sur la page Réalisations."),
+]
+
+SERVICE_ELEC = {
+    "name": "Travaux d'électricité — ARélec",
+    "description": "Installation, rénovation, mise aux normes NF C 15-100, dépannage et éclairage par un artisan électricien installé à Plouzané depuis 2010, intervenant dans tout le bassin brestois.",
+    "service_type": "Electrical installation, renovation and repair",
+}
+SERVICE_CHAUF = {
+    "name": "Travaux de chauffage — ARélec",
+    "description": "Installation, remplacement et entretien de chauffage, radiateurs et eau chaude sanitaire dans le bassin brestois. Conseil en régulation et économies d'énergie.",
+    "service_type": "Heating installation, replacement and maintenance",
+}
+SERVICE_PLOMB = {
+    "name": "Travaux de plomberie — ARélec",
+    "description": "Salle de bain, sanitaires, recherche de fuite, réseau d'eau, robinetterie et évacuations dans le bassin brestois (Brest, Plouzané, et alentour).",
+    "service_type": "Plumbing installation, renovation and leak detection",
+}
 
 # ---------- PAGES ----------
 SECT_HOME="De la prise qui claque à la salle de bain complète : on s'occupe de toute la maison, en neuf comme en rénovation."
@@ -641,17 +945,19 @@ pages=[]
 # HOME
 home_body=(hero_home("Électricité · Chauffage · Plomberie — Finistère, depuis 2010","Une maison bien câblée,<br><b>bien chauffée.</b>",
   "À Plouzané et dans tout le bassin brestois depuis 2010 : électricité, chauffage et plomberie, en neuf comme en rénovation.<br><b>Faites une estimation en ligne</b> ou contactez-nous — devis gratuit.")
- +trades_panel("Trois métiers, <em>un seul interlocuteur.</em>",SECT_HOME)+avis_panel(AVIS_HOME)+falling_panel()+FOOTER)
+ +trades_panel("Trois métiers, <em>un seul interlocuteur.</em>",SECT_HOME)+avis_panel(AVIS_HOME)
+ +faq_section(FAQ_HOME, h2="Vos questions, nos réponses.")+falling_panel()+FOOTER)
 pages.append(("","ARélec — Électricien, chauffagiste & plombier à Plouzané (29)",
   "Électricité, chauffage et plomberie dans le bassin brestois depuis 2010. Devis gratuit, travail soigné. Estimez votre projet en ligne.",
-  home_body, jsonld("/","Accueil",None), "home"))
+  home_body, jsonld("/","Accueil",None,faq=FAQ_HOME), "home"))
 
 # Helper subpage build
-def gen_sub(slug,title,desc,active,crumb,eyebrow,h1,lead,hero_img,hero_float,sections,recap_h2,area,extra="",breadcrumb_name=None,hero_alt=None):
+def gen_sub(slug,title,desc,active,crumb,eyebrow,h1,lead,hero_img,hero_float,sections,recap_h2,area,extra="",breadcrumb_name=None,hero_alt=None,faq=None,service=None):
+    faq_html = faq_section(faq) if faq else ""
     body = (subnav(active) + subhero(crumb,eyebrow,h1,lead,hero_img,hero_float,hero_alt) + trust_strip()
             + "".join(feat_section(*s, flip=(i%2==1)) for i,s in enumerate(sections))
-            + extra + recap(recap_h2) + FOOTER)
-    pages.append((slug,title,desc,body,jsonld("/"+slug,h1,area,breadcrumb_name=breadcrumb_name),"sub"))
+            + extra + faq_html + recap(recap_h2) + FOOTER)
+    pages.append((slug,title,desc,body,jsonld("/"+slug,h1,area,breadcrumb_name=breadcrumb_name,faq=faq,service=service),"sub"))
 
 CRUMB_M = '<a href="/">Accueil</a> › {label}'
 CRUMB_L = '<a href="/">Accueil</a> › <a href="/{metier_url}">{metier}</a> › {commune}'
@@ -675,7 +981,8 @@ gen_sub("electricite","Électricien à Brest & Plouzané | ARélec",
    "Un disjoncteur qui claque, une prise grillée, un éclairage qui ne marche plus : on intervient rapidement. Et pour les pièces où la lumière fait tout, on conçoit l'éclairage avec soin.",
    ["Intervention dépannage","Réparation rapide","Éclairage architectural","Pilotage simple"],
    "eclairage.jpg","Éclairage soigné")],
- "Un projet électrique ? Estimons-le ensemble.", None, breadcrumb_name="Électricité")
+ "Un projet électrique ? Estimons-le ensemble.", None, breadcrumb_name="Électricité",
+ faq=FAQ_ELEC, service=SERVICE_ELEC)
 
 gen_sub("chauffage","Chauffagiste à Brest | ARélec",
  "Installation, remplacement et entretien de votre chauffage, radiateurs et eau chaude dans le bassin brestois. Devis gratuit — ARélec.",
@@ -695,7 +1002,8 @@ gen_sub("chauffage","Chauffagiste à Brest | ARélec",
    "Un chauffage entretenu consomme moins et tombe moins souvent en panne. On passe une fois par an, on contrôle, on règle, on remplace ce qui doit l'être.",
    ["Visite annuelle","Contrôle complet","Petits remplacements","Conseil de longévité"],
    "maison-bleue.jpg","Entretien à domicile")],
- "Un remplacement, une révision, une question ?", None, breadcrumb_name="Chauffage")
+ "Un remplacement, une révision, une question ?", None, breadcrumb_name="Chauffage",
+ faq=FAQ_CHAUF, service=SERVICE_CHAUF)
 
 gen_sub("plomberie","Plombier à Brest | ARélec",
  "Salle de bain, sanitaires, recherche de fuite et réseau d'eau dans le bassin brestois. Rénovation soignée, devis gratuit — ARélec.",
@@ -715,7 +1023,8 @@ gen_sub("plomberie","Plombier à Brest | ARélec",
    "On reprend le réseau d'eau dans les rénovations, on installe les évacuations et la robinetterie. Pas de bidouille — on remet aux standards d'aujourd'hui.",
    ["Refonte réseau eau","Évacuations","Robinetterie","Mises aux normes"],
    "sdb-marbre.jpg","Finitions soignées")],
- "Une salle de bain, une fuite, un projet ?", None)
+ "Une salle de bain, une fuite, un projet ?", None, breadcrumb_name="Plomberie",
+ faq=FAQ_PLOMB, service=SERVICE_PLOMB)
 
 # ------- LOCALES -------
 def gen_local(slug,title,desc,metier,metier_url,commune,commune_label,h1,lead,hero_img,sec01,sec02,sec03,recap_h2):
@@ -923,12 +1232,12 @@ for m_slug,m_label,m_url,hero_img,sec01_img,noun,desc_short,prest_lower,sec01_it
                   f"Un projet de {noun.lower()} à {c_label} ?")
 
 # ---------- STUBS ----------
-def stub(slug,title,desc,h1,inner):
+def stub(slug,title,desc,h1,inner,breadcrumb_name=None):
     body=('<section class="panel visible" id="hero"><div class="bg"></div>'+nav_home("/"+slug)+
       '<div class="spacer"></div><div class="content"><h1 class="reveal d2">'+h1+'</h1>'
       '<div class="hr reveal d3"></div><div class="reveal d4" style="max-width:640px;color:rgba(255,255,255,.92);line-height:1.6">'+inner+'</div></div>'
       '<div class="scrollhint">Suite<div class="arr"></div></div></section>'+FOOTER)
-    pages.append((slug,title,desc,body,jsonld("/"+slug,h1,None,reviews=False),"home"))
+    pages.append((slug,title,desc,body,jsonld("/"+slug,h1,None,reviews=False,breadcrumb_name=breadcrumb_name),"home"))
 
 # ---------- /contact : page simple (3 boutons + formulaire) ----------
 PHONE_MOBILE_DISP="06 78 02 04 24"; PHONE_MOBILE_TEL="0678020424"; WHATSAPP_INT="33678020424"
@@ -980,7 +1289,7 @@ gen_sub("entreprise","L'entreprise | ARélec, artisan depuis 2010",
    'On fait les trois métiers nous-mêmes : <a href="/electricite">électricité</a>, <a href="/chauffage">chauffage</a> et <a href="/plomberie">plomberie</a>. Pour une rénovation, ça veut dire un seul devis, pas de coordination à faire entre artisans, et personne qui attend l\'autre sur le chantier. Si l\'un dépend de l\'autre, on s\'organise tout seul.',
    ["Électricité","Chauffage &amp; thermique","Plomberie","Coordination du chantier"],
    "escalier-led.jpg","Trois métiers, une équipe")],
- "Un projet ? On en parle.", None)
+ "Un projet ? On en parle.", None, breadcrumb_name="L'entreprise")
 # ---------- /realisations : galerie des chantiers ----------
 GALLERY=[
  ("hero.jpg","Rénovation","Extension bois & pierre, à l'heure bleue · Plouider"),
@@ -1020,15 +1329,19 @@ pages.append(("realisations","Nos réalisations | ARélec — Brest & Finistère
 stub("estimation","Faire une estimation | ARélec",
  "Estimez vos travaux d'électricité, chauffage ou plomberie en ligne, puis ARélec vient affiner sur place. Gratuit.",
  "Estimez<br><b>vos travaux.</b>",
- "L'estimateur en ligne arrive bientôt : un aperçu de prix en quelques minutes, puis une visite sur place gratuite pour le vrai devis. En attendant, appelez-nous.")
+ "L'estimateur en ligne arrive bientôt : un aperçu de prix en quelques minutes, puis une visite sur place gratuite pour le vrai devis. En attendant, appelez-nous.",
+ breadcrumb_name="Estimation")
 stub("avis","Avis clients | ARélec — Brest & Plouzané",
  "Ce que nos clients disent d'ARélec : qualité, propreté, réactivité et bons conseils. Avis vérifiés Google.",
  "Ils nous<br><b>recommandent.</b>",
- "Qualité du travail, chantier propre, réactivité et bons conseils reviennent dans nos avis Google. Retrouvez-les en bas de chaque page.")
+ "Qualité du travail, chantier propre, réactivité et bons conseils reviennent dans nos avis Google. Retrouvez-les en bas de chaque page.",
+ breadcrumb_name="Avis clients")
 stub("mentions-legales","Mentions légales | ARélec","Mentions légales du site ARélec (SARL ARélec, Plouzané).",
- "Mentions<br><b>légales.</b>","SARL ARélec — SIREN 790 223 036 — Plouzané (29280). Directeur de la publication : Arnaud Roncey. <em>(À compléter : hébergeur, capital, TVA.)</em>")
+ "Mentions<br><b>légales.</b>","SARL ARélec — SIREN 790 223 036 — Plouzané (29280). Directeur de la publication : Arnaud Roncey. <em>(À compléter : hébergeur, capital, TVA.)</em>",
+ breadcrumb_name="Mentions légales")
 stub("politique-confidentialite","Politique de confidentialité | ARélec","Politique de confidentialité et gestion des données du site ARélec.",
- "Confidentialité.","Les données envoyées via le formulaire de contact servent uniquement à répondre à votre demande. <em>(À compléter avec Arnaud.)</em>")
+ "Confidentialité.","Les données envoyées via le formulaire de contact servent uniquement à répondre à votre demande. <em>(À compléter avec Arnaud.)</em>",
+ breadcrumb_name="Confidentialité")
 
 # ---------- écriture ----------
 for slug,t,d,body,jl,kind in pages:
@@ -1036,13 +1349,266 @@ for slug,t,d,body,jl,kind in pages:
     else: write(slug, shell_home(slug,t,d,body,jl, dots=(4 if slug=="" else 0)))
 
 urls=[p[0] for p in pages]
+TODAY=datetime.date.today().isoformat()
+def url_meta(u):
+    if u=="": return ("1.0","weekly")
+    if u in ("electricite","chauffage","plomberie"): return ("0.9","monthly")
+    if u in ("contact","estimation"): return ("0.8","monthly")
+    if u in ("realisations","entreprise","avis"): return ("0.7","monthly")
+    if u in ("mentions-legales","politique-confidentialite"): return ("0.2","yearly")
+    return ("0.6","monthly")  # pages locales [métier]-[commune]
 sm='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 for u in urls:
     loc=DOMAIN+("/" if u=="" else "/"+u+"/")
-    sm+=f'  <url><loc>{loc}</loc><changefreq>monthly</changefreq><priority>{"1.0" if u=="" else "0.8"}</priority></url>\n'
+    pr,cf=url_meta(u)
+    sm+=f'  <url><loc>{loc}</loc><lastmod>{TODAY}</lastmod><changefreq>{cf}</changefreq><priority>{pr}</priority></url>\n'
 sm+='</urlset>\n'
 (SITE/"sitemap.xml").write_text(sm)
-(SITE/"robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {DOMAIN}/sitemap.xml\n")
+
+# ---------- robots.txt avec directives IA explicites ----------
+ROBOTS = f"""# robots.txt — ARélec (entreprise-arelec.fr)
+User-agent: *
+Allow: /
+
+# Crawlers IA — autorisés à indexer et citer le contenu
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+Sitemap: {DOMAIN}/sitemap.xml
+"""
+(SITE/"robots.txt").write_text(ROBOTS)
+
+# ---------- llms.txt — résumé pour crawlers IA ----------
+LLMS_TXT = f"""# ARélec
+
+> Artisan électricien, chauffagiste et plombier installé à Plouzané (29280) depuis 2010. Intervention dans tout le bassin brestois (Finistère).
+
+## Identité
+
+- **Nom légal** : SARL ARélec
+- **SIREN** : 790 223 036
+- **Gérant** : Arnaud Roncey
+- **Adresse** : Plouzané (29280), Finistère, France
+- **Téléphone** : +33 2 98 40 20 43 (fixe) · +33 6 78 02 04 24 (mobile / WhatsApp)
+- **Email** : contact@entreprise-arelec.fr
+- **Année de création** : 2010
+- **Site web** : {DOMAIN}
+
+## Métiers
+
+ARélec couvre trois métiers du bâtiment, en interne, avec la même équipe :
+
+1. **Électricité** — installation, rénovation, mise aux normes NF C 15-100, dépannage, tableau électrique, éclairage architectural.
+2. **Chauffage / thermique** — installation, remplacement, dimensionnement, entretien annuel, régulation, équilibrage du réseau.
+3. **Plomberie** — salle de bain complète, recherche de fuite, réseau d'eau, sanitaires, robinetterie, évacuations.
+
+Un seul interlocuteur prend en charge le chantier de A à Z, sans coordination à faire entre plusieurs artisans.
+
+## Zone d'intervention
+
+Siège à Plouzané (29280). Interventions dans tout le bassin brestois :
+
+- Brest
+- Plouzané (siège)
+- Saint-Renan
+- Le Conquet
+- Landerneau
+- Plouider
+- Guipavas
+- Le Relecq-Kerhuon
+- Guilers
+- Plougonvelin
+- Locmaria-Plouzané
+- Lannilis
+- Plabennec
+
+Rayon d'intervention typique : environ 30 km autour de Plouzané, dans le Finistère.
+
+## Comment travailler avec ARélec
+
+1. **Estimation en ligne gratuite** (~2 minutes) sur {DOMAIN}/estimation
+2. **Visite sur place gratuite** pour établir le vrai devis si la fourchette correspond
+3. **Devis détaillé**, écrit, sans engagement
+4. **Réalisation du chantier** par la même équipe, de la dépose à la mise en route
+
+Devis toujours gratuit. Réponse sous 24 à 48 h.
+
+## Pages clés
+
+- [Accueil]({DOMAIN}/)
+- [Électricité]({DOMAIN}/electricite/)
+- [Chauffage]({DOMAIN}/chauffage/)
+- [Plomberie]({DOMAIN}/plomberie/)
+- [Réalisations]({DOMAIN}/realisations/)
+- [L'entreprise]({DOMAIN}/entreprise/)
+- [Avis clients]({DOMAIN}/avis/)
+- [Estimation]({DOMAIN}/estimation/)
+- [Contact]({DOMAIN}/contact/)
+- [Documentation complète pour IA]({DOMAIN}/llms-full.txt)
+
+## Pages locales par métier
+
+ARélec a une page dédiée pour chaque combinaison métier × commune :
+
+- Électricien : {DOMAIN}/electricien-brest/, electricien-plouzane, electricien-saint-renan, electricien-le-conquet, electricien-landerneau, electricien-plouider, electricien-guipavas, electricien-le-relecq-kerhuon, electricien-guilers, electricien-plougonvelin, electricien-locmaria-plouzane, electricien-lannilis, electricien-plabennec
+- Chauffagiste : même liste de communes, préfixe `chauffagiste-`
+- Plombier : même liste de communes, préfixe `plombier-`
+
+## Contact
+
+- Téléphone : 02 98 40 20 43
+- WhatsApp : 06 78 02 04 24
+- Email : contact@entreprise-arelec.fr
+- Formulaire : {DOMAIN}/contact/
+
+Dernière mise à jour : {TODAY}
+"""
+(SITE/"llms.txt").write_text(LLMS_TXT)
+
+# ---------- llms-full.txt — documentation détaillée pour IA ----------
+def _faq_block(title, qa_pairs):
+    out = [f"### {title}", ""]
+    for q, a in qa_pairs:
+        out.append(f"**Q : {q}**")
+        out.append("")
+        out.append(f"R : {a}")
+        out.append("")
+    return "\n".join(out)
+
+LLMS_FULL = f"""# ARélec — documentation complète
+
+> Artisan électricien, chauffagiste et plombier installé à Plouzané (29280) depuis 2010. Intervention dans tout le bassin brestois (Finistère).
+
+Ce fichier est destiné aux moteurs de recherche IA (ChatGPT, Perplexity, Claude, Google AI Overviews, Bing Copilot) pour comprendre l'activité, la zone, et les compétences d'ARélec, et pouvoir citer l'entreprise dans leurs réponses.
+
+---
+
+## 1. Qui est ARélec
+
+ARélec (raison sociale : SARL ARélec, SIREN 790 223 036) est une entreprise artisanale du bâtiment fondée en 2010 et installée à Plouzané (29280), dans le Finistère, en France. Le gérant est Arnaud Roncey. L'entreprise couvre trois métiers complémentaires — électricité, chauffage, plomberie — avec une seule équipe, ce qui permet à un client de mener une rénovation complète sans coordonner plusieurs artisans.
+
+ARélec intervient principalement dans le bassin brestois : Brest, Plouzané, Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec. Le rayon d'intervention typique est d'environ 30 km autour de Plouzané.
+
+Le devis est toujours gratuit. L'entreprise propose un outil d'estimation en ligne (~2 minutes), puis une visite sur place gratuite pour établir le vrai devis si la fourchette de prix correspond au budget du client.
+
+---
+
+## 2. Métiers en détail
+
+### 2.1 Électricité
+
+ARélec est avant tout un électricien — c'est le cœur de métier depuis 2010. Les prestations incluent :
+
+- **Installation neuve** : conception du plan électrique, tirage des gaines, pose du tableau, des différentiels et des appareillages, éclairage intérieur et extérieur.
+- **Rénovation** : reprise d'installation existante, mise au propre du tableau, remplacement d'appareillage.
+- **Mise aux normes NF C 15-100** : diagnostic complet, remplacement de ce qui n'est plus conforme, sans casser inutilement les murs.
+- **Dépannage** : disjoncteur qui claque, prise grillée, panne d'éclairage, court-circuit.
+- **Éclairage** : conception architecturale (escaliers à LED intégrées, appliques chaudes, pilotage simple).
+
+### 2.2 Chauffage / thermique
+
+ARélec installe, remplace et entretient le chauffage des maisons individuelles :
+
+- **Installation et remplacement** : radiateurs, distribution, eau chaude sanitaire, dimensionnement adapté à l'isolation et à la surface.
+- **Confort et économies** : régulation par pièce, équilibrage du réseau, conseil sur les leviers d'économies sans changer l'appareil.
+- **Entretien** : visite annuelle, contrôle complet, réglages, petits remplacements. Un chauffage entretenu consomme moins et tombe moins souvent en panne.
+
+### 2.3 Plomberie
+
+ARélec couvre toute la plomberie résidentielle :
+
+- **Salle de bain complète** : dépose, réseau d'eau, douche / baignoire / WC, robinetterie, finitions, coordination carrelage.
+- **Recherche et réparation de fuite** : localisation précise avant ouverture, réparation propre, remise en état.
+- **Réseau d'eau et sanitaires** : refonte des canalisations en rénovation, évacuations, mises aux standards actuels.
+
+---
+
+## 3. Zone d'intervention détaillée
+
+Siège à **Plouzané (29280)**, Finistère, Bretagne.
+
+Communes couvertes (chacune a une page dédiée par métier) :
+
+| Commune | Code postal |
+|---|---|
+| Brest | 29200 |
+| Plouzané | 29280 |
+| Saint-Renan | 29290 |
+| Le Conquet | 29217 |
+| Landerneau | 29800 |
+| Plouider | 29260 |
+| Guipavas | 29490 |
+| Le Relecq-Kerhuon | 29480 |
+| Guilers | 29820 |
+| Plougonvelin | 29217 |
+| Locmaria-Plouzané | 29280 |
+| Lannilis | 29870 |
+| Plabennec | 29860 |
+
+---
+
+## 4. Questions fréquentes
+
+{_faq_block("Général", FAQ_HOME)}
+
+{_faq_block("Électricité", FAQ_ELEC)}
+
+{_faq_block("Chauffage", FAQ_CHAUF)}
+
+{_faq_block("Plomberie", FAQ_PLOMB)}
+
+---
+
+## 5. Contact
+
+- **Téléphone fixe** : 02 98 40 20 43
+- **Téléphone mobile / WhatsApp** : 06 78 02 04 24
+- **Email** : contact@entreprise-arelec.fr
+- **Adresse** : Plouzané (29280), Finistère, France
+- **Site** : {DOMAIN}
+- **Formulaire de contact** : {DOMAIN}/contact/
+
+Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00.
+
+---
+
+## 6. Identifiants légaux
+
+- **Raison sociale** : SARL ARélec
+- **SIREN** : 790 223 036
+- **Statut** : SARL (Société à responsabilité limitée)
+- **Année de création** : 2010
+- **Gérant** : Arnaud Roncey
+
+---
+
+Dernière mise à jour : {TODAY}
+"""
+(SITE/"llms-full.txt").write_text(LLMS_FULL)
 
 print("Pages :", len(pages))
 for slug,*_ in pages: print("  /"+(slug or "(accueil)"))
