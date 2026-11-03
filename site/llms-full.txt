@@ -12,7 +12,7 @@ ARélec (raison sociale : SARL ARélec, SIREN 790 223 036) est une entreprise ar
 
 ARélec intervient principalement dans le bassin brestois : Brest, Plouzané, Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec. Le rayon d'intervention typique est d'environ 30 km autour de Plouzané.
 
-Le devis est toujours gratuit. L'entreprise propose un outil d'estimation en ligne (~2 minutes), puis une visite sur place gratuite pour établir le vrai devis si la fourchette de prix correspond au budget du client.
+Le devis est toujours gratuit. Le premier échange se fait via l'assistant du site puis sur WhatsApp (ou par téléphone), puis ARélec se déplace gratuitement pour établir le vrai devis sur place.
 
 ---
 
@@ -88,7 +88,7 @@ R : Trois métiers, par la même équipe : électricité (installation, rénovat
 
 **Q : Le devis est-il payant ?**
 
-R : Non. L'estimation en ligne est gratuite (~2 minutes). Si la fourchette correspond à votre budget, ARélec se déplace ensuite gratuitement pour établir le vrai devis sur place.
+R : Non. Le devis est gratuit : on échange d'abord sur votre projet (assistant du site, WhatsApp ou téléphone), puis ARélec se déplace gratuitement pour établir le vrai devis sur place.
 
 **Q : Comment contacter ARélec ?**
 
@@ -193,4 +193,4 @@ Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00.
 
 ---
 
-Dernière mise à jour : 2026-05-28
+Dernière mise à jour : 2026-11-03

@@ -45,8 +45,8 @@ Rayon d'intervention typique : environ 30 km autour de Plouzané, dans le Finist
 
 ## Comment travailler avec ARélec
 
-1. **Estimation en ligne gratuite** (~2 minutes) sur https://www.entreprise-arelec.fr/estimation
-2. **Visite sur place gratuite** pour établir le vrai devis si la fourchette correspond
+1. **Premier échange** : assistant du site, puis WhatsApp (06 78 02 04 24), ou téléphone
+2. **Visite sur place gratuite** pour établir le vrai devis
 3. **Devis détaillé**, écrit, sans engagement
 4. **Réalisation du chantier** par la même équipe, de la dépose à la mise en route
 
@@ -61,7 +61,6 @@ Devis toujours gratuit. Réponse sous 24 à 48 h.
 - [Réalisations](https://www.entreprise-arelec.fr/realisations/)
 - [L'entreprise](https://www.entreprise-arelec.fr/entreprise/)
 - [Avis clients](https://www.entreprise-arelec.fr/avis/)
-- [Estimation](https://www.entreprise-arelec.fr/estimation/)
 - [Contact](https://www.entreprise-arelec.fr/contact/)
 - [Documentation complète pour IA](https://www.entreprise-arelec.fr/llms-full.txt)
 
@@ -80,4 +79,4 @@ ARélec a une page dédiée pour chaque combinaison métier × commune :
 - Email : contact@entreprise-arelec.fr
 - Formulaire : https://www.entreprise-arelec.fr/contact/
 
-Dernière mise à jour : 2026-05-28
+Dernière mise à jour : 2026-11-03

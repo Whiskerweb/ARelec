@@ -6,15 +6,17 @@
 import os, html, pathlib, datetime, json
 from PIL import Image, ImageOps
 
-ROOT = pathlib.Path("/Users/lucasroncey/Desktop/Projet Saas/Arelec")
+ROOT = pathlib.Path(__file__).resolve().parent
 SITE = ROOT/"site"; IMG = SITE/"assets/img"; CSS = SITE/"assets/css"
 DOMAIN = "https://www.entreprise-arelec.fr"
 PHONE_DISP = "02 98 40 20 43"; PHONE_TEL = "0298402043"; EMAIL = "contact@entreprise-arelec.fr"
+PHONE_MOBILE_DISP="06 78 02 04 24"; PHONE_MOBILE_TEL="0678020424"; WHATSAPP_INT="33678020424"
 SVG_PHONE='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
 SVG_MAIL='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>'
 SVG_WA='<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23-1.48 0-2.93-.39-4.19-1.15l-.3-.17-3.12.82.83-3.04-.2-.32a8.188 8.188 0 0 1-1.26-4.38c.01-4.54 3.7-8.24 8.25-8.24zM8.53 7.33c-.16 0-.43.06-.66.31-.22.25-.87.86-.87 2.07 0 1.22.89 2.39 1 2.56.14.17 1.76 2.67 4.25 3.73.59.27 1.05.42 1.41.53.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.16-.48-.27-.25-.14-1.47-.74-1.69-.82-.23-.08-.4-.12-.56.12-.17.25-.64.81-.78.97-.15.17-.29.19-.53.07-.26-.13-1.06-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.12-.24-.01-.39.11-.5.11-.11.27-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.11-.56-1.35-.77-1.84-.2-.48-.4-.42-.56-.43-.14 0-.3-.01-.47-.01z"/></svg>'
 SVG_FB='<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12.07C22 6.51 17.52 2 12 2S2 6.51 2 12.07c0 5.02 3.66 9.18 8.44 9.93v-7.02H7.9v-2.91h2.54V9.84c0-2.51 1.49-3.89 3.78-3.89 1.09 0 2.24.19 2.24.19v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.77l-.44 2.91h-2.33V22c4.78-.75 8.43-4.91 8.43-9.93z"/></svg>'
-for p in (IMG,CSS): p.mkdir(parents=True, exist_ok=True)
+JS_DIR = SITE/"assets/js"; API = ROOT/"api"
+for p in (IMG,CSS,JS_DIR,API): p.mkdir(parents=True, exist_ok=True)
 
 # ---------- images mutualisees ----------
 def save(srcname, dst, w):
@@ -411,17 +413,54 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offse
 .md-tel-sub{font-size:11.5px;color:rgba(255,255,255,.55);letter-spacing:.04em;margin-top:2px}
 body.menu-open{overflow:hidden;touch-action:none}
 
-/* ===== BOTTOM ACTION BAR (mobile thumb zone) ===== */
-.mobile-cta{display:none}
-@media (max-width:760px){
-  .mobile-cta{display:flex;position:fixed;left:8px;right:8px;z-index:45;bottom:calc(8px + env(safe-area-inset-bottom));gap:8px;padding:8px;border-radius:20px;background:linear-gradient(165deg,rgba(255,255,255,.94),rgba(255,255,255,.82));backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);border:1px solid rgba(255,255,255,.95);box-shadow:0 18px 40px rgba(20,60,140,.22)}
-  .mca{flex:1;min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:-.01em}
-  .mca.call{color:#0c2a5e;background:rgba(20,87,255,.08);border:1px solid rgba(20,87,255,.18)}
-  .mca.quote{color:#fff;background:linear-gradient(180deg,#3a7dff,#1654d8);border:1px solid rgba(255,255,255,.25);box-shadow:0 8px 18px rgba(20,87,255,.28)}
-  .mca .ic{width:16px;height:16px}
-  .snap{scroll-padding-bottom:80px}
-  body.menu-open .mobile-cta{display:none}
+/* ===== ASSISTANT : bulle discrète + panneau de discussion ===== */
+.chat-fab{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:1200;width:58px;height:58px;padding:0;border-radius:999px;display:grid;place-items:center;cursor:pointer;color:#fff;font:inherit;overflow:hidden;background:linear-gradient(180deg,rgba(58,125,255,.9),rgba(22,84,216,.9));backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 30px rgba(20,60,140,.35);transition:transform .2s,opacity .2s}
+.chat-fab::after{content:"";position:absolute;left:1px;right:1px;top:1px;height:50%;border-radius:999px 999px 40% 40%;background:linear-gradient(180deg,rgba(255,255,255,.32),transparent);pointer-events:none}
+.chat-fab:hover{transform:translateY(-2px)}
+.chat-fab:focus-visible,.chat button:focus-visible,.chat a:focus-visible,.chat textarea:focus-visible{outline:3px solid #0BB0FF;outline-offset:2px}
+.chat-fab .ic{width:25px;height:25px}
+.chat-fab .live{position:absolute;top:6px;right:7px;width:11px;height:11px;border-radius:50%;background:#36E07F;border:2px solid #fff;z-index:1}
+body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;transform:scale(.8)}
+.chat{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:1201;width:min(390px,calc(100vw - 36px));height:min(600px,calc(100vh - 36px));height:min(600px,calc(100dvh - 36px));display:flex;flex-direction:column;border-radius:24px;overflow:hidden;color:#11233F;background:linear-gradient(165deg,rgba(255,255,255,.96),rgba(255,255,255,.88));backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);border:1px solid rgba(255,255,255,.95);box-shadow:0 24px 60px rgba(10,30,70,.32);transform-origin:bottom right;animation:chatIn .22s cubic-bezier(.2,.7,.2,1)}
+.chat[hidden]{display:none}
+@keyframes chatIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.chat-head{display:flex;align-items:center;gap:12px;padding:14px 14px 14px 18px;color:#fff;background:radial-gradient(80% 120% at 100% 0,rgba(11,176,255,.35),transparent 60%),linear-gradient(160deg,#0c2750,#0a1c39 60%,#06101f)}
+.chat-id{flex:1;min-width:0;line-height:1.2}
+.chat-id b{display:block;font-size:15.5px;font-weight:700;letter-spacing:-.01em}
+.chat-id span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.7)}
+.chat-id span::before{content:"";width:7px;height:7px;border-radius:50%;background:#36E07F}
+.chat-hbtn{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;color:#fff;text-decoration:none;cursor:pointer;padding:0;font:inherit;font-size:24px;line-height:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22)}
+.chat-hbtn:hover{background:rgba(255,255,255,.18)}
+.chat-hbtn .ic{width:18px;height:18px}
+.chat-msgs{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:16px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{max-width:86%;padding:10px 14px;border-radius:18px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.chat-msg.bot{align-self:flex-start;background:#eef3fc;border:1px solid rgba(20,87,255,.10);border-bottom-left-radius:6px}
+.chat-msg.me{align-self:flex-end;color:#fff;background:linear-gradient(180deg,#3a7dff,#1654d8);border-bottom-right-radius:6px}
+.chat-typing{align-self:flex-start;display:flex;gap:4px;padding:14px 16px;border-radius:18px;background:#eef3fc}
+.chat-typing i{width:7px;height:7px;border-radius:50%;background:#7d95c4;animation:chatDot 1s infinite ease-in-out}
+.chat-typing i:nth-child(2){animation-delay:.15s}.chat-typing i:nth-child(3){animation-delay:.3s}
+@keyframes chatDot{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.chat-wa{align-self:stretch;display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;border-radius:16px;text-decoration:none;color:#fff;background:linear-gradient(180deg,#2bd46b,#1fa952);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 22px rgba(31,169,82,.28)}
+.chat-wa .ic{width:24px;height:24px;flex:none}
+.chat-wa b{display:block;font-size:15px}
+.chat-wa small{display:block;font-size:12px;opacity:.9;line-height:1.3}
+.chat-sugg{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 10px}
+.chat-sugg[hidden]{display:none}
+.chat-sugg button{min-height:44px;padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;color:#0c2a5e;background:rgba(20,87,255,.07);border:1px solid rgba(20,87,255,.2)}
+.chat-sugg button:hover{background:rgba(20,87,255,.13)}
+.chat-form{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;border-top:1px solid rgba(15,40,90,.08);background:rgba(255,255,255,.7)}
+.chat-form textarea{flex:1;resize:none;min-height:44px;max-height:120px;padding:11px 14px;border-radius:16px;font:inherit;font-size:16px;line-height:1.35;color:#11233F;background:#fff;border:1px solid rgba(15,40,90,.16)}
+.chat-send{width:44px;height:44px;flex:none;border-radius:999px;display:grid;place-items:center;cursor:pointer;padding:0;color:#fff;background:linear-gradient(180deg,#3a7dff,#1654d8);border:1px solid rgba(255,255,255,.3);box-shadow:0 6px 14px rgba(20,87,255,.3)}
+.chat-send:disabled{opacity:.5;cursor:default}
+.chat-send .ic{width:18px;height:18px}
+.chat-note{margin:0;padding:0 14px 10px;font-size:11px;color:#6b7b96;text-align:center;background:rgba(255,255,255,.7)}
+.chat-note a{color:inherit}
+@media (max-width:560px){
+  .chat-fab{width:52px;height:52px;right:calc(14px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom))}
+  .chat-fab .ic{width:22px;height:22px}
+  .chat{left:8px;right:8px;width:auto;bottom:calc(8px + env(safe-area-inset-bottom));height:min(640px,calc(100vh - 70px));height:min(640px,calc(100dvh - 70px));border-radius:22px}
 }
+@media (prefers-reduced-motion:reduce){.chat,.chat-typing i{animation:none}.chat-fab{transition:none}}
 """
 (CSS/"styles.css").write_text(CSS_TXT)
 
@@ -432,7 +471,7 @@ def nav_home(active):
     links="".join(f'<a href="{u}"{" aria-current=\"page\"" if u==active else ""}>{t}</a>' for u,t in NAV_LINKS)
     return ('<nav class="nav reveal d1"><a href="/"><img class="brand-img" alt="ARELEC" src="/assets/img/logo.png"></a>'
             f'<div class="navlinks">{links}</div>'
-            '<a href="/estimation" class="btn">Faire une estimation</a>'
+            '<a href="/contact" class="btn" data-chat>Prendre contact</a>'
             '<button class="burger" type="button" aria-expanded="false" aria-controls="mdrawer" aria-label="Ouvrir le menu"><span></span></button></nav>')
 
 def mobile_drawer():
@@ -462,18 +501,31 @@ def mobile_drawer():
             f'<div class="md-section"><div class="md-label">Nos métiers</div>{trade_html}</div>'
             f'<div class="md-section"><div class="md-label">L\'entreprise</div>{link_html}</div>'
             '<div class="md-foot">'
-            '<a class="btn solid md-cta" href="/estimation">Faire une estimation →</a>'
+            '<a class="btn solid md-cta" href="/contact" data-chat>Prendre contact →</a>'
             f'<a class="md-tel" href="tel:{PHONE_TEL}" aria-label="Appeler {PHONE_DISP}">'
             f'<span class="md-tel-ic" aria-hidden="true">{SVG_PHONE}</span>'
             f'<span class="md-tel-txt"><span class="md-tel-num">{PHONE_DISP}</span>'
             '<span class="md-tel-sub">Lun–Ven · 8h–18h</span></span></a>'
             '</div></div>')
 
-def mobile_cta_bar():
-    return ('<nav class="mobile-cta" aria-label="Actions rapides">'
-            f'<a class="mca call" href="tel:{PHONE_TEL}">{SVG_PHONE} <span>Appeler</span></a>'
-            '<a class="mca quote" href="/estimation">✏️ <span>Estimer</span></a>'
-            '</nav>')
+SVG_CHAT='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>'
+SVG_SEND='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
+def chat_widget():
+    # Bulle discrète en bas à droite + panneau de l'assistant (logique : /assets/js/chat.js, API : /api/chat)
+    sugg="".join(f'<button type="button">{t}</button>' for t in
+                 ("Rénover mon électricité","Changer mon chauffage","Une fuite, une panne","Vous venez chez moi ?"))
+    return (f'<button class="chat-fab" type="button" aria-label="Poser une question à ARélec" aria-controls="chat" aria-expanded="false"><span class="live" aria-hidden="true"></span>{SVG_CHAT}</button>'
+            f'<section class="chat" id="chat" hidden role="dialog" aria-label="Assistant ARélec" data-wa="{WHATSAPP_INT}">'
+            '<div class="chat-head"><div class="chat-id"><b>ARélec</b><span>On vous répond tout de suite</span></div>'
+            f'<a class="chat-hbtn" href="tel:{PHONE_TEL}" aria-label="Appeler le {PHONE_DISP}">{SVG_PHONE}</a>'
+            '<button class="chat-hbtn chat-close" type="button" aria-label="Fermer">×</button></div>'
+            '<div class="chat-msgs" aria-live="polite"></div>'
+            f'<div class="chat-sugg">{sugg}</div>'
+            '<form class="chat-form"><textarea rows="1" maxlength="800" placeholder="Votre question, votre projet…" aria-label="Votre message"></textarea>'
+            f'<button class="chat-send" type="submit" aria-label="Envoyer">{SVG_SEND}</button></form>'
+            '<p class="chat-note">Assistant automatique · <a href="/politique-confidentialite">confidentialité</a></p></section>'
+            f'<template id="chat-wa-ic">{SVG_WA}</template>'
+            '<script src="/assets/js/chat.js?v=1" defer></script>')
 def trades_panel(heading_em, sub):
     cards=[("/electricite","escalier-led.jpg","⚡","Électricité","Du tableau à l'éclairage soigné — le cœur de métier ARélec.",True),
            ("/chauffage","confort.jpg","🌡️","Chauffage","Le confort toute l'année, sans faire flamber la facture.",False),
@@ -491,7 +543,7 @@ def trades_panel(heading_em, sub):
             f'<div class="lead-col">'
             f'<h2 class="trade-list reveal d1"><span>Électricité.</span><span>Chauffage.</span><span>Plomberie.</span></h2>'
             f'<div class="lead-actions reveal d3">'
-            f'<a class="btn solid" href="/estimation">Faire une estimation →</a>'
+            f'<a class="btn solid" href="/contact" data-chat>Prendre contact →</a>'
             f'</div></div>'
             f'<div class="accordion reveal d2">{c}</div></div></section>')
 
@@ -603,8 +655,8 @@ ALL_COMMUNES=sorted(EXISTING_COMMUNES+EXTRA_COMMUNES, key=lambda c:c[1])
 def _li(metier_slug): return "".join(f'<li><a href="/{metier_slug}-{s}">{l}</a></li>' for s,l in ALL_COMMUNES)
 FCITY_E=_li("electricien"); FCITY_P=_li("plombier"); FCITY_C=_li("chauffagiste")
 FOOTER=('<section class="cta-band"><div><h2>Un projet, une panne, une question&nbsp;?</h2>'
- '<p>Estimez vos travaux en ligne, ou appelez-nous. Devis gratuit.</p></div>'
- '<div class="cta-actions"><a href="/estimation" class="btn solid">Faire une estimation →</a>'
+ '<p>Posez votre question à notre assistant, on continue sur WhatsApp. Devis gratuit.</p></div>'
+ '<div class="cta-actions"><a href="/contact" class="btn solid" data-chat>Prendre contact →</a>'
  f'<a href="tel:{PHONE_TEL}" class="btn line">Contacter</a></div></section>'
  '<footer class="site"><div class="fgrid">'
  '<div class="brand"><a href="/"><img class="blogo" src="/assets/img/logo.png" alt="ARELEC"></a>'
@@ -616,7 +668,7 @@ FOOTER=('<section class="cta-band"><div><h2>Un projet, une panne, une question&n
  f'<div class="fcol"><h4>Électricien à…</h4><ul>{FCITY_E}</ul></div>'
  f'<div class="fcol"><h4>Plombier à…</h4><ul>{FCITY_P}</ul></div>'
  f'<div class="fcol"><h4>Chauffagiste à…</h4><ul>{FCITY_C}</ul></div>'
- '<div class="fcol"><h4>Entreprise</h4><ul><li><a href="/entreprise">L\'entreprise</a></li><li><a href="/avis">Avis clients</a></li><li><a href="/contact">Contact</a></li><li><a href="/estimation">Faire une estimation</a></li></ul></div>'
+ '<div class="fcol"><h4>Entreprise</h4><ul><li><a href="/entreprise">L\'entreprise</a></li><li><a href="/avis">Avis clients</a></li><li><a href="/contact">Contact</a></li></ul></div>'
  '</div><div class="legal"><span>© 2026 SARL ARélec — SIREN 790 223 036 — Plouzané</span>'
  '<span><a href="/mentions-legales">Mentions légales</a> · <a href="/politique-confidentialite">Confidentialité</a></span></div></footer>')
 JS=r'''<script>
@@ -744,7 +796,7 @@ def hero_home(kicker,h1,desc):
      '<div class="spacer"></div><div class="content"><div class="topline"><div>'
      f'<div class="kicker reveal d2"><span class="dot"></span>{kicker}</div>'
      f'<h1 class="reveal d2">{h1}</h1></div>'
-     '<a href="/estimation" class="btn primary reveal d3">Faire une estimation →</a></div>'
+     '<a href="/contact" class="btn primary reveal d3" data-chat>Prendre contact →</a></div>'
      '<div class="hr reveal d3"></div><div class="bottom"><div class="meta reveal d4">'
      f'<a class="chip" href="tel:{PHONE_TEL}">{SVG_PHONE} {PHONE_DISP}</a><span class="chip">📍 Plouzané · bassin brestois</span><span class="chip">✓ Devis gratuit</span></div>'
      f'<p class="desc reveal d4">{desc}</p></div></div>'
@@ -756,7 +808,7 @@ def subnav(active):
     return (f'<header class="subnav"><a href="/" aria-label="ARELEC accueil"><img class="logo-dark" src="/assets/img/logo-dark.png" alt="ARELEC"></a>'
             f'<nav>{nv}</nav>'
             f'<div class="ctas"><a class="tel" href="tel:{PHONE_TEL}" aria-label="Appeler {PHONE_DISP}">{SVG_PHONE} <span class="tel-label">{PHONE_DISP}</span></a>'
-            '<a class="btn solid" href="/estimation">Faire une estimation</a>'
+            '<a class="btn solid" href="/contact" data-chat>Prendre contact</a>'
             '<button class="burger" type="button" aria-expanded="false" aria-controls="mdrawer" aria-label="Ouvrir le menu"><span></span></button></div></header>')
 
 def trust_strip():
@@ -770,7 +822,7 @@ def subhero(crumb_html, eyebrow, h1, lead, img, float_html, hero_alt=None):
             f'<div class="crumb">{crumb_html}</div>'
             f'<div class="eyebrow-blue">{eyebrow}</div>'
             f'<h1>{h1}</h1><p class="lead">{lead}</p>'
-            '<div class="actions"><a class="btn solid" href="/estimation">Faire une estimation →</a>'
+            '<div class="actions"><a class="btn solid" href="/contact" data-chat>Prendre contact →</a>'
             f'<a class="btn line" href="tel:{PHONE_TEL}">Contacter</a></div></div>'
             f'<div class="imgcard"><img src="/assets/img/{img}" alt="{html.escape(hero_alt or "ARÉLEC, chantier en Bretagne")}" loading="eager">{fl}</div></div></section>')
 
@@ -783,9 +835,9 @@ def feat_section(num, eyebrow, h2, p, items, img, tag, flip=False):
             f'<h2>{h2}</h2><p>{p}</p><ul>{li}</ul></div>'
             f'<div class="imgcard"><img src="/assets/img/{img}" alt="{eyebrow}" loading="lazy">{tg}</div></div></section>')
 
-def recap(h2, p="Estimation en ligne en quelques minutes, ou un coup de fil. Devis gratuit."):
+def recap(h2, p="Une question, un projet ? On vous répond tout de suite, puis on continue sur WhatsApp. Devis gratuit."):
     return (f'<section class="recap"><h2>{h2}</h2><p>{p}</p>'
-            '<div class="actions"><a class="btn solid" href="/estimation">Faire une estimation →</a>'
+            '<div class="actions"><a class="btn solid" href="/contact" data-chat>Prendre contact →</a>'
             f'<a class="btn line" href="tel:{PHONE_TEL}">Contacter</a></div></section>')
 
 def faq_section(qa_pairs, h2="Questions fréquentes"):
@@ -948,7 +1000,7 @@ def head_common(path,title,desc,jl):
             '<meta name="viewport" content="width=device-width, initial-scale=1">'
             f'<title>{t_esc}</title><meta name="description" content="{d_esc}">'
             f'<link rel="canonical" href="{canon}">{og}{icons}{jl}'
-            '<link rel="stylesheet" href="/assets/css/styles.css?v=43"></head>')
+            '<link rel="stylesheet" href="/assets/css/styles.css?v=44"></head>')
 
 def shell_home(path,title,desc,body,jl,dots=4):
     dotbtns="".join(f'<button{" class=\"on\"" if i==0 else ""} data-go="{i}"></button>' for i in range(dots))
@@ -960,11 +1012,11 @@ def shell_home(path,title,desc,body,jl,dots=4):
             '<a href="/" aria-label="ARELEC accueil"><img class="logo-dark" src="/assets/img/logo-dark.png" alt="ARELEC"></a>'
             f'<nav>{nl}</nav>'
             f'<div class="ctas"><a class="tel" href="tel:{PHONE_TEL}" aria-label="Appeler {PHONE_DISP}">{SVG_PHONE} <span class="tel-label">{PHONE_DISP}</span></a>'
-            '<a class="btn solid" href="/estimation">Faire une estimation</a>'
+            '<a class="btn solid" href="/contact" data-chat>Prendre contact</a>'
             '<button class="burger" type="button" aria-expanded="false" aria-controls="mdrawer" aria-label="Ouvrir le menu"><span></span></button></div></header>')
-    return head_common(path,title,desc,jl)+f'<body>{topnav}{mobile_drawer()}{mobile_cta_bar()}{dotsdiv}<main class="snap" id="snap" role="main">{body}</main>{JS}</body></html>'
+    return head_common(path,title,desc,jl)+f'<body>{topnav}{mobile_drawer()}{chat_widget()}{dotsdiv}<main class="snap" id="snap" role="main">{body}</main>{JS}</body></html>'
 def shell_sub(path,title,desc,body,jl):
-    return head_common(path,title,desc,jl)+f'<body class="sub-shell">{mobile_drawer()}{mobile_cta_bar()}<main role="main">{body}</main>{JS}</body></html>'
+    return head_common(path,title,desc,jl)+f'<body class="sub-shell">{mobile_drawer()}{chat_widget()}<main role="main">{body}</main>{JS}</body></html>'
 
 def write(path,h):
     d=SITE/(path.strip("/")); d.mkdir(parents=True,exist_ok=True)
@@ -979,7 +1031,7 @@ FAQ_HOME = [
     ("Quels métiers couvre ARélec ?",
      "Trois métiers, par la même équipe : électricité (installation, rénovation, mise aux normes NF C 15-100, dépannage, éclairage), chauffage (installation, remplacement, entretien) et plomberie (salle de bain, recherche de fuite, réseau d'eau, sanitaires). Un seul interlocuteur pour tout le chantier."),
     ("Le devis est-il payant ?",
-     "Non. L'estimation en ligne est gratuite (~2 minutes). Si la fourchette correspond à votre budget, ARélec se déplace ensuite gratuitement pour établir le vrai devis sur place."),
+     "Non. Le devis est gratuit : on échange d'abord sur votre projet (assistant du site, WhatsApp ou téléphone), puis ARélec se déplace gratuitement pour établir le vrai devis sur place."),
     ("Comment contacter ARélec ?",
      "Par téléphone au 02 98 40 20 43, par WhatsApp au 06 78 02 04 24, par email à contact@entreprise-arelec.fr, ou via le formulaire de contact du site. Réponse sous 24 à 48 h."),
     ("ARélec fait-il du dépannage ?",
@@ -1048,11 +1100,11 @@ pages=[]
 
 # HOME
 home_body=(hero_home("Électricité · Chauffage · Plomberie — Finistère, depuis 2010","Une maison bien câblée,<br><b>bien chauffée.</b>",
-  "À Plouzané et dans tout le bassin brestois depuis 2010 : électricité, chauffage et plomberie, en neuf comme en rénovation.<br><b>Faites une estimation en ligne</b> ou contactez-nous — devis gratuit.")
+  "À Plouzané et dans tout le bassin brestois depuis 2010 : électricité, chauffage et plomberie, en neuf comme en rénovation.<br><b>Parlez-nous de votre projet</b> — devis gratuit, sur place.")
  +trades_panel("Trois métiers, <em>un seul interlocuteur.</em>",SECT_HOME)+avis_panel(AVIS_HOME)+realisations_panel()
  +faq_section(FAQ_HOME, h2="Vos questions, nos réponses.")+falling_panel()+FOOTER)
 pages.append(("","ARélec — Électricien, chauffagiste & plombier à Plouzané (29)",
-  "Électricité, chauffage et plomberie dans le bassin brestois depuis 2010. Devis gratuit, travail soigné. Estimez votre projet en ligne.",
+  "Électricité, chauffage et plomberie dans le bassin brestois depuis 2010. Devis gratuit, travail soigné. Parlez-nous de votre projet.",
   home_body, jsonld("/","Accueil",None,faq=FAQ_HOME), "home"))
 
 # Helper subpage build
@@ -1344,7 +1396,6 @@ def stub(slug,title,desc,h1,inner,breadcrumb_name=None):
     pages.append((slug,title,desc,body,jsonld("/"+slug,h1,None,reviews=False,breadcrumb_name=breadcrumb_name),"home"))
 
 # ---------- /contact : page simple (3 boutons + formulaire) ----------
-PHONE_MOBILE_DISP="06 78 02 04 24"; PHONE_MOBILE_TEL="0678020424"; WHATSAPP_INT="33678020424"
 contact_body=(subnav("/contact")+
  '<section class="contact-hero"><div class="wrap-c">'
  '<div class="crumb"><a href="/">Accueil</a> › Contact</div>'
@@ -1424,17 +1475,10 @@ real_body=(subnav("/realisations")+
  '<section class="gallery-section"><div class="wrap-g">'
  f'<div class="gallery">{gallery_items}</div>'
  '</div></section>'
- +gradual_blur(position="bottom",height="8rem",strength=1.1,divCount=6,curve="bezier",exponential=True,target="page")
- +recap("Un projet similaire ? On en parle.")+FOOTER+
- '<script>(function(){const b=document.querySelector(\'.gradual-blur[data-target="page"]\');const g=document.querySelector(".gallery-section");if(!b||!g)return;let raf=0;function u(){const r=g.getBoundingClientRect();const vh=window.innerHeight;const bh=b.offsetHeight||128;const overlap=r.top<vh && r.bottom>(vh-bh);b.classList.toggle("on",overlap);raf=0;}function onScroll(){if(!raf)raf=requestAnimationFrame(u);}window.addEventListener("scroll",onScroll,{passive:true});window.addEventListener("resize",onScroll);u();})();</script>')
+ +recap("Un projet similaire ? On en parle.")+FOOTER)
 pages.append(("realisations","Nos réalisations | ARélec — Brest & Finistère",
  "Galerie de nos chantiers à Brest, Plouzané et alentour : salles de bain, rénovations complètes, éclairage et installations électriques.",
  real_body, jsonld("/realisations","Réalisations",None), "sub"))
-stub("estimation","Faire une estimation | ARélec",
- "Estimez vos travaux d'électricité, chauffage ou plomberie en ligne, puis ARélec vient affiner sur place. Gratuit.",
- "Estimez<br><b>vos travaux.</b>",
- "L'estimateur en ligne arrive bientôt : un aperçu de prix en quelques minutes, puis une visite sur place gratuite pour le vrai devis. En attendant, appelez-nous.",
- breadcrumb_name="Estimation")
 stub("avis","Avis clients | ARélec — Brest & Plouzané",
  "Ce que nos clients disent d'ARélec : qualité, propreté, réactivité et bons conseils. Avis vérifiés Google.",
  "Ils nous<br><b>recommandent.</b>",
@@ -1444,7 +1488,7 @@ stub("mentions-legales","Mentions légales | ARélec","Mentions légales du site
  "Mentions<br><b>légales.</b>","SARL ARélec — SIREN 790 223 036 — Plouzané (29280). Directeur de la publication : Arnaud Roncey. <em>(À compléter : hébergeur, capital, TVA.)</em>",
  breadcrumb_name="Mentions légales")
 stub("politique-confidentialite","Politique de confidentialité | ARélec","Politique de confidentialité et gestion des données du site ARélec.",
- "Confidentialité.","Les données envoyées via le formulaire de contact servent uniquement à répondre à votre demande. <em>(À compléter avec Arnaud.)</em>",
+ "Confidentialité.","Les données envoyées via le formulaire de contact servent uniquement à répondre à votre demande. Les messages écrits à l'assistant du site sont transmis à un service d'IA (via OpenRouter) uniquement pour générer la réponse ; le site ne les enregistre pas. <em>(À compléter avec Arnaud.)</em>",
  breadcrumb_name="Confidentialité")
 
 # ---------- écriture ----------
@@ -1457,7 +1501,7 @@ TODAY=datetime.date.today().isoformat()
 def url_meta(u):
     if u=="": return ("1.0","weekly")
     if u in ("electricite","chauffage","plomberie"): return ("0.9","monthly")
-    if u in ("contact","estimation"): return ("0.8","monthly")
+    if u == "contact": return ("0.8","monthly")
     if u in ("realisations","entreprise","avis"): return ("0.7","monthly")
     if u in ("mentions-legales","politique-confidentialite"): return ("0.2","yearly")
     return ("0.6","monthly")  # pages locales [métier]-[commune]
@@ -1554,8 +1598,8 @@ Rayon d'intervention typique : environ 30 km autour de Plouzané, dans le Finist
 
 ## Comment travailler avec ARélec
 
-1. **Estimation en ligne gratuite** (~2 minutes) sur {DOMAIN}/estimation
-2. **Visite sur place gratuite** pour établir le vrai devis si la fourchette correspond
+1. **Premier échange** : assistant du site, puis WhatsApp (06 78 02 04 24), ou téléphone
+2. **Visite sur place gratuite** pour établir le vrai devis
 3. **Devis détaillé**, écrit, sans engagement
 4. **Réalisation du chantier** par la même équipe, de la dépose à la mise en route
 
@@ -1570,7 +1614,6 @@ Devis toujours gratuit. Réponse sous 24 à 48 h.
 - [Réalisations]({DOMAIN}/realisations/)
 - [L'entreprise]({DOMAIN}/entreprise/)
 - [Avis clients]({DOMAIN}/avis/)
-- [Estimation]({DOMAIN}/estimation/)
 - [Contact]({DOMAIN}/contact/)
 - [Documentation complète pour IA]({DOMAIN}/llms-full.txt)
 
@@ -1617,7 +1660,7 @@ ARélec (raison sociale : SARL ARélec, SIREN 790 223 036) est une entreprise ar
 
 ARélec intervient principalement dans le bassin brestois : Brest, Plouzané, Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec. Le rayon d'intervention typique est d'environ 30 km autour de Plouzané.
 
-Le devis est toujours gratuit. L'entreprise propose un outil d'estimation en ligne (~2 minutes), puis une visite sur place gratuite pour établir le vrai devis si la fourchette de prix correspond au budget du client.
+Le devis est toujours gratuit. Le premier échange se fait via l'assistant du site puis sur WhatsApp (ou par téléphone), puis ARélec se déplace gratuitement pour établir le vrai devis sur place.
 
 ---
 
@@ -1713,6 +1756,9 @@ Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00.
 Dernière mise à jour : {TODAY}
 """
 (SITE/"llms-full.txt").write_text(LLMS_FULL)
+# Contexte de l'assistant (/api/chat) = la documentation complète du site
+(API/"_context.js").write_text("// Généré par build_site.py — ne pas éditer.\nmodule.exports = { CONTEXT: " + json.dumps(LLMS_FULL, ensure_ascii=False) + " };\n")
+(JS_DIR/"chat.js").write_text((ROOT/"chat.js").read_text())
 
 print("Pages :", len(pages))
 for slug,*_ in pages: print("  /"+(slug or "(accueil)"))
