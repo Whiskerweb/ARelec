@@ -1,13 +1,18 @@
-// Agent WhatsApp ARélec — webhook WhatsApp Cloud API (Meta) : GET /api/whatsapp (vérification), POST (messages).
+// Agent WhatsApp ARélec — webhook WhatsApp Cloud API : GET /api/whatsapp (vérification Meta), POST (messages).
+// Deux branchements possibles, même format de messages :
+//   - via 360dialog (prestataire, numéro en coexistence) : D360_API_KEY + WHATSAPP_WEBHOOK_KEY
+//   - via Meta en direct : WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID (+ WHATSAPP_APP_SECRET)
 // Il reprend la conversation commencée sur le site, qualifie la demande, puis passe la main à Arnaud
 // avec une fiche prospect. Mise en service : docs/agent-whatsapp.md.
 const crypto = require("node:crypto");
 const { complete, takeTag } = require("./_openrouter.js");
 const store = require("./_store.js");
 
+const D360_KEY = process.env.D360_API_KEY;
 const GRAPH = `https://graph.facebook.com/${process.env.WHATSAPP_GRAPH_VERSION || "v23.0"}`;
 const PHONE_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
 const TOKEN = process.env.WHATSAPP_TOKEN;
+const WEBHOOK_KEY = process.env.WHATSAPP_WEBHOOK_KEY;      // secret partagé avec 360dialog (en-tête X-Arelec-Key)
 const NOTIFY = process.env.ARELEC_NOTIFY_WA;               // n° perso d'Arnaud (format 336…), facultatif
 const NOTIFY_TEMPLATE = process.env.ARELEC_NOTIFY_TEMPLATE; // modèle Meta à 1 variable, facultatif
 const CONV_TTL = 30 * 24 * 3600, PAUSE_MS = 48 * 3600 * 1000, MAX_HISTORY = 24;
@@ -31,11 +36,14 @@ Mets « ? » pour ce qui manque. Cette fiche est transmise à Arnaud ; ne la men
 - Après la fiche, si le client écrit encore, réponds simplement qu'Arnaud a sa demande et va le recontacter.
 - Un message entre crochets (ex. « [photo] ») décrit un média reçu : remercie, tu ne vois pas son contenu.`;
 
-// ---------- Graph API ----------
+// ---------- envoi (360dialog ou Graph API) ----------
 async function graph(body) {
-  const r = await fetch(`${GRAPH}/${PHONE_ID}/messages`, {
+  const [url, auth] = D360_KEY
+    ? ["https://waba-v2.360dialog.io/messages", { "D360-API-KEY": D360_KEY }]
+    : [`${GRAPH}/${PHONE_ID}/messages`, { Authorization: `Bearer ${TOKEN}` }];
+  const r = await fetch(url, {
     method: "POST",
-    headers: { Authorization: `Bearer ${TOKEN}`, "Content-Type": "application/json" },
+    headers: { ...auth, "Content-Type": "application/json" },
     body: JSON.stringify({ messaging_product: "whatsapp", ...body }),
     signal: AbortSignal.timeout(10000)
   });
@@ -128,12 +136,14 @@ async function rawBody(req) {
   return raw;
 }
 
-function signed(raw, header) {
+const same = (x, y) => { const a = Buffer.from(String(x || "")), b = Buffer.from(String(y)); return a.length === b.length && crypto.timingSafeEqual(a, b); };
+
+function signed(req, raw) {
+  // 360dialog ne signe pas les webhooks : il renvoie l'en-tête secret qu'on lui a donné (scripts/setup-360dialog.mjs).
+  if (D360_KEY) return !!WEBHOOK_KEY && same(req.headers["x-arelec-key"], WEBHOOK_KEY);
   const secret = process.env.WHATSAPP_APP_SECRET;
   if (!secret) return true; // conseillé en production : voir docs/agent-whatsapp.md
-  const expected = "sha256=" + crypto.createHmac("sha256", secret).update(raw, "utf8").digest("hex");
-  const a = Buffer.from(String(header || "")), b = Buffer.from(expected);
-  return a.length === b.length && crypto.timingSafeEqual(a, b);
+  return same(req.headers["x-hub-signature-256"], "sha256=" + crypto.createHmac("sha256", secret).update(raw, "utf8").digest("hex"));
 }
 
 module.exports = async (req, res) => {
@@ -147,8 +157,8 @@ module.exports = async (req, res) => {
   if (req.method !== "POST") { res.statusCode = 405; return res.end(); }
 
   const raw = await rawBody(req);
-  if (!signed(raw, req.headers["x-hub-signature-256"])) { res.statusCode = 401; return res.end(); }
-  if (!PHONE_ID || !TOKEN) { res.statusCode = 503; return res.end(); }
+  if (!signed(req, raw)) { res.statusCode = 401; return res.end(); }
+  if (!D360_KEY && (!PHONE_ID || !TOKEN)) { res.statusCode = 503; return res.end(); }
 
   let payload;
   try { payload = JSON.parse(raw); } catch (e) { res.statusCode = 400; return res.end(); }
@@ -158,7 +168,7 @@ module.exports = async (req, res) => {
     for (const change of entry.changes || []) {
       const v = change.value || {};
       try {
-        if (change.field === "messages" && v.metadata?.phone_number_id === PHONE_ID) {
+        if (change.field === "messages" && (!PHONE_ID || v.metadata?.phone_number_id === PHONE_ID)) {
           for (const msg of v.messages || []) {
             await handleMessage(msg, (v.contacts || []).find(c => c.wa_id === msg.from));
           }

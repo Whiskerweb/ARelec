@@ -81,7 +81,7 @@ Architecture SEO/SEA complète : `docs/seo-architecture.md` · avis réels : `do
 - Fonction Vercel `api/chat.js` → OpenRouter. Variables Vercel : `OPENROUTER_API_KEY` (obligatoire), `OPENROUTER_MODEL` (facultatif, défaut `anthropic/claude-haiku-4.5`). Le contexte (`api/_context.js`) est **généré** depuis `llms-full.txt` : modifier le contenu dans `build_site.py`, pas à la main.
 - Bascule WhatsApp : le modèle termine par `<<WHATSAPP>>résumé<<END>>`, l'API le retire et le client ouvre `wa.me/33678020424` avec le résumé prérempli.
 - Aperçu local avec l'API : `OPENROUTER_API_KEY=… node dev-server.mjs` → http://127.0.0.1:4400.
-- **Agent WhatsApp** : webhook Cloud API `api/whatsapp.js` (même socle `api/_openrouter.js`, mémoire `api/_store.js` sur Upstash Redis). Il reprend le « Mon projet : … » du site, qualifie (travaux, commune, urgence, photos, dispos, nom), envoie une fiche à Arnaud puis se tait 48 h si Arnaud répond depuis l'app (coexistence). Mise en service et variables : `docs/agent-whatsapp.md`.
+- **Agent WhatsApp** (06 78 02 04 24 en coexistence via **360dialog** ; Meta direct reste possible) : webhook Cloud API `api/whatsapp.js`, branchement `scripts/setup-360dialog.mjs`, (même socle `api/_openrouter.js`, mémoire `api/_store.js` sur Upstash Redis). Il reprend le « Mon projet : … » du site, qualifie (travaux, commune, urgence, photos, dispos, nom), envoie une fiche à Arnaud puis se tait 48 h si Arnaud répond depuis l'app (coexistence). Mise en service et variables : `docs/agent-whatsapp.md`.
 
 ## Maquettes & outils
 - Maquettes de brainstorming (compagnon visuel) : `.superpowers/brainstorm/.../content/*.html` (HTML autonomes, logo embarqué en data-URI). Servir le fichier le plus récent.
