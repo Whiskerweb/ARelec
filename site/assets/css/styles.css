@@ -14,7 +14,10 @@ ul{margin:0;padding:0;list-style:none}
 .sec{padding:120px 0}
 .sec.tight{padding:72px 0}
 .ic{width:20px;height:20px;flex:none;display:inline-block}
-.tbd{white-space:nowrap}
+.tbd{overflow-wrap:anywhere}
+.stat-n .tbd,.score .tbd{white-space:nowrap}
+/* les enfants de grille peuvent rétrécir sous leur contenu (évite tout débordement sur mobile) */
+.story-card>*,.split-head>*,.why-body>*,.rating-card>*,.dark-card>*,.areas-card>*,.faq-grid>*,.phero-card>*,.feat-row>*,.two-col>*,.contact-grid>*,.post-feat>*,.f-top>*{min-width:0}
 /* --- typo --- */
 .h1{font-size:clamp(40px,5vw,68px);line-height:1.02;font-weight:300;letter-spacing:-.035em;margin:0}
 .h2{font-size:clamp(32px,3.4vw,48px);line-height:1.08;font-weight:300;letter-spacing:-.03em;margin:0}
@@ -439,7 +442,8 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
   .faq-intro{position:static}
   .faq-grid{gap:40px}
   .story-img,.dark-img{min-height:380px}
-  .story-txt{padding:16px 8px 8px}
+  .story-card{gap:8px}
+  .story-txt{padding:20px 8px 8px}
   .rating-card{padding:16px}
   .rating-card>div:first-child{padding:24px 16px 8px}
   .dark-card{padding:16px;gap:16px}
@@ -464,6 +468,8 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
   .nav-cta{display:none}
   .hero-card{border-radius:24px;min-height:max(640px,calc(100svh - 16px));padding:112px 18px 18px}
   .hero-content .actions{width:100%}
+  .hero .h1 br{display:none}
+  .quote-foot .btn{width:100%}
   .hero-content .actions .btn{flex:1 1 auto}
   .avail img{width:84px;height:72px}
   .stats-grid{grid-template-columns:1fr 1fr;row-gap:32px;margin-top:44px}
