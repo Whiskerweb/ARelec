@@ -10,7 +10,7 @@ Ce fichier est destiné aux moteurs de recherche IA (ChatGPT, Perplexity, Claude
 
 ARélec (raison sociale : SARL ARélec, SIREN 790 223 036) est une entreprise artisanale du bâtiment fondée en 2010 et installée à Plouzané (29280), dans le Finistère, en France. Le gérant est Arnaud Roncey. L'entreprise couvre trois métiers complémentaires — électricité, chauffage, plomberie — avec une seule équipe, ce qui permet à un client de mener une rénovation complète sans coordonner plusieurs artisans.
 
-ARélec intervient principalement dans le bassin brestois : Brest, Plouzané, Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec. Le rayon d'intervention typique est d'environ 30 km autour de Plouzané.
+ARélec intervient principalement dans le bassin brestois : Brest, Plouzané, Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec, Bohars, Gouesnou, Plougastel-Daoulas, Milizac-Guipronvel, Plouarzel, Ploudalmézeau, Lanildut, Porspoder, Lesneven, Le Folgoët. Le rayon d'intervention typique est d'environ 50 km autour de Plouzané.
 
 Le devis est toujours gratuit. Le premier échange se fait via l'assistant du site puis sur WhatsApp (ou par téléphone), puis ARélec se déplace gratuitement pour établir le vrai devis sur place.
 
@@ -22,26 +22,29 @@ Le devis est toujours gratuit. Le premier échange se fait via l'assistant du si
 
 ARélec est avant tout un électricien — c'est le cœur de métier depuis 2010. Les prestations incluent :
 
-- **Installation neuve** : conception du plan électrique, tirage des gaines, pose du tableau, des différentiels et des appareillages, éclairage intérieur et extérieur.
+- **Installation neuve** : tirage des gaines, pose du tableau, des différentiels et des appareillages, éclairage intérieur et extérieur.
 - **Rénovation** : reprise d'installation existante, mise au propre du tableau, remplacement d'appareillage.
 - **Mise aux normes NF C 15-100** : diagnostic complet, remplacement de ce qui n'est plus conforme, sans casser inutilement les murs.
 - **Dépannage** : disjoncteur qui claque, prise grillée, panne d'éclairage, court-circuit.
-- **Éclairage** : conception architecturale (escaliers à LED intégrées, appliques chaudes, pilotage simple).
+- **Éclairage** : intérieur et extérieur, LED intégrées (escaliers, plafonds).
+- **Équipements** : VMC (ventilation), interphone et visiophone, borne de recharge pour véhicule électrique, raccordement au compteur (Enedis).
 
 ### 2.2 Chauffage / thermique
 
-ARélec installe, remplace et entretient le chauffage des maisons individuelles :
+ARélec installe et remplace le chauffage, en neuf comme en rénovation :
 
-- **Installation et remplacement** : radiateurs, distribution, eau chaude sanitaire, dimensionnement adapté à l'isolation et à la surface.
-- **Confort et économies** : régulation par pièce, équilibrage du réseau, conseil sur les leviers d'économies sans changer l'appareil.
-- **Entretien** : visite annuelle, contrôle complet, réglages, petits remplacements. Un chauffage entretenu consomme moins et tombe moins souvent en panne.
+- **Installation et remplacement** : chauffage neuf, remplacement de chaudière ou d'appareil, radiateurs (dont radiateurs électriques), plancher chauffant.
+- **Pompe à chaleur et climatisation** : pompe à chaleur air/eau, climatisation et PAC air/air.
+- **Eau chaude sanitaire** : chauffe-eau, ballon, chauffe-eau thermodynamique.
+- **Énergies** : électricité et pompe à chaleur. ARélec n'installe pas de chauffage au gaz ou au fioul.
 
 ### 2.3 Plomberie
 
 ARélec couvre toute la plomberie résidentielle :
 
-- **Salle de bain complète** : dépose, réseau d'eau, douche / baignoire / WC, robinetterie, finitions, coordination carrelage.
-- **Recherche et réparation de fuite** : localisation précise avant ouverture, réparation propre, remise en état.
+- **Salle de bain clé en main** : dépose de l'ancienne, réseau d'eau, douche / baignoire / WC (dont WC suspendu), sanitaires et robinetterie. Le carrelage est fait avec le carreleur habituel d'ARélec.
+- **Recherche de fuite** : localisation précise avant ouverture.
+- **Raccordements de cuisine** et mise aux normes plomberie.
 - **Réseau d'eau et sanitaires** : refonte des canalisations en rénovation, évacuations, mises aux standards actuels.
 
 ---
@@ -67,6 +70,16 @@ Communes couvertes (chacune a une page dédiée par métier) :
 | Locmaria-Plouzané | 29280 |
 | Lannilis | 29870 |
 | Plabennec | 29860 |
+| Bohars | 29820 |
+| Gouesnou | 29850 |
+| Plougastel-Daoulas | 29470 |
+| Milizac-Guipronvel | 29290 |
+| Plouarzel | 29810 |
+| Ploudalmézeau | 29830 |
+| Lanildut | 29840 |
+| Porspoder | 29840 |
+| Lesneven | 29260 |
+| Le Folgoët | 29260 |
 
 ---
 
@@ -80,7 +93,7 @@ R : ARélec (SARL ARélec) est un artisan électricien-chauffagiste-plombier ins
 
 **Q : Sur quelle zone intervient ARélec ?**
 
-R : ARélec intervient à Plouzané (siège), Brest et dans les communes du bassin brestois — Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec.
+R : ARélec intervient à Plouzané (siège), Brest et dans les communes du bassin brestois — Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec, Bohars, Gouesnou, Plougastel-Daoulas, Milizac-Guipronvel, Plouarzel, Ploudalmézeau, Lanildut, Porspoder, Lesneven, Le Folgoët.
 
 **Q : Quels métiers couvre ARélec ?**
 
@@ -96,7 +109,11 @@ R : Par téléphone au 02 98 40 20 43, par WhatsApp au 06 78 02 04 24, par email
 
 **Q : ARélec fait-il du dépannage ?**
 
-R : Oui : disjoncteur qui claque, prise grillée, fuite, panne d'éclairage. ARélec intervient pour les dépannages dans le bassin brestois.
+R : Oui : disjoncteur qui claque, prise grillée, fuite, panne d'éclairage. ARélec intervient pour les dépannages dans le bassin brestois, du lundi au vendredi de 8 h à 18 h, et en soirée pour les urgences.
+
+**Q : Pour qui travaille ARélec ?**
+
+R : Pour les particuliers, les bailleurs et agences immobilières, les constructeurs et promoteurs, ainsi que les syndics et copropriétés. En neuf comme en rénovation : maisons, appartements, extensions et agrandissements.
 
 
 ### Électricité
@@ -126,34 +143,34 @@ R : Oui, pour respecter la norme NF C 15-100 et garantir la sécurité. ARélec 
 
 **Q : Quel chauffage choisir en rénovation ?**
 
-R : Le choix dépend de l'isolation du logement, de la surface, de l'usage et du budget. ARélec dimensionne radiateurs et distribution selon votre maison, et conseille sur les solutions les plus durables (radiateurs, pompe à chaleur, eau chaude sanitaire).
+R : Le choix dépend de l'isolation du logement, de la surface, de l'usage et du budget. ARélec vous oriente selon votre maison : pompe à chaleur air/eau, climatisation réversible (PAC air/air), plancher chauffant, radiateurs ou radiateurs électriques.
 
-**Q : ARélec entretient-il les chaudières ?**
+**Q : ARélec installe-t-il des pompes à chaleur ?**
 
-R : Oui — visite annuelle, contrôle complet, réglages, petits remplacements. Un chauffage entretenu consomme moins et tombe moins souvent en panne.
+R : Oui — pompes à chaleur air/eau, climatisation et PAC air/air, ainsi que les chauffe-eau thermodynamiques, dans tout le bassin brestois.
 
-**Q : Comment réduire sa facture de chauffage ?**
+**Q : ARélec installe-t-il du chauffage au gaz ou au fioul ?**
 
-R : Trois leviers concrets : revoir la régulation (programmation par pièce), équilibrer le réseau (chaque radiateur à la bonne température), et améliorer l'isolation si possible. ARélec règle souvent le confort sans avoir à changer l'appareil.
+R : Non. ARélec n'installe pas de chauffage au gaz ou au fioul. L'entreprise travaille sur l'électricité et la pompe à chaleur, et peut remplacer une ancienne chaudière par un équipement adapté.
 
 **Q : ARélec installe-t-il des radiateurs neufs ?**
 
-R : Oui — installation, remplacement, dimensionnement et raccordement. ARélec gère l'eau chaude sanitaire et la distribution dans le bassin brestois.
+R : Oui — radiateurs à eau ou radiateurs électriques, installation et remplacement. ARélec s'occupe aussi de l'eau chaude sanitaire (chauffe-eau, ballon).
 
-**Q : Quelle est la fréquence d'entretien d'un chauffage ?**
+**Q : ARélec pose-t-il des planchers chauffants ?**
 
-R : L'entretien annuel est recommandé (et obligatoire pour la plupart des chaudières). ARélec passe une fois par an, contrôle, règle, remplace ce qui doit l'être.
+R : Oui, en construction neuve comme en rénovation, en coordination avec l'électricité et la plomberie du chantier.
 
 
 ### Plomberie
 
 **Q : ARélec rénove-t-il des salles de bain complètes ?**
 
-R : Oui — de la dépose à la pose : douche, baignoire, WC, robinetterie, réseau d'eau, évacuations, coordination carrelage. ARélec fait toute la plomberie et l'électricité de la pièce, sans laisser de tranchée ouverte le week-end.
+R : Oui — de la dépose à la pose : douche, baignoire, WC, robinetterie, réseau d'eau, évacuations. Le carrelage est fait avec notre carreleur habituel. ARélec fait toute la plomberie et l'électricité de la pièce, sans laisser de tranchée ouverte le week-end.
 
 **Q : Comment détecter une fuite d'eau ?**
 
-R : Compteur qui tourne sans usage, traces d'humidité, baisse de pression. ARélec localise précisément la fuite avant d'ouvrir (pas de casse inutile), répare et remet en état.
+R : Compteur qui tourne sans usage, traces d'humidité, baisse de pression. ARélec localise précisément la fuite avant d'ouvrir, sans casse inutile.
 
 **Q : ARélec refait-il les réseaux d'eau ?**
 
@@ -179,7 +196,7 @@ R : Oui — douches italiennes, finitions marbre, vasques, robinetteries soigné
 - **Site** : https://www.entreprise-arelec.fr
 - **Formulaire de contact** : https://www.entreprise-arelec.fr/contact/
 
-Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00.
+Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00. Fermé le samedi et le dimanche. Interventions d'urgence possibles en soirée.
 
 ---
 
@@ -190,6 +207,8 @@ Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00.
 - **Statut** : SARL (Société à responsabilité limitée)
 - **Année de création** : 2010
 - **Gérant** : Arnaud Roncey
+- **Assurance décennale** : GROUPAMA, contrat n° 109942100001
+- **Responsabilité civile professionnelle** : GROUPAMA
 
 ---
 

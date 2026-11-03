@@ -14,6 +14,7 @@ PHONE_MOBILE_DISP="06 78 02 04 24"; PHONE_MOBILE_TEL="0678020424"; WHATSAPP_INT=
 # Note publique relevée sur avis-electricien.fr (reprise de la fiche Google) le 03/11/2026
 RATING="4,6"; RATING_COUNT=9
 ADDRESS="Rue du Cloître, 29280 Plouzané"
+GOOGLE_URL="https://share.google/32pt95Lpj3xox6rWT"
 SVG_PHONE='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
 SVG_MAIL='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>'
 SVG_WA='<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23-1.48 0-2.93-.39-4.19-1.15l-.3-.17-3.12.82.83-3.04-.2-.32a8.188 8.188 0 0 1-1.26-4.38c.01-4.54 3.7-8.24 8.25-8.24zM8.53 7.33c-.16 0-.43.06-.66.31-.22.25-.87.86-.87 2.07 0 1.22.89 2.39 1 2.56.14.17 1.76 2.67 4.25 3.73.59.27 1.05.42 1.41.53.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.16-.48-.27-.25-.14-1.47-.74-1.69-.82-.23-.08-.4-.12-.56.12-.17.25-.64.81-.78.97-.15.17-.29.19-.53.07-.26-.13-1.06-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.12-.24-.01-.39.11-.5.11-.11.27-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.11-.56-1.35-.77-1.84-.2-.48-.4-.42-.56-.43-.14 0-.3-.01-.47-.01z"/></svg>'
@@ -628,7 +629,7 @@ def hero_home():
             '<img class="hero-bg" src="/assets/img/hero.jpg" alt="Maison rénovée à l\'heure bleue, chantier ARélec" fetchpriority="high">'
             '<div class="hero-grid"><div class="hero-content">'
             f'<span{R(.05)}>{label("Électricité · Chauffage · Plomberie — depuis 2010","dark")}</span>'
-            f'<h1{R(.12,"h1")}>Une maison bien câblée,<br>bien chauffée.</h1>'
+            f'<h1{R(.12,"h1")}>Électricité, plomberie, chauffage.<br>Une installation bien réalisée.</h1>'
             f'<p{R(.2,"lead")}>À Plouzané et dans tout le bassin brestois, on s\'occupe de l\'électricité, du chauffage et de la plomberie, en neuf comme en rénovation. Un seul artisan, du devis à la mise en route.</p>'
             f'<div{R(.28,"actions")}>{btn_contact("dark")}{btn("Nos services","/services","glass","right")}</div>'
             f'<div{R(.36,"trust-line")}><span>{ic("check")}Artisan depuis 2010</span><span>{ic("check")}Devis gratuit, sur place</span><span>{ic("check")}Un seul interlocuteur</span></div>'
@@ -648,7 +649,7 @@ def logos_band():
 
 def stats_section(title='Un savoir-faire qui se voit.<br><b>Un travail qui dure.</b>',
                   side="Chaque chantier est mené avec soin, des explications claires et le souci de laisser une installation sûre et propre."):
-    stats=[(tbd("1 200+"),"Chantiers réalisés",None),
+    stats=[("2 000+","Chantiers réalisés depuis 2010",None),
            (f"{YEARS} ans","D'expérience, depuis 2010",(YEARS," ans")),
            ("3","Métiers, une seule équipe",(3,"")),
            (str(len(ALL_COMMUNES)),"Communes du bassin brestois",(len(ALL_COMMUNES),""))]
@@ -679,9 +680,9 @@ def why_section():
 SERVICES6=[("/electricite","cablage.jpg","Installation &amp; rénovation électrique","Du plan électrique au dernier interrupteur, en neuf comme en rénovation complète."),
            ("/electricite","reno-cablage.jpg","Mise aux normes NF C 15-100","Diagnostic, remplacement du tableau, protection des personnes — pièce par pièce."),
            ("/electricite","escalier-led.jpg","Dépannage &amp; éclairage","Disjoncteur qui saute, prise grillée, éclairage soigné : on intervient vite."),
-           ("/chauffage","confort.jpg","Chauffage &amp; eau chaude","Installation, remplacement, réglages et entretien pour un confort juste."),
+           ("/chauffage","confort.jpg","Chauffage &amp; eau chaude","Pompe à chaleur, radiateurs, plancher chauffant, chauffe-eau : installation et remplacement."),
            ("/plomberie","sdb-baignoire.jpg","Salle de bain clé en main","Dépose, réseau d'eau, sanitaires, douche et finitions, coordonnés de A à Z."),
-           ("/plomberie","douche-marbre.jpg","Fuites &amp; réseau d'eau","On localise précisément avant d'ouvrir, on répare et on remet en état.")]
+           ("/plomberie","douche-marbre.jpg","Fuites &amp; réseau d'eau","Recherche de fuite, réseau d'eau, évacuations et raccordements de cuisine.")]
 def svc_cards():
     return "".join(
         f'<a{R(.06*(i%3),"svc")} href="{u}"><img src="/assets/img/{img}" alt="" loading="lazy">'
@@ -718,7 +719,7 @@ def rating_section():
             f'<p{R(.14,"lead")}>La confiance se gagne chantier après chantier : qualité du travail, chantier propre, réactivité et bons conseils reviennent dans nos avis.</p>'
             f'<span{R(.2)}>{btn("Lire les avis","/avis","light","arrow")}</span></div>'
             f'<div{R(.1,"rating-panel")}><div class="score"><b>{RATING}</b><span>/5</span></div>{STARS}'
-            f'<p>Note moyenne sur Google</p><hr><p>Basé sur {RATING_COUNT} avis clients Google</p></div>'
+            f'<p>Note moyenne sur Google</p><hr><p>Basé sur {RATING_COUNT} avis clients Google · <a href="{GOOGLE_URL}" target="_blank" rel="noopener">voir la fiche</a></p></div>'
             '</div></div></section>')
 
 def safety_section():
@@ -772,7 +773,7 @@ def carousel(items_html, name):
 
 def areas_block(metier_slug="electricien", h2='Un artisan du coin,<br><b>près de chez vous.</b>', lab="Zone d'intervention"):
     chips="".join(f'<a class="area-chip" href="/{metier_slug}-{s}">{ic("pin")}{l}</a>' for s,l in ALL_COMMUNES)
-    cov=[("pin",f"{len(ALL_COMMUNES)} communes","Plouzané, Brest et tout le bassin brestois, dans un rayon d'environ 30 km."),
+    cov=[("pin",f"{len(ALL_COMMUNES)} communes","Plouzané, Brest et tout le bassin brestois, dans un rayon d'environ 50 km."),
          ("cal","Visite gratuite sur place","Un rendez-vous pour voir le chantier et établir un devis juste."),
          ("home","Neuf &amp; rénovation","Maisons, appartements, extensions : de la construction à la rénovation complète.")]
     covh="".join(f'<div{R(.08*i,"cov")}><span class="icon-chip">{ic(a)}</span><div><b>{b}</b><p>{c}</p></div></div>' for i,(a,b,c) in enumerate(cov))
@@ -837,7 +838,10 @@ EXTRA_COMMUNES=[
  ("le-conquet","Le Conquet"),("saint-renan","Saint-Renan"),("guipavas","Guipavas"),
  ("le-relecq-kerhuon","Le Relecq-Kerhuon"),("guilers","Guilers"),("plougonvelin","Plougonvelin"),
  ("locmaria-plouzane","Locmaria-Plouzané"),("lannilis","Lannilis"),("plabennec","Plabennec"),
- ("landerneau","Landerneau"),
+ ("landerneau","Landerneau"),("bohars","Bohars"),("gouesnou","Gouesnou"),
+ ("plougastel-daoulas","Plougastel-Daoulas"),("milizac-guipronvel","Milizac-Guipronvel"),("plouarzel","Plouarzel"),
+ ("ploudalmezeau","Ploudalmézeau"),("lanildut","Lanildut"),("porspoder","Porspoder"),
+ ("lesneven","Lesneven"),("le-folgoet","Le Folgoët"),
 ]
 EXISTING_COMMUNES=[("brest","Brest"),("plouzane","Plouzané"),("plouider","Plouider")]
 ALL_COMMUNES=sorted(EXISTING_COMMUNES+EXTRA_COMMUNES, key=lambda c:c[1])
@@ -847,7 +851,7 @@ def _seo_list(metier_slug): return "".join(f'<li><a href="/{metier_slug}-{c}">{l
 FOOTER=('<footer class="footer"><div class="footer-card">'
  '<div class="f-top"><div class="f-brand">'
  '<a href="/" aria-label="ARélec, accueil"><img src="/assets/img/logo-dark.png" alt="ARélec" width="140" height="40"></a>'
- '<p class="tagline">Une maison bien câblée, bien chauffée.</p>'
+ '<p class="tagline">Une installation bien réalisée.</p>'
  '<p class="small">Électricité, chauffage et plomberie pour les maisons du bassin brestois. Un seul interlocuteur, depuis 2010.</p>'
  '<div class="f-contact">'
  f'<a href="tel:{PHONE_TEL}"><span class="f-ic">{ic("bolt")}</span>{PHONE_DISP}</a>'
@@ -857,7 +861,7 @@ FOOTER=('<footer class="footer"><div class="footer-card">'
  '</div></div>'
  '<div class="f-col"><h4 class="mono">Navigation</h4><ul>'+"".join(f'<li><a href="{u}">{t}</a></li>' for u,t in NAV_LINKS)+'</ul></div>'
  '<div class="f-col"><h4 class="mono">Services</h4><ul><li><a href="/electricite">Électricité</a></li><li><a href="/chauffage">Chauffage</a></li><li><a href="/plomberie">Plomberie</a></li><li><a href="/realisations">Réalisations</a></li><li><a href="/avis">Avis clients</a></li></ul></div>'
- '<div class="f-col"><h4 class="mono">Horaires</h4><ul><li><span>Lun–Ven : 8h–18h</span></li><li><span>Sam : '+tbd("à compléter")+'</span></li><li><span>Dim : fermé '+tbd("à confirmer")+'</span></li></ul></div>'
+ '<div class="f-col"><h4 class="mono">Horaires</h4><ul><li><span>Lun–Ven : 8h–18h</span></li><li><span>Sam–Dim : fermé</span></li><li><span>Urgences : en soirée</span></li></ul></div>'
  '</div>'
  '<div class="f-seo">'
  f'<div><h4 class="mono">Électricien à…</h4><ul>{_seo_list("electricien")}</ul></div>'
@@ -975,7 +979,7 @@ def _local_business(path, area, reviews=True):
         "alternateName": "SARL ARélec",
         "legalName": "SARL ARélec",
         "description": "Artisan électricien, chauffagiste et plombier installé à Plouzané depuis 2010. Intervention dans tout le bassin brestois (Finistère).",
-        "slogan": "Une maison bien câblée, bien chauffée.",
+        "slogan": "Électricité, plomberie, chauffage. Une installation bien réalisée.",
         "image": f"{DOMAIN}/assets/img/hero.jpg",
         "logo": f"{DOMAIN}/assets/img/logo.png",
         "url": f"{DOMAIN}{path}",
@@ -997,7 +1001,7 @@ def _local_business(path, area, reviews=True):
         "serviceArea": {
             "@type": "GeoCircle",
             "geoMidpoint": {"@type": "GeoCoordinates", "latitude": PLOUZANE_GEO["lat"], "longitude": PLOUZANE_GEO["lon"]},
-            "geoRadius": "30000",
+            "geoRadius": "50000",
         },
         "openingHoursSpecification": OPENING_HOURS,
         "priceRange": "€€",
@@ -1112,7 +1116,7 @@ FAQ_HOME = [
     ("Qui est ARélec ?",
      "ARélec (SARL ARélec) est un artisan électricien-chauffagiste-plombier installé à Plouzané (29280) depuis 2010. Le gérant est Arnaud Roncey. La SARL intervient dans tout le bassin brestois (Finistère)."),
     ("Sur quelle zone intervient ARélec ?",
-     "ARélec intervient à Plouzané (siège), Brest et dans les communes du bassin brestois — Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec."),
+     "ARélec intervient à Plouzané (siège), Brest et dans les communes du bassin brestois — Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec, Bohars, Gouesnou, Plougastel-Daoulas, Milizac-Guipronvel, Plouarzel, Ploudalmézeau, Lanildut, Porspoder, Lesneven, Le Folgoët."),
     ("Quels métiers couvre ARélec ?",
      "Trois métiers, par la même équipe : électricité (installation, rénovation, mise aux normes NF C 15-100, dépannage, éclairage), chauffage (installation, remplacement, entretien) et plomberie (salle de bain, recherche de fuite, réseau d'eau, sanitaires). Un seul interlocuteur pour tout le chantier."),
     ("Le devis est-il payant ?",
@@ -1120,7 +1124,9 @@ FAQ_HOME = [
     ("Comment contacter ARélec ?",
      "Par téléphone au 02 98 40 20 43, par WhatsApp au 06 78 02 04 24, par email à contact@entreprise-arelec.fr, ou via le formulaire de contact du site. Réponse sous 24 à 48 h."),
     ("ARélec fait-il du dépannage ?",
-     "Oui : disjoncteur qui claque, prise grillée, fuite, panne d'éclairage. ARélec intervient pour les dépannages dans le bassin brestois."),
+     "Oui : disjoncteur qui claque, prise grillée, fuite, panne d'éclairage. ARélec intervient pour les dépannages dans le bassin brestois, du lundi au vendredi de 8 h à 18 h, et en soirée pour les urgences."),
+    ("Pour qui travaille ARélec ?",
+     "Pour les particuliers, les bailleurs et agences immobilières, les constructeurs et promoteurs, ainsi que les syndics et copropriétés. En neuf comme en rénovation : maisons, appartements, extensions et agrandissements."),
 ]
 
 FAQ_ELEC = [
@@ -1138,22 +1144,22 @@ FAQ_ELEC = [
 
 FAQ_CHAUF = [
     ("Quel chauffage choisir en rénovation ?",
-     "Le choix dépend de l'isolation du logement, de la surface, de l'usage et du budget. ARélec dimensionne radiateurs et distribution selon votre maison, et conseille sur les solutions les plus durables (radiateurs, pompe à chaleur, eau chaude sanitaire)."),
-    ("ARélec entretient-il les chaudières ?",
-     "Oui — visite annuelle, contrôle complet, réglages, petits remplacements. Un chauffage entretenu consomme moins et tombe moins souvent en panne."),
-    ("Comment réduire sa facture de chauffage ?",
-     "Trois leviers concrets : revoir la régulation (programmation par pièce), équilibrer le réseau (chaque radiateur à la bonne température), et améliorer l'isolation si possible. ARélec règle souvent le confort sans avoir à changer l'appareil."),
+     "Le choix dépend de l'isolation du logement, de la surface, de l'usage et du budget. ARélec vous oriente selon votre maison : pompe à chaleur air/eau, climatisation réversible (PAC air/air), plancher chauffant, radiateurs ou radiateurs électriques."),
+    ("ARélec installe-t-il des pompes à chaleur ?",
+     "Oui — pompes à chaleur air/eau, climatisation et PAC air/air, ainsi que les chauffe-eau thermodynamiques, dans tout le bassin brestois."),
+    ("ARélec installe-t-il du chauffage au gaz ou au fioul ?",
+     "Non. ARélec n'installe pas de chauffage au gaz ou au fioul. L'entreprise travaille sur l'électricité et la pompe à chaleur, et peut remplacer une ancienne chaudière par un équipement adapté."),
     ("ARélec installe-t-il des radiateurs neufs ?",
-     "Oui — installation, remplacement, dimensionnement et raccordement. ARélec gère l'eau chaude sanitaire et la distribution dans le bassin brestois."),
-    ("Quelle est la fréquence d'entretien d'un chauffage ?",
-     "L'entretien annuel est recommandé (et obligatoire pour la plupart des chaudières). ARélec passe une fois par an, contrôle, règle, remplace ce qui doit l'être."),
+     "Oui — radiateurs à eau ou radiateurs électriques, installation et remplacement. ARélec s'occupe aussi de l'eau chaude sanitaire (chauffe-eau, ballon)."),
+    ("ARélec pose-t-il des planchers chauffants ?",
+     "Oui, en construction neuve comme en rénovation, en coordination avec l'électricité et la plomberie du chantier."),
 ]
 
 FAQ_PLOMB = [
     ("ARélec rénove-t-il des salles de bain complètes ?",
-     "Oui — de la dépose à la pose : douche, baignoire, WC, robinetterie, réseau d'eau, évacuations, coordination carrelage. ARélec fait toute la plomberie et l'électricité de la pièce, sans laisser de tranchée ouverte le week-end."),
+     "Oui — de la dépose à la pose : douche, baignoire, WC, robinetterie, réseau d'eau, évacuations. Le carrelage est fait avec notre carreleur habituel. ARélec fait toute la plomberie et l'électricité de la pièce, sans laisser de tranchée ouverte le week-end."),
     ("Comment détecter une fuite d'eau ?",
-     "Compteur qui tourne sans usage, traces d'humidité, baisse de pression. ARélec localise précisément la fuite avant d'ouvrir (pas de casse inutile), répare et remet en état."),
+     "Compteur qui tourne sans usage, traces d'humidité, baisse de pression. ARélec localise précisément la fuite avant d'ouvrir, sans casse inutile."),
     ("ARélec refait-il les réseaux d'eau ?",
      "Oui — dans les rénovations, ARélec reprend les canalisations, installe les évacuations et la robinetterie, et remet l'installation aux standards actuels."),
     ("Combien de temps pour rénover une salle de bain ?",
@@ -1169,8 +1175,8 @@ SERVICE_ELEC = {
 }
 SERVICE_CHAUF = {
     "name": "Travaux de chauffage — ARélec",
-    "description": "Installation, remplacement et entretien de chauffage, radiateurs et eau chaude sanitaire dans le bassin brestois. Conseil en régulation et économies d'énergie.",
-    "service_type": "Heating installation, replacement and maintenance",
+    "description": "Installation et remplacement de chauffage dans le bassin brestois : pompe à chaleur air/eau, climatisation et PAC air/air, plancher chauffant, radiateurs, eau chaude sanitaire et chauffe-eau thermodynamique.",
+    "service_type": "Heating installation and replacement",
 }
 SERVICE_PLOMB = {
     "name": "Travaux de plomberie — ARélec",
@@ -1210,61 +1216,61 @@ gen_sub("electricite","Électricien à Brest & Plouzané | ARélec",
  "Installation, rénovation, mise aux normes (NF C 15-100) et dépannage électrique dans le bassin brestois. Devis gratuit — ARélec.",
  "/electricite", CRUMB_M.format(label="Électricité"),
  "Électricité", "L'électricité, <b>du tableau à la dernière prise.</b>",
- 'Notre cœur de métier depuis 2010. Installation, rénovation, mise aux normes et dépannage — à <a href="/electricien-brest">Brest</a>, <a href="/electricien-plouzane">Plouzané</a>, <a href="/electricien-saint-renan">Saint-Renan</a>, <a href="/electricien-landerneau">Landerneau</a> et dans une dizaine d\'autres communes du bassin brestois.',
+ 'Notre cœur de métier depuis 2010. Installation, rénovation, mise aux normes et dépannage — à <a href="/electricien-brest">Brest</a>, <a href="/electricien-plouzane">Plouzané</a>, <a href="/electricien-saint-renan">Saint-Renan</a>, <a href="/electricien-landerneau">Landerneau</a> et dans une vingtaine d\'autres communes du bassin brestois.',
  "escalier-led.jpg", "<span class='stars'>★★★★★</span> Avis Google",
  [("01","Installation &amp; rénovation","Du plan au dernier interrupteur",
    "Que ce soit une construction neuve ou une rénovation complète, on conçoit l'installation, on tire les gaines, on pose le tableau et les appareillages, et on remet la lumière en route. Vous repartez avec une installation propre, sûre et à jour.",
-   ["Conception du plan électrique","Réseau et appareillage","Tableau et différentiels","Éclairage intérieur & extérieur"],
+   ["Réseau et appareillage","Tableau et différentiels","Éclairage intérieur & extérieur","VMC, interphone, visiophone"],
    "cablage.jpg","Chantier en cours"),
   ("02","Mise aux normes","NF C 15-100, sans tout casser",
    "Beaucoup de logements anciens ont une installation qui ne suit plus la norme. On vient diagnostiquer, on remplace ce qui doit l'être et on remet le tableau au propre — pièce par pièce, sans transformer votre maison en chantier.",
    ["Diagnostic complet","Mise aux normes NF C 15-100","Remplacement de tableau","Protection des personnes"],
    "reno-cablage.jpg","Rénovation"),
-  ("03","Dépannage &amp; éclairage","Ça lâche ? On arrive.",
-   "Un disjoncteur qui claque, une prise grillée, un éclairage qui ne marche plus : on intervient rapidement. Et pour les pièces où la lumière fait tout, on conçoit l'éclairage avec soin.",
-   ["Intervention dépannage","Réparation rapide","Éclairage architectural","Pilotage simple"],
+  ("03","Dépannage, éclairage &amp; borne","Ça lâche ? On arrive.",
+   "Un disjoncteur qui claque, une prise grillée, un éclairage qui ne marche plus : on intervient rapidement. On soigne aussi l'éclairage (LED intégrées dans les escaliers et les plafonds), on pose les bornes de recharge pour véhicule électrique et on s'occupe du raccordement au compteur Enedis.",
+   ["Intervention dépannage","Éclairage LED intégré","Borne de recharge","Raccordement Enedis"],
    "eclairage.jpg","Éclairage soigné")],
  "Un projet électrique ? Estimons-le ensemble.", None, breadcrumb_name="Électricité",
  faq=FAQ_ELEC, service=SERVICE_ELEC)
 
 gen_sub("chauffage","Chauffagiste à Brest | ARélec",
- "Installation, remplacement et entretien de votre chauffage, radiateurs et eau chaude dans le bassin brestois. Devis gratuit — ARélec.",
+ "Pompe à chaleur, climatisation, plancher chauffant, radiateurs et eau chaude dans le bassin brestois. Installation et remplacement, devis gratuit — ARélec.",
  "/chauffage", CRUMB_M.format(label="Chauffage"),
  "Chauffage &amp; thermique", "Une maison <b>bien chauffée,</b> sans gaspiller.",
- 'On installe, on remplace et on entretient votre chauffage à <a href="/chauffagiste-brest">Brest</a>, <a href="/chauffagiste-plouzane">Plouzané</a>, <a href="/chauffagiste-saint-renan">Saint-Renan</a>, <a href="/chauffagiste-landerneau">Landerneau</a> et dans une dizaine d\'autres communes du bassin brestois. L\'objectif : du confort l\'hiver, des factures sous contrôle.',
+ 'On installe et on remplace votre chauffage à <a href="/chauffagiste-brest">Brest</a>, <a href="/chauffagiste-plouzane">Plouzané</a>, <a href="/chauffagiste-saint-renan">Saint-Renan</a>, <a href="/chauffagiste-landerneau">Landerneau</a> et dans une vingtaine d\'autres communes du bassin brestois. L\'objectif : du confort l\'hiver, des factures sous contrôle.',
  "confort.jpg", "<span class='stars'>★★★★★</span> Avis Google",
  [("01","Installation &amp; remplacement","Un chauffage dimensionné juste",
    "On installe et on remplace votre chauffage avec un seul but : que vous soyez bien chez vous l'hiver. Radiateurs, distribution, eau chaude sanitaire — on dimensionne ce qui correspond à votre maison.",
    ["Installation neuve","Remplacement d'appareil","Radiateurs","Eau chaude sanitaire"],
    "chantier-plouider.jpg","Chantier rénovation"),
-  ("02","Confort &amp; économies","Ce qui chauffe bien chauffe juste",
-   "On revoit la régulation et l'équilibrage pour que chaque pièce soit à la bonne température. C'est souvent là qu'on gagne sur la facture, sans changer d'appareil.",
-   ["Régulation et réglages","Équilibrage du réseau","Conseil économies","Pilotage simple"],
+  ("02","Pompe à chaleur &amp; climatisation","Des équipements actuels",
+   "Pompe à chaleur air/eau, climatisation réversible (PAC air/air) et chauffe-eau thermodynamique : on vous oriente vers ce qui convient à votre maison, puis on l'installe.",
+   ["Pompe à chaleur air/eau","Climatisation, PAC air/air","Chauffe-eau thermodynamique","Conseil sur le bon équipement"],
    "eclairage.jpg","Confort"),
-  ("03","Entretien","Pour que ça dure",
-   "Un chauffage entretenu consomme moins et tombe moins souvent en panne. On passe une fois par an, on contrôle, on règle, on remplace ce qui doit l'être.",
-   ["Visite annuelle","Contrôle complet","Petits remplacements","Conseil de longévité"],
-   "maison-bleue.jpg","Entretien à domicile")],
- "Un remplacement, une révision, une question ?", None, breadcrumb_name="Chauffage",
+  ("03","Radiateurs &amp; plancher chauffant","La chaleur, pièce par pièce",
+   "Radiateurs à eau ou électriques, plancher chauffant en neuf comme en rénovation : on installe ce qui correspond à chaque pièce. Pas d'installation gaz ou fioul.",
+   ["Radiateurs","Radiateurs électriques","Plancher chauffant","Eau chaude sanitaire"],
+   "maison-bleue.jpg","Chauffage à domicile")],
+ "Un remplacement, une pompe à chaleur, une question ?", None, breadcrumb_name="Chauffage",
  faq=FAQ_CHAUF, service=SERVICE_CHAUF)
 
 gen_sub("plomberie","Plombier à Brest | ARélec",
  "Salle de bain, sanitaires, recherche de fuite et réseau d'eau dans le bassin brestois. Rénovation soignée, devis gratuit — ARélec.",
  "/plomberie", CRUMB_M.format(label="Plomberie"),
  "Plomberie", "Sanitaire et réseau d'eau, <b>propre et durable.</b>",
- 'Salle de bain, fuites, réseau d\'eau, sanitaires : on s\'occupe de toute la plomberie à <a href="/plombier-brest">Brest</a>, <a href="/plombier-plouzane">Plouzané</a>, <a href="/plombier-saint-renan">Saint-Renan</a>, <a href="/plombier-landerneau">Landerneau</a> et dans une dizaine d\'autres communes du bassin brestois.',
+ 'Salle de bain, fuites, réseau d\'eau, sanitaires : on s\'occupe de toute la plomberie à <a href="/plombier-brest">Brest</a>, <a href="/plombier-plouzane">Plouzané</a>, <a href="/plombier-saint-renan">Saint-Renan</a>, <a href="/plombier-landerneau">Landerneau</a> et dans une vingtaine d\'autres communes du bassin brestois.',
  "plomb.jpg", "<span class='stars'>★★★★★</span> Avis Google",
  [("01","Salle de bain","Le plus gros chantier, fait propre",
    "Refaire une salle de bain, c'est dépose, réseau d'eau, sanitaires, douche et finitions. On gère tout du début à la fin, sans laisser de tranchée ouverte le week-end.",
    ["Dépose de l'ancienne","Réseau d'eau","Douche / baignoire / WC","Coordination carrelage"],
    "sdb-bois.jpg","Salle de bain — Plouider"),
-  ("02","Recherche &amp; réparation de fuites","On trouve, on répare.",
-   "Une fuite, c'est rarement où on croit. On localise précisément avant d'ouvrir, on répare, et on remet en état — sans tout casser.",
-   ["Localisation précise","Réparation propre","Remise en état","Conseil prévention"],
+  ("02","Recherche de fuite &amp; mise aux normes","On trouve d'où ça vient.",
+   "Une fuite, c'est rarement où on croit. On la localise précisément avant d'ouvrir, sans tout casser. On remet aussi la plomberie aux normes et on fait les raccordements de cuisine.",
+   ["Recherche de fuite","Localisation précise","Mise aux normes plomberie","Raccordements de cuisine"],
    "douche-marbre.jpg","Réno haut de gamme"),
   ("03","Réseau d'eau &amp; sanitaires","Du tuyau à la robinetterie",
    "On reprend le réseau d'eau dans les rénovations, on installe les évacuations et la robinetterie. Pas de bidouille — on remet aux standards d'aujourd'hui.",
-   ["Refonte réseau eau","Évacuations","Robinetterie","Mises aux normes"],
+   ["Réseau d'eau","Évacuations","Sanitaires &amp; robinetterie","WC suspendu"],
    "sdb-marbre.jpg","Finitions soignées")],
  "Une salle de bain, une fuite, un projet ?", None, breadcrumb_name="Plomberie",
  faq=FAQ_PLOMB, service=SERVICE_PLOMB)
@@ -1376,37 +1382,37 @@ gen_local("plombier-plouider","Plombier à Plouider (29) | ARélec",
 
 # chauffagiste × communes
 gen_local("chauffagiste-brest","Chauffagiste à Brest (29) | ARélec",
- "Chauffagiste à Brest : installation, remplacement et entretien de votre chauffage, radiateurs et eau chaude. Devis gratuit — ARélec.",
+ "Chauffagiste à Brest : pompe à chaleur, climatisation, radiateurs, plancher chauffant et eau chaude. Devis gratuit — ARélec.",
  "Chauffage","chauffage","Brest","Brest",
  "Votre <b>chauffagiste à Brest.</b>",
- "Installation, remplacement et entretien de votre chauffage à Brest. Confort, simplicité et factures sous contrôle.",
+ "Installation et remplacement de votre chauffage à Brest : pompe à chaleur, radiateurs, plancher chauffant, eau chaude.",
  "confort.jpg",
  ("01","À Brest","Du centre aux Rives de la Penfeld",
-  "À Brest, on intervient dans toute la ville — de Saint-Marc aux Rives de la Penfeld, de Recouvrance au centre. Beaucoup d'appartements et de maisons brestoises ont une installation qui date : on remplace une chaudière fatiguée, on rééquilibre les radiateurs, on remet l'eau chaude propre.",
-  ["Quartiers brestois couverts","Remplacement de chaudière","Radiateurs &amp; ECS","Mise au propre des réglages"], "eclairage.jpg","Confort à Brest"),
- ("02","Confort &amp; économies","Régulation et équilibrage",
-  "On revoit la régulation et l'équilibrage du réseau : chaque pièce à la bonne température, et la facture qui baisse — sans changer d'appareil.",
-  ["Régulation","Équilibrage","Conseil économies","Pilotage simple"], "maison-bleue.jpg","Ajustement fin"),
+  "À Brest, on intervient dans toute la ville — de Saint-Marc aux Rives de la Penfeld, de Recouvrance au centre. Beaucoup d'appartements et de maisons brestoises ont une installation qui date : on remplace une chaudière ou un appareil fatigué, on change les radiateurs, on remet l'eau chaude au propre.",
+  ["Quartiers brestois couverts","Remplacement de chaudière","Radiateurs &amp; ECS","Pompe à chaleur"], "eclairage.jpg","Confort à Brest"),
+ ("02","Pompe à chaleur &amp; climatisation","Des équipements actuels",
+  "Pompe à chaleur air/eau, climatisation réversible, chauffe-eau thermodynamique, plancher chauffant ou radiateurs : on vous oriente vers ce qui convient à votre maison, puis on l'installe.",
+  ["Pompe à chaleur air/eau","Climatisation, PAC air/air","Chauffe-eau thermodynamique","Plancher chauffant"],"maison-bleue.jpg","Équipements actuels"),
  SEC_INTERLO,
- "Un chauffage à remplacer ou à entretenir ?")
+ "Un chauffage à installer ou à remplacer ?")
 
 gen_local("chauffagiste-plouzane","Chauffagiste à Plouzané (29) | ARélec",
- "Chauffagiste à Plouzané : ARélec installe, remplace et entretient votre chauffage. Basé sur la commune depuis 2010. Devis gratuit.",
+ "Chauffagiste à Plouzané : ARélec installe et remplace votre chauffage (pompe à chaleur, radiateurs, plancher chauffant). Basé sur la commune depuis 2010. Devis gratuit.",
  "Chauffage","chauffage","Plouzané","Plouzané",
  "Votre <b>chauffagiste à Plouzané.</b>",
- "Basés à Plouzané, on s'occupe de votre chauffage de l'installation à l'entretien.",
+ "Basés à Plouzané, on installe et on remplace votre chauffage : pompe à chaleur, radiateurs, plancher chauffant.",
  "confort.jpg",
  ("01","À Plouzané","Basés ici depuis 2010",
-  "Plouzané, c'est chez nous. Pour les maisons néo-bretonnes du coin (et il y en a beaucoup), un chauffage bien dimensionné et bien réglé change la vie l'hiver. On installe en neuf, on remplace l'existant fatigué, on entretient — du tableau de bord aux radiateurs de l'étage.",
-  ["Maisons néo-bretonnes","Installation neuve","Remplacement","Réglages &amp; entretien"], "eclairage.jpg","Sur la commune"),
- ("02","Confort &amp; économies","Le bon réglage, pas plus",
-  "On revoit la régulation et l'équilibrage du réseau pour que chaque pièce soit à bonne température. Souvent, on gagne sur la facture sans changer d'appareil.",
-  ["Régulation","Équilibrage","Conseil économies","Pilotage simple"], "maison-bleue.jpg","Ajustement"),
+  "Plouzané, c'est chez nous. Pour les maisons néo-bretonnes du coin (et il y en a beaucoup), un chauffage bien dimensionné change la vie l'hiver. On installe en neuf et on remplace l'existant fatigué, jusqu'aux radiateurs de l'étage.",
+  ["Maisons néo-bretonnes","Installation neuve","Remplacement","Pompe à chaleur"], "eclairage.jpg","Sur la commune"),
+ ("02","Pompe à chaleur &amp; climatisation","Des équipements actuels",
+  "Pompe à chaleur air/eau, climatisation réversible, chauffe-eau thermodynamique, plancher chauffant ou radiateurs : on vous oriente vers ce qui convient à votre maison, puis on l'installe.",
+  ["Pompe à chaleur air/eau","Climatisation, PAC air/air","Chauffe-eau thermodynamique","Plancher chauffant"],"maison-bleue.jpg","Équipements actuels"),
  SEC_INTERLO,
  "Un chauffage à voir à Plouzané ?")
 
 gen_local("chauffagiste-plouider","Chauffagiste à Plouider (29) | ARélec",
- "Chauffagiste à Plouider : installation et entretien du chauffage lors de vos travaux. ARélec, artisan depuis 2010 — devis gratuit.",
+ "Chauffagiste à Plouider : installation et remplacement du chauffage lors de vos travaux. ARélec, artisan depuis 2010 — devis gratuit.",
  "Chauffage","chauffage","Plouider","Plouider",
  "Votre <b>chauffagiste à Plouider.</b>",
  "À Plouider, on a déjà installé le chauffage lors d'une grande rénovation — en coordination avec l'élec et la plomberie.",
@@ -1414,9 +1420,9 @@ gen_local("chauffagiste-plouider","Chauffagiste à Plouider (29) | ARélec",
  ("01","À Plouider","On y a déjà fait du gros chantier",
   "À Plouider, on a été missionnés pour une rénovation complète où on a installé le chauffage en plus de l'élec et de la plomberie. C'est tout l'intérêt d'ARélec : un seul interlocuteur, du tableau au radiateur du fond du couloir.",
   ["Chantier réalisé","Coordination des 3 métiers","Installation chauffage","Eau chaude sanitaire"], "chantier-plouider.jpg","Chantier Plouider"),
- ("02","Confort &amp; économies","Le bon réglage, pas plus",
-  "On revoit la régulation et l'équilibrage du réseau pour que chaque pièce soit à la bonne température. Souvent, on gagne sur la facture sans changer d'appareil.",
-  ["Régulation","Équilibrage","Conseil économies","Pilotage simple"], "maison-bleue.jpg","Ajustement fin"),
+ ("02","Pompe à chaleur &amp; climatisation","Des équipements actuels",
+  "Pompe à chaleur air/eau, climatisation réversible, chauffe-eau thermodynamique, plancher chauffant ou radiateurs : on vous oriente vers ce qui convient à votre maison, puis on l'installe.",
+  ["Pompe à chaleur air/eau","Climatisation, PAC air/air","Chauffe-eau thermodynamique","Plancher chauffant"],"maison-bleue.jpg","Équipements actuels"),
  SEC_INTERLO,
  "Un chauffage à voir à Plouider ?")
 
@@ -1427,9 +1433,9 @@ SEC02_E=("02","Notre savoir-faire élec","Du tableau à l'éclairage soigné",
 SEC02_P=("02","Salle de bain &amp; sanitaires","Dépose, eau, finitions",
   "On reprend le réseau d'eau, on pose la douche, le meuble et les sanitaires au propre, et on laisse le chantier net en partant.",
   ["Dépose de l'ancienne","Réseau d'eau","Sanitaires &amp; robinetterie","Finitions propres"],"sdb-bois.jpg","Finitions soignées")
-SEC02_C=("02","Confort &amp; économies","Le bon réglage, pas plus",
-  "On revoit la régulation et l'équilibrage du réseau pour que chaque pièce soit à la bonne température. Souvent, on gagne sur la facture sans changer d'appareil.",
-  ["Régulation","Équilibrage","Conseil économies","Pilotage simple"],"maison-bleue.jpg","Ajustement fin")
+SEC02_C=("02","Pompe à chaleur &amp; climatisation","Des équipements actuels",
+  "Pompe à chaleur air/eau, climatisation réversible, chauffe-eau thermodynamique, plancher chauffant ou radiateurs : on vous oriente vers ce qui convient à votre maison, puis on l'installe.",
+  ["Pompe à chaleur air/eau","Climatisation, PAC air/air","Chauffe-eau thermodynamique","Plancher chauffant"],"maison-bleue.jpg","Équipements actuels")
 
 # (metier_slug, metier_label, metier_url, hero_img, sec01_img, noun, desc_short, prest_lower, sec01_items, sec02)
 METIER_DEFS=[
@@ -1442,9 +1448,9 @@ METIER_DEFS=[
   "salle de bain, recherche de fuite, réseau d'eau et sanitaires",
   ["Salle de bain","Recherche de fuite","Réseau d'eau","Sanitaires"], SEC02_P),
  ("chauffagiste","Chauffage","chauffage","confort.jpg","eclairage.jpg","Chauffagiste",
-  "installation, remplacement et entretien du chauffage",
-  "installation, remplacement et entretien du chauffage, eau chaude sanitaire et réglages",
-  ["Installation neuve","Remplacement","Eau chaude sanitaire","Réglages"], SEC02_C),
+  "pompe à chaleur, radiateurs, plancher chauffant et eau chaude",
+  "installation et remplacement du chauffage, pompe à chaleur, plancher chauffant et eau chaude sanitaire",
+  ["Installation neuve","Remplacement","Eau chaude sanitaire","Pompe à chaleur"], SEC02_C),
 ]
 
 COMMUNE_HOOKS={
@@ -1458,6 +1464,16 @@ COMMUNE_HOOKS={
  "lannilis":"Pays des Abers, au nord du Pays de Brest.",
  "plabennec":"Pays des Abers, à 15 km de Brest.",
  "landerneau":"Sur l'Élorn, à 20 km — on s'y déplace régulièrement.",
+ "bohars":"Juste au nord-ouest de Brest.",
+ "gouesnou":"Au nord de Brest, près de l'aéroport.",
+ "plougastel-daoulas":"Face à Brest, de l'autre côté de l'Élorn.",
+ "milizac-guipronvel":"En Pays d'Iroise, au nord de Plouzané.",
+ "plouarzel":"En Pays d'Iroise, vers la pointe de Corsen.",
+ "ploudalmezeau":"En Pays d'Iroise, au nord-ouest de Brest.",
+ "lanildut":"Au bord de l'Aber Ildut, en Pays d'Iroise.",
+ "porspoder":"Sur la côte nord du Pays d'Iroise.",
+ "lesneven":"Au nord-est de Brest, voisine de Plouider.",
+ "le-folgoet":"Accolée à Lesneven, tout près de Plouider.",
 }
 
 for m_slug,m_label,m_url,hero_img,sec01_img,noun,desc_short,prest_lower,sec01_items,sec02 in METIER_DEFS:
@@ -1517,7 +1533,7 @@ about_body=(phero(CRUMB_M.format(label="L'entreprise"),"À propos d'ARélec",
   "maison-bleue.jpg",FLOAT_AVIS,"Maison rénovée à l'heure bleue, chantier ARélec")
  +('<section class="sec"><div class="wrap"><div class="two-col">'
    f'<div class="head"><span{R()}>{label("Notre histoire")}</span><h2{R(.08,"h2")}>Une histoire d\'artisan,<br><b>à Plouzané.</b></h2>'
-   f'<p{R(.14,"lead")}>On a démarré ARélec en 2010, ici, dans le bassin brestois. Le principe de base : qu\'un même artisan puisse refaire la maison de bout en bout — élec, chauffage, plomberie — sans qu\'il faille jongler avec trois entreprises. Quinze ans plus tard, on fait toujours comme ça.</p>'
+   f'<p{R(.14,"lead")}>ARélec a été créée en 2010 sur le bassin brestois. Le principe : qu\'une entreprise à taille humaine puisse réaliser et suivre les travaux des installations de bout en bout (électricité, plomberie, chauffage) sans qu\'il faille jongler avec trois entreprises.</p>'
    f'<p{R(.18,"lead")}>Le pont sur le logo, c\'est le pont de l\'Iroise. On est d\'ici, on y reste.</p></div>'
    f'<img{R(.1)} src="/assets/img/chantier-plouider.jpg" alt="Chantier ARélec à Plouider" loading="lazy">'
    '</div></div></section>')
@@ -1528,17 +1544,16 @@ about_body=(phero(CRUMB_M.format(label="L'entreprise"),"À propos d'ARélec",
    '</div></div></section>')
  +('<section class="sec" style="padding-top:0"><div class="wrap">'
    f'<div class="split-head"><div class="head"><span{R()}>{label("L\'équipe")}</span><h2{R(.08,"h2")}>Les gens derrière<br><b>ARélec.</b></h2></div>'
-   f'<div class="side"><p{R(.12,"lead")}>Une petite équipe d\'artisans qui fait les trois métiers elle-même.</p></div></div>'
-   '<div class="cards-3">'
-   f'<div{R(0,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>Arnaud Roncey</b><span>Gérant · électricité, chauffage, plomberie</span></div></div>'
-   f'<div{R(.08,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>{tbd("Prénom Nom")}</b><span>{tbd("Rôle à compléter")}</span></div></div>'
-   f'<div{R(.16,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>{tbd("Prénom Nom")}</b><span>{tbd("Rôle à compléter")}</span></div></div>'
+   f'<div class="side"><p{R(.12,"lead")}>Deux artisans qui font les trois métiers eux-mêmes.</p></div></div>'
+   '<div class="cards-2">'
+   f'<div{R(0,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>Arnaud Roncey</b><span>Gérant · électricité, chauffage</span></div></div>'
+   f'<div{R(.08,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>Damien D.</b><span>Plombier · plomberie, chauffage</span></div></div>'
    '</div></div></section>')
  +('<section class="sec" style="padding-top:0"><div class="wrap">'
    f'<div class="head"><span{R()}>{label("Garanties")}</span><h2{R(.08,"h2")}>Des engagements<br><b>clairement expliqués.</b></h2></div>'
    '<div class="cards-3">'
    f'<div{R(0,"mist-card")}><span class="icon-chip">{ic("doc")}</span><div class="txt"><h3 class="h3">Entreprise immatriculée</h3><p class="small">SARL ARélec, SIREN 790 223 036, Plouzané (29280).</p></div></div>'
-   f'<div{R(.08,"mist-card")}><span class="icon-chip">{ic("shield")}</span><div class="txt"><h3 class="h3">Assurances</h3><p class="small">{tbd("Assurance décennale et RC pro : assureur et n° de contrat à compléter")}</p></div></div>'
+   f'<div{R(.08,"mist-card")}><span class="icon-chip">{ic("shield")}</span><div class="txt"><h3 class="h3">Assurances</h3><p class="small">Assurance décennale GROUPAMA (contrat n° 109942100001) et responsabilité civile professionnelle GROUPAMA.</p></div></div>'
    f'<div{R(.16,"mist-card")}><span class="icon-chip">{ic("check")}</span><div class="txt"><h3 class="h3">Qualifications</h3><p class="small">{tbd("Labels et qualifications à compléter")}</p></div></div>'
    '</div></div></section>')
  +cta_section('Et si on parlait<br><b>de votre projet ?</b>'))
@@ -1552,7 +1567,7 @@ POSTS=[("chauffage","confort.jpg","Chauffage : les réglages qui font baisser la
        ("électricité","reno-cablage.jpg","Mise aux normes NF C 15-100 : ce qu'il faut savoir"),
        ("plomberie","douche-marbre.jpg","Une fuite invisible ? Les signes qui ne trompent pas"),
        ("électricité","eclairage.jpg","Bien éclairer une pièce : nos conseils d'artisan"),
-       ("chauffage","maison-bleue.jpg","Entretien annuel du chauffage : pourquoi c'est utile")]
+       ("chauffage","maison-bleue.jpg","Pompe à chaleur : est-ce adapté à ma maison ?")]
 posts="".join(f'<article{R(.06*(i%3),"post")}><div class="img"><img src="/assets/img/{img}" alt="" loading="lazy"><span class="tag mono">{cat}</span></div>'
               f'<div class="meta mono"><span class="pill lime">À rédiger</span>{tbd("date")}</div><h3 class="h3">{t}</h3>'
               f'<p class="small">{tbd("Résumé de l\'article à rédiger")}</p></article>' for i,(cat,img,t) in enumerate(POSTS))
@@ -1749,7 +1764,7 @@ LLMS_TXT = f"""# ARélec
 ARélec couvre trois métiers du bâtiment, en interne, avec la même équipe :
 
 1. **Électricité** — installation, rénovation, mise aux normes NF C 15-100, dépannage, tableau électrique, éclairage architectural.
-2. **Chauffage / thermique** — installation, remplacement, dimensionnement, entretien annuel, régulation, équilibrage du réseau.
+2. **Chauffage / thermique** — installation neuve, remplacement de chaudière ou d'appareil, radiateurs (dont électriques), plancher chauffant, pompe à chaleur air/eau, climatisation et PAC air/air, eau chaude sanitaire, chauffe-eau thermodynamique. Pas d'installation gaz ou fioul.
 3. **Plomberie** — salle de bain complète, recherche de fuite, réseau d'eau, sanitaires, robinetterie, évacuations.
 
 Un seul interlocuteur prend en charge le chantier de A à Z, sans coordination à faire entre plusieurs artisans.
@@ -1771,8 +1786,18 @@ Siège à Plouzané (29280). Interventions dans tout le bassin brestois :
 - Locmaria-Plouzané
 - Lannilis
 - Plabennec
+- Bohars
+- Gouesnou
+- Plougastel-Daoulas
+- Milizac-Guipronvel
+- Plouarzel
+- Ploudalmézeau
+- Lanildut
+- Porspoder
+- Lesneven
+- Le Folgoët
 
-Rayon d'intervention typique : environ 30 km autour de Plouzané, dans le Finistère.
+Rayon d'intervention typique : environ 50 km autour de Plouzané, dans le Finistère.
 
 ## Comment travailler avec ARélec
 
@@ -1799,7 +1824,7 @@ Devis toujours gratuit. Réponse sous 24 à 48 h.
 
 ARélec a une page dédiée pour chaque combinaison métier × commune :
 
-- Électricien : {DOMAIN}/electricien-brest/, electricien-plouzane, electricien-saint-renan, electricien-le-conquet, electricien-landerneau, electricien-plouider, electricien-guipavas, electricien-le-relecq-kerhuon, electricien-guilers, electricien-plougonvelin, electricien-locmaria-plouzane, electricien-lannilis, electricien-plabennec
+- Électricien : {DOMAIN}/electricien-brest/, electricien-plouzane, electricien-saint-renan, electricien-le-conquet, electricien-landerneau, electricien-plouider, electricien-guipavas, electricien-le-relecq-kerhuon, electricien-guilers, electricien-plougonvelin, electricien-locmaria-plouzane, electricien-lannilis, electricien-plabennec, electricien-bohars, electricien-gouesnou, electricien-plougastel-daoulas, electricien-milizac-guipronvel, electricien-plouarzel, electricien-ploudalmezeau, electricien-lanildut, electricien-porspoder, electricien-lesneven, electricien-le-folgoet
 - Chauffagiste : même liste de communes, préfixe `chauffagiste-`
 - Plombier : même liste de communes, préfixe `plombier-`
 
@@ -1836,7 +1861,7 @@ Ce fichier est destiné aux moteurs de recherche IA (ChatGPT, Perplexity, Claude
 
 ARélec (raison sociale : SARL ARélec, SIREN 790 223 036) est une entreprise artisanale du bâtiment fondée en 2010 et installée à Plouzané (29280), dans le Finistère, en France. Le gérant est Arnaud Roncey. L'entreprise couvre trois métiers complémentaires — électricité, chauffage, plomberie — avec une seule équipe, ce qui permet à un client de mener une rénovation complète sans coordonner plusieurs artisans.
 
-ARélec intervient principalement dans le bassin brestois : Brest, Plouzané, Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec. Le rayon d'intervention typique est d'environ 30 km autour de Plouzané.
+ARélec intervient principalement dans le bassin brestois : Brest, Plouzané, Saint-Renan, Le Conquet, Landerneau, Plouider, Guipavas, Le Relecq-Kerhuon, Guilers, Plougonvelin, Locmaria-Plouzané, Lannilis, Plabennec, Bohars, Gouesnou, Plougastel-Daoulas, Milizac-Guipronvel, Plouarzel, Ploudalmézeau, Lanildut, Porspoder, Lesneven, Le Folgoët. Le rayon d'intervention typique est d'environ 50 km autour de Plouzané.
 
 Le devis est toujours gratuit. Le premier échange se fait via l'assistant du site puis sur WhatsApp (ou par téléphone), puis ARélec se déplace gratuitement pour établir le vrai devis sur place.
 
@@ -1848,26 +1873,29 @@ Le devis est toujours gratuit. Le premier échange se fait via l'assistant du si
 
 ARélec est avant tout un électricien — c'est le cœur de métier depuis 2010. Les prestations incluent :
 
-- **Installation neuve** : conception du plan électrique, tirage des gaines, pose du tableau, des différentiels et des appareillages, éclairage intérieur et extérieur.
+- **Installation neuve** : tirage des gaines, pose du tableau, des différentiels et des appareillages, éclairage intérieur et extérieur.
 - **Rénovation** : reprise d'installation existante, mise au propre du tableau, remplacement d'appareillage.
 - **Mise aux normes NF C 15-100** : diagnostic complet, remplacement de ce qui n'est plus conforme, sans casser inutilement les murs.
 - **Dépannage** : disjoncteur qui claque, prise grillée, panne d'éclairage, court-circuit.
-- **Éclairage** : conception architecturale (escaliers à LED intégrées, appliques chaudes, pilotage simple).
+- **Éclairage** : intérieur et extérieur, LED intégrées (escaliers, plafonds).
+- **Équipements** : VMC (ventilation), interphone et visiophone, borne de recharge pour véhicule électrique, raccordement au compteur (Enedis).
 
 ### 2.2 Chauffage / thermique
 
-ARélec installe, remplace et entretient le chauffage des maisons individuelles :
+ARélec installe et remplace le chauffage, en neuf comme en rénovation :
 
-- **Installation et remplacement** : radiateurs, distribution, eau chaude sanitaire, dimensionnement adapté à l'isolation et à la surface.
-- **Confort et économies** : régulation par pièce, équilibrage du réseau, conseil sur les leviers d'économies sans changer l'appareil.
-- **Entretien** : visite annuelle, contrôle complet, réglages, petits remplacements. Un chauffage entretenu consomme moins et tombe moins souvent en panne.
+- **Installation et remplacement** : chauffage neuf, remplacement de chaudière ou d'appareil, radiateurs (dont radiateurs électriques), plancher chauffant.
+- **Pompe à chaleur et climatisation** : pompe à chaleur air/eau, climatisation et PAC air/air.
+- **Eau chaude sanitaire** : chauffe-eau, ballon, chauffe-eau thermodynamique.
+- **Énergies** : électricité et pompe à chaleur. ARélec n'installe pas de chauffage au gaz ou au fioul.
 
 ### 2.3 Plomberie
 
 ARélec couvre toute la plomberie résidentielle :
 
-- **Salle de bain complète** : dépose, réseau d'eau, douche / baignoire / WC, robinetterie, finitions, coordination carrelage.
-- **Recherche et réparation de fuite** : localisation précise avant ouverture, réparation propre, remise en état.
+- **Salle de bain clé en main** : dépose de l'ancienne, réseau d'eau, douche / baignoire / WC (dont WC suspendu), sanitaires et robinetterie. Le carrelage est fait avec le carreleur habituel d'ARélec.
+- **Recherche de fuite** : localisation précise avant ouverture.
+- **Raccordements de cuisine** et mise aux normes plomberie.
 - **Réseau d'eau et sanitaires** : refonte des canalisations en rénovation, évacuations, mises aux standards actuels.
 
 ---
@@ -1893,6 +1921,16 @@ Communes couvertes (chacune a une page dédiée par métier) :
 | Locmaria-Plouzané | 29280 |
 | Lannilis | 29870 |
 | Plabennec | 29860 |
+| Bohars | 29820 |
+| Gouesnou | 29850 |
+| Plougastel-Daoulas | 29470 |
+| Milizac-Guipronvel | 29290 |
+| Plouarzel | 29810 |
+| Ploudalmézeau | 29830 |
+| Lanildut | 29840 |
+| Porspoder | 29840 |
+| Lesneven | 29260 |
+| Le Folgoët | 29260 |
 
 ---
 
@@ -1917,7 +1955,7 @@ Communes couvertes (chacune a une page dédiée par métier) :
 - **Site** : {DOMAIN}
 - **Formulaire de contact** : {DOMAIN}/contact/
 
-Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00.
+Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00. Fermé le samedi et le dimanche. Interventions d'urgence possibles en soirée.
 
 ---
 
@@ -1928,6 +1966,8 @@ Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00.
 - **Statut** : SARL (Société à responsabilité limitée)
 - **Année de création** : 2010
 - **Gérant** : Arnaud Roncey
+- **Assurance décennale** : GROUPAMA, contrat n° 109942100001
+- **Responsabilité civile professionnelle** : GROUPAMA
 
 ---
 

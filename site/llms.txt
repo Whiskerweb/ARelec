@@ -18,7 +18,7 @@
 ARélec couvre trois métiers du bâtiment, en interne, avec la même équipe :
 
 1. **Électricité** — installation, rénovation, mise aux normes NF C 15-100, dépannage, tableau électrique, éclairage architectural.
-2. **Chauffage / thermique** — installation, remplacement, dimensionnement, entretien annuel, régulation, équilibrage du réseau.
+2. **Chauffage / thermique** — installation neuve, remplacement de chaudière ou d'appareil, radiateurs (dont électriques), plancher chauffant, pompe à chaleur air/eau, climatisation et PAC air/air, eau chaude sanitaire, chauffe-eau thermodynamique. Pas d'installation gaz ou fioul.
 3. **Plomberie** — salle de bain complète, recherche de fuite, réseau d'eau, sanitaires, robinetterie, évacuations.
 
 Un seul interlocuteur prend en charge le chantier de A à Z, sans coordination à faire entre plusieurs artisans.
@@ -40,8 +40,18 @@ Siège à Plouzané (29280). Interventions dans tout le bassin brestois :
 - Locmaria-Plouzané
 - Lannilis
 - Plabennec
+- Bohars
+- Gouesnou
+- Plougastel-Daoulas
+- Milizac-Guipronvel
+- Plouarzel
+- Ploudalmézeau
+- Lanildut
+- Porspoder
+- Lesneven
+- Le Folgoët
 
-Rayon d'intervention typique : environ 30 km autour de Plouzané, dans le Finistère.
+Rayon d'intervention typique : environ 50 km autour de Plouzané, dans le Finistère.
 
 ## Comment travailler avec ARélec
 
@@ -68,7 +78,7 @@ Devis toujours gratuit. Réponse sous 24 à 48 h.
 
 ARélec a une page dédiée pour chaque combinaison métier × commune :
 
-- Électricien : https://www.entreprise-arelec.fr/electricien-brest/, electricien-plouzane, electricien-saint-renan, electricien-le-conquet, electricien-landerneau, electricien-plouider, electricien-guipavas, electricien-le-relecq-kerhuon, electricien-guilers, electricien-plougonvelin, electricien-locmaria-plouzane, electricien-lannilis, electricien-plabennec
+- Électricien : https://www.entreprise-arelec.fr/electricien-brest/, electricien-plouzane, electricien-saint-renan, electricien-le-conquet, electricien-landerneau, electricien-plouider, electricien-guipavas, electricien-le-relecq-kerhuon, electricien-guilers, electricien-plougonvelin, electricien-locmaria-plouzane, electricien-lannilis, electricien-plabennec, electricien-bohars, electricien-gouesnou, electricien-plougastel-daoulas, electricien-milizac-guipronvel, electricien-plouarzel, electricien-ploudalmezeau, electricien-lanildut, electricien-porspoder, electricien-lesneven, electricien-le-folgoet
 - Chauffagiste : même liste de communes, préfixe `chauffagiste-`
 - Plombier : même liste de communes, préfixe `plombier-`
 
