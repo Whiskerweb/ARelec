@@ -9,49 +9,22 @@ Site vitrine moderne pour **SARL ARélec** — électricité, chauffage/thermiqu
 ## Règles non négociables
 
 1. **100% responsive / mobile-friendly à CHAQUE modification.** Toujours penser desktop ET mobile (clamp() + media queries ≤900px et ≤560px). Vérifier le rendu petit écran systématiquement.
-2. **Boutons & surfaces en liquid glass** (jamais de boutons plats opaques) : translucide, `backdrop-filter:blur(...)`, reflet spéculaire en haut, bord clair fin, ombre douce, coins très arrondis.
+2. **DA « Voltora »** (refonte nov. 2026, inspirée de voltora.framer.website) : voir la section Direction artistique. Boutons pilule avec pastille ronde, cartes très arrondies.
 3. **Ton naturel d'artisan** : concret, fier du métier, rassurant. Pas de slogan tordu ni de jargon. Ex. retenu : « Une maison bien câblée, bien chauffée. »
 4. **Reste un site vitrine simple.** PAS d'app de suivi de chantier, pas de SaaS.
 5. **CTA principal = « Prendre contact »** (attribut `data-chat`) : ouvre l'assistant du site, qui répond aux questions puis fait basculer le prospect sur **WhatsApp** (message prérempli avec le résumé de sa demande ; un agent WhatsApp prendra le relais). L'estimateur en ligne est abandonné (`/estimation` redirige vers `/contact/`). Jamais de prix donné par l'assistant.
 
 ---
 
-## Direction artistique (source de vérité)
-
-**Monde retenu : « Le Réseau » — lumineux, moderne, premium.** Mot-clé visuel : **la lumière**.
-
-### Couleurs
-- Accent unique : **bleu électrique** `#1457FF` → dégradé cyan `#0BB0FF` (à doser, jamais envahissant).
-- Texte : blanc pur sur photo ; bleu nuit `#0C2A5E` / `#11233F` sur fond clair.
-- Fonds sombres : navy `#0A1322`, `#06101F`, dégradés `#0C2750`→`#06101F`.
-- Vert « dispo / conforme / OK » : `#36E07F`.
-- Verre : blanc translucide 7–22% d'opacité.
-
-### Typographie
-- **Inter** (grotesk géométrique). Titres semi-bold (600–700), interlettrage serré (`-0.03em`), grandes tailles en `clamp()`. Wordmark/labels en capitales, letter-spacing large.
-
-### Liquid glass (recette de référence)
-```css
-backdrop-filter: blur(20px) saturate(160%);
-background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.08));
-border: 1px solid rgba(255,255,255,.4);
-box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 12px 30px rgba(0,0,0,.3);
-/* + reflet : ::after gradient blanc sur la moitié haute */
-```
-Coins arrondis : pilules `999px`, cartes `18–26px`.
-
-### Photographie
-Cinématique, jamais cliché « ouvrier en gilet ». Heure bleue/dorée, lumière chaude, zone sombre pour poser le texte blanc.
-- Hero maquette (provisoire) : **côte bretonne à l'heure dorée** (identité Finistère, écho au pont du logo).
-- **Objectif version finale : vraies photos des chantiers ARélec** (maison bretonne pierre/ardoise à l'heure bleue) — le plus crédible et le plus local.
-
-### Logo
-- `assets/logo-arelec-white.png` — monoline blanc transparent : signature « Arélec » + **pont à haubans (Pont de l'Iroise, Brest)** = ancrage local fort + wordmark ARELEC. Se pose sur fond sombre / dans une pilule de verre. Prévoir version lisible sans contenant.
-
-### Mise en page hero (validée)
-Inspirée de la réf. « abysse » : titre en bas à gauche, CTA primaire (verre clair) à droite, ligne de séparation fine, puis puces de confiance (📞 / 📍 Plouzané / ✓ devis gratuit) à gauche et descriptif à droite. Nav = pilule de verre (logo gauche · liens centre · CTA « Prendre contact » droite ; burger en verre ≤900px).
-
----
+## Direction artistique (source de vérité) — refonte « Voltora » (nov. 2026)
+Inspirée de https://voltora.framer.website (mise en page, typo, effets), avec le contenu, les photos et le logo d'ARélec.
+- **Polices** : Geist 300 pour les titres (H1 68px, H2 48px, interlettrage -0.035em), Geist 400 pour le texte, **Geist Mono 500** en capitales pour les étiquettes, **Doto 900** (police pixel) pour le grand « ARÉLEC » du footer.
+- **Couleurs** : encre `#121211` / `#191917`, crème `#F3F2EE`, filet `#E4E2DC`, texte secondaire `#6F6D66`, **accent jaune-vert `#E3FF4A`** (pastilles des boutons, étoiles, puces). Fond de page blanc.
+- **Composants** : étiquette pilule « ● TEXTE » en mono ; bouton pilule sombre avec pastille ronde jaune-vert (flèche qui pivote au survol) ; cartes de 32px de rayon posées à 12px des bords (hero, CTA, footer) ; cartes crème de 20 à 24px ; panneaux en verre flouté sur les photos.
+- **Effets** : apparition au scroll en fondu + flou + montée (`.r` → `.in`, `--d` = délai) ; compteurs animés ; défilant de logos ; zoom lent de la photo du hero ; trait des étapes qui se dessine. Tout est coupé avec `prefers-reduced-motion`.
+- **Informations inconnues** : affichées entre astérisques avec `tbd()` (ex. « *1 200+* », « *Partenaire 1* ») = à compléter avec ARélec, ne jamais inventer.
+- **Avis** : note 4,6/5 sur 9 avis (relevée sur avis-electricien.fr, reprise de la fiche Google, le 03/11/2026), adresse Rue du Cloître, 29280 Plouzané. `AggregateRating` toujours absent du JSON-LD : à ajouter seulement avec la fiche Google officielle.
+- **Pages** : Accueil, Services (`/services`), À propos (`/entreprise`), Réalisations, Blog (`/blog`, maquette en noindex tant que les articles ne sont pas rédigés), Contact, Avis, pages métier et 39 pages locales SEO (même gabarit `gen_sub`, contenu inchangé).
 
 ## Expérience de défilement
 **Scroll par panneaux façon Apple** (pas un scroll continu) : chaque section = plein écran, **`scroll-snap-type:y proximity`** + `scroll-snap-stop:always` (⚠️ **proximity, PAS mandatory** : avec `mandatory`, le bandeau/footer de bas de page — qui n'est pas un panneau plein écran — devient inatteignable, le scroll « repince » vers le dernier panneau). Le fond se remplace et le contenu apparaît en fondu/translation (IntersectionObserver ajoute `.visible`). Bandeau contact + footer = blocs en flux normal (`scroll-snap-align:none`, sauf le bandeau en `start`). Points de navigation latéraux. Sur mobile (≤760px), idem proximity.

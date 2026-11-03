@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# Generateur du site statique ARELEC.
+# Generateur du site statique ARELEC — DA inspirée de voltora.framer.website (Geist, crème, accent #E3FF4A).
 # HOME = scroll-snap (hero photo + metiers + avis + footer).
 # SUBPAGES (metier + locales) = layout inspire de traaaction.com/portal :
 #   subnav claire sticky, hero 2 colonnes, trust strip, 3 sections numerotees, recap CTA, footer.
-import os, html, pathlib, datetime, json
+import os, re, html, pathlib, datetime, json
 from PIL import Image, ImageOps
 
 ROOT = pathlib.Path(__file__).resolve().parent
@@ -11,6 +11,9 @@ SITE = ROOT/"site"; IMG = SITE/"assets/img"; CSS = SITE/"assets/css"
 DOMAIN = "https://www.entreprise-arelec.fr"
 PHONE_DISP = "02 98 40 20 43"; PHONE_TEL = "0298402043"; EMAIL = "contact@entreprise-arelec.fr"
 PHONE_MOBILE_DISP="06 78 02 04 24"; PHONE_MOBILE_TEL="0678020424"; WHATSAPP_INT="33678020424"
+# Note publique relevée sur avis-electricien.fr (reprise de la fiche Google) le 03/11/2026
+RATING="4,6"; RATING_COUNT=9
+ADDRESS="Rue du Cloître, 29280 Plouzané"
 SVG_PHONE='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
 SVG_MAIL='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>'
 SVG_WA='<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23-1.48 0-2.93-.39-4.19-1.15l-.3-.17-3.12.82.83-3.04-.2-.32a8.188 8.188 0 0 1-1.26-4.38c.01-4.54 3.7-8.24 8.25-8.24zM8.53 7.33c-.16 0-.43.06-.66.31-.22.25-.87.86-.87 2.07 0 1.22.89 2.39 1 2.56.14.17 1.76 2.67 4.25 3.73.59.27 1.05.42 1.41.53.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.15-1.18-.07-.1-.23-.16-.48-.27-.25-.14-1.47-.74-1.69-.82-.23-.08-.4-.12-.56.12-.17.25-.64.81-.78.97-.15.17-.29.19-.53.07-.26-.13-1.06-.39-2-1.23-.74-.66-1.23-1.47-1.38-1.72-.12-.24-.01-.39.11-.5.11-.11.27-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.11-.56-1.35-.77-1.84-.2-.48-.4-.42-.56-.43-.14 0-.3-.01-.47-.01z"/></svg>'
@@ -29,485 +32,836 @@ for n,name,wpx in [(7,"plomb.jpg",1100),(8,"chantier-plouider.jpg",1100),(10,"ma
                    (12,"eclairage.jpg",1100),(13,"sdb-bois.jpg",1100),(14,"confort.jpg",1100),
                    (15,"sdb-baignoire.jpg",1100),(16,"sdb-marbre.jpg",1100),(17,"douche-marbre.jpg",1100),
                    (18,"escalier-led.jpg",1100),(20,"sdb-bleue.jpg",1100),(21,"cablage.jpg",1100),
-                   (22,"reno-cablage.jpg",1100)]:
+                   (22,"reno-cablage.jpg",1100),(9,"chantier-toiture.jpg",1100)]:
     save(f"photo-{n:02d}.jpg", name, wpx)
 # Logos : blanc (nav photo sombre) + sombre (subnav claire)
 wl = Image.open(ROOT/"assets/logo-arelec-white.png").convert("RGBA"); wl.thumbnail((640,640), Image.LANCZOS); wl.save(IMG/"logo.png")
-alpha = wl.split()[3]; dark = Image.new("RGBA", wl.size, (12,28,58,255)); dark.putalpha(alpha); dark.save(IMG/"logo-dark.png")
+alpha = wl.split()[3]; dark = Image.new("RGBA", wl.size, (18,18,17,255)); dark.putalpha(alpha); dark.save(IMG/"logo-dark.png")
 
-# ---------- CSS partage ----------
-CSS_TXT = r"""@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-:root{--ink:#0c1c3a;--ink-soft:#46587a;--blue:#1457ff;--cyan:#0bb0ff;--paper:#fbfcfe;--r:28px;--glass-d:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.08))}
-*{box-sizing:border-box;margin:0;padding:0}html,body{height:100%}
-html,body{overflow-x:clip}img,video,svg{max-width:100%}
-body{font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;background:var(--paper);color:var(--ink)}
+# ---------- CSS partage (DA inspirée de Voltora : Geist, crème #F3F2EE, encre #121211, accent #E3FF4A) ----------
+CSS_TXT = r""":root{--ink:#121211;--ink2:#191917;--mist:#F3F2EE;--line:#E4E2DC;--muted:#6F6D66;--lime:#E3FF4A;--white:#fff;
+--font:'Geist',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+--ease:cubic-bezier(.2,.7,.2,1);--max:1248px}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:#fff;color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+img{display:block;max-width:100%}
 a{color:inherit}
-.snap{height:100vh;height:100svh;overflow-y:scroll;scroll-snap-type:y proximity;scroll-behavior:smooth;scrollbar-width:none}
-.snap::-webkit-scrollbar{display:none}
-.panel{position:relative;height:100vh;height:100svh;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;padding:clamp(16px,3.2vw,28px) clamp(18px,4vw,48px) clamp(24px,4vw,40px)}
-.bg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center 46%;transform:scale(1.08);opacity:.4;transition:transform 1.1s ease,opacity 1.1s ease;background-image:linear-gradient(to bottom,rgba(8,15,30,.30),rgba(8,15,30,0) 26%,rgba(8,15,30,0) 42%,rgba(6,12,24,.82)),url('/assets/img/hero.jpg')}
-.panel.visible .bg{transform:scale(1);opacity:1}
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .85s cubic-bezier(.2,.7,.2,1),transform .85s cubic-bezier(.2,.7,.2,1)}
-.panel.visible .reveal{opacity:1;transform:none}
-.panel.visible .d1{transition-delay:.05s}.panel.visible .d2{transition-delay:.15s}.panel.visible .d3{transition-delay:.27s}.panel.visible .d4{transition-delay:.39s}
-.nav{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.nav>a:first-child,.topnav>a:first-child,.subnav>a:first-child{flex:none;display:block}
-.brand-img{height:clamp(40px,5.2vw,54px);width:auto;max-width:none;display:block;filter:drop-shadow(0 2px 12px rgba(0,0,0,.55))}
-.topnav .logo-dark,.subnav .logo-dark{flex:none}
-.navlinks{display:flex;gap:4px;padding:7px 10px;border-radius:999px;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);background:var(--glass-d);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 30px rgba(0,0,0,.28)}
-.navlinks a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;text-decoration:none;color:#fff;font-size:14.5px;font-weight:500;text-shadow:0 1px 6px rgba(0,0,0,.3);white-space:nowrap;transition:.2s}
-.navlinks a:hover,.navlinks a[aria-current]{background:rgba(255,255,255,.2)}
-.btn{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:44px;gap:9px;padding:12px 22px;border-radius:999px;font-size:14.5px;font-weight:600;color:#fff;cursor:pointer;text-decoration:none;overflow:hidden;white-space:nowrap;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);background:var(--glass-d);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 12px 30px rgba(0,0,0,.3)}
-.btn::after{content:"";position:absolute;left:0;right:0;top:0;height:48%;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.4),transparent);pointer-events:none}
-.btn.primary{padding:14px 26px;font-size:15px;color:#0c2a5e;background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(225,238,255,.78));border:1px solid rgba(255,255,255,.9);box-shadow:inset 0 1px 0 rgba(255,255,255,1),0 16px 36px rgba(0,0,0,.34)}
-.btn.solid{color:#fff;background:linear-gradient(180deg,#3a7dff,#1654d8);border:1px solid rgba(255,255,255,.4);box-shadow:0 10px 22px rgba(20,87,255,.22),inset 0 1px 0 rgba(255,255,255,.35);backdrop-filter:none;-webkit-backdrop-filter:none}
-.btn.solid::after{display:none}
-.btn.line{color:#0c2a5e;background:rgba(255,255,255,.85);border:1px solid rgba(20,60,140,.18);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.btn.line::after{display:none}
-.burger{display:none;width:46px;height:46px;border-radius:14px;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:var(--glass-d);border:1px solid rgba(255,255,255,.4);padding:0;font:inherit;color:inherit}
-.burger span{display:block;width:18px;height:2px;background:#fff;border-radius:2px;box-shadow:0 5px 0 #fff,0 -5px 0 #fff;transition:transform .25s,box-shadow .25s,background .25s}
-.burger[aria-expanded="true"] span{background:transparent;box-shadow:none;transform:rotate(45deg)}
-.burger[aria-expanded="true"] span::before,.burger[aria-expanded="true"] span::after{content:""}
-.subnav .burger,.topnav .burger{display:none}
-.subnav .burger span,.topnav .burger span{background:#0c1c3a;box-shadow:0 5px 0 #0c1c3a,0 -5px 0 #0c1c3a}
-.subnav .burger,.topnav .burger{background:rgba(255,255,255,.6);border-color:rgba(15,40,90,.12)}
-.subnav .burger[aria-expanded="true"] span,.topnav .burger[aria-expanded="true"] span{background:transparent;box-shadow:none}
-#hero{color:#fff;background:#0a1322}
-.spacer{flex:1;min-height:24px;position:relative;z-index:2}.content{position:relative;z-index:2}
-.topline{display:flex;align-items:flex-end;justify-content:space-between;gap:clamp(20px,4vw,40px);flex-wrap:wrap}
-.kicker{display:inline-flex;align-items:center;gap:9px;font-size:clamp(11.5px,1.6vw,13px);font-weight:600;letter-spacing:.02em;margin-bottom:16px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
-.kicker .dot{width:8px;height:8px;border-radius:50%;background:#36e07f;box-shadow:0 0 0 4px rgba(54,224,127,.25);flex:none}
-h1{font-size:clamp(34px,7.5vw,66px);line-height:1.0;letter-spacing:-.035em;font-weight:600;text-shadow:0 4px 30px rgba(0,0,0,.5)}
-h1 b{font-weight:700}
-.hr{height:1px;background:linear-gradient(to right,rgba(255,255,255,.05),rgba(255,255,255,.45),rgba(255,255,255,.05));margin:clamp(20px,3vw,28px) 0 20px}
-.bottom{display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(20px,4vw,40px);flex-wrap:wrap}
-.meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.chip{font-size:13.5px;font-weight:500;padding:11px 14px;min-height:44px;border-radius:999px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.28);display:inline-flex;gap:7px;align-items:center;color:#fff;text-decoration:none}
-.desc{max-width:440px;font-size:clamp(14px,1.8vw,15px);line-height:1.55;color:rgba(255,255,255,.94);text-align:right;text-shadow:0 1px 10px rgba(0,0,0,.5)}
-.scrollhint{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:3;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;color:#fff;opacity:.85;display:flex;flex-direction:column;align-items:center;gap:6px;animation:bob 2s ease-in-out infinite}
-.scrollhint .arr{width:20px;height:20px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg)}
-@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,7px)}}
-.light{align-items:center;color:var(--ink);overflow-y:auto;padding-top:clamp(56px,9vh,110px);padding-bottom:clamp(48px,7vh,90px);background:radial-gradient(42% 42% at 12% 8%,rgba(20,87,255,.16),transparent 60%),radial-gradient(46% 46% at 88% 16%,rgba(11,176,255,.16),transparent 62%),linear-gradient(160deg,#fff,#edf3ff)}
-.sec{position:relative;z-index:2;max-width:1200px;margin:auto;width:100%}
-.sechead{text-align:center;margin-bottom:clamp(36px,4.5vw,60px)}
-.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);padding:8px 16px;border-radius:999px;background:rgba(20,87,255,.07);border:1px solid rgba(20,87,255,.14);margin-bottom:22px}
-.sec h2{font-size:clamp(28px,4.4vw,48px);font-weight:700;letter-spacing:-.03em;line-height:1.04}
-.sec h2 em{font-style:normal;background:linear-gradient(110deg,var(--blue),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
-.sec .sub{margin:18px auto 0;font-size:clamp(15px,1.8vw,16.5px);color:var(--ink-soft);max-width:620px;line-height:1.6}
-/* Trades — split layout: texte+CTA gauche, accordéon image droite */
-.sec-split{display:grid;grid-template-columns:1.2fr 1fr;gap:clamp(28px,5vw,56px);align-items:center;max-width:1360px;margin:auto;width:100%}
-.lead-col{max-width:720px}
-.lead-col .trade-list{display:flex;flex-direction:column;gap:.08em;font-weight:800;letter-spacing:-.05em;line-height:1.04;font-size:clamp(54px,7.6vw,108px);margin:0 0 clamp(32px,3.5vw,44px);text-align:left;color:var(--ink)}
-.lead-col .trade-list span{display:block;white-space:nowrap}
-.lead-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.lead-actions .btn{min-height:56px;font-size:16px;padding:16px 30px}
-.accordion{display:flex;gap:14px;height:clamp(420px,62vh,560px);width:100%;--ease:cubic-bezier(.22,.61,.36,1)}
-.acc{position:relative;flex:1;border-radius:26px;overflow:hidden;text-decoration:none;color:inherit;isolation:isolate;cursor:pointer;
- transition:flex .85s var(--ease),box-shadow .5s var(--ease);
- border:1px solid rgba(255,255,255,.55);
- box-shadow:0 30px 60px -28px rgba(20,60,140,.34),0 2px 6px rgba(20,60,140,.08);
- will-change:flex}
-.acc::before{content:"";position:absolute;inset:0;border-radius:inherit;z-index:5;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 18%)}
-.acc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .95s var(--ease),filter .6s ease;filter:brightness(.86) saturate(1.05);will-change:transform,filter}
-.acc-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,16,32,.05) 0%,rgba(6,16,32,.45) 55%,rgba(6,12,24,.88) 100%);transition:opacity .5s ease}
-.acc-rail{position:absolute;left:0;top:0;bottom:0;width:64px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:20px 0 22px;z-index:3;
- background:linear-gradient(180deg,rgba(6,18,38,.10),rgba(6,18,38,.55));
- border-right:1px solid rgba(255,255,255,.10);
- opacity:1;transform:none;
- transition:opacity .4s var(--ease) .2s,transform .55s var(--ease) .2s}
-.acc-ic{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:20px;color:#fff;background:linear-gradient(160deg,rgba(255,255,255,.20),rgba(255,255,255,.06));backdrop-filter:blur(14px) saturate(160%);-webkit-backdrop-filter:blur(14px) saturate(160%);border:1px solid rgba(255,255,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
-.acc-vt{writing-mode:vertical-rl;transform:rotate(180deg);color:#fff;font-weight:700;font-size:13.5px;letter-spacing:.22em;text-transform:uppercase;text-shadow:0 2px 12px rgba(0,0,0,.45)}
-.acc-open{position:absolute;left:0;right:0;bottom:0;padding:clamp(22px,2.4vw,34px);color:#fff;z-index:3;opacity:0;pointer-events:none;transition:opacity .5s var(--ease);will-change:opacity;text-align:left}
-.acc-open>*{opacity:0;transition:opacity .45s var(--ease)}
-.acc-ic-lg{width:56px;height:56px;border-radius:17px;display:grid;place-items:center;font-size:24px;margin-bottom:14px;background:linear-gradient(160deg,rgba(255,255,255,.26),rgba(255,255,255,.08));backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);border:1px solid rgba(255,255,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 10px 22px rgba(0,0,0,.25)}
-.acc-open h3{font-size:clamp(26px,2.8vw,34px);font-weight:700;letter-spacing:-.02em;line-height:1.06;margin-bottom:8px;text-shadow:0 2px 16px rgba(0,0,0,.4)}
-.acc-open p{font-size:14.5px;line-height:1.55;margin-bottom:16px;max-width:380px;text-shadow:0 1px 8px rgba(0,0,0,.4)}
-.acc-cta{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;letter-spacing:.02em;padding:11px 18px;border-radius:999px;color:#0c2a5e;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(225,238,255,.82));border:1px solid rgba(255,255,255,.95);box-shadow:inset 0 1px 0 #fff,0 10px 22px rgba(0,0,0,.22)}
-/* Ouverture: par défaut (.is-open) + hover (le hover suit la souris) */
-.acc.is-open,.acc:hover,.acc:focus-visible{flex:2.7}
-.acc.is-open .acc-rail,.acc:hover .acc-rail,.acc:focus-visible .acc-rail{opacity:0;transform:translateX(-12px);transition-delay:0s,0s}
-.acc.is-open .acc-open,.acc:hover .acc-open,.acc:focus-visible .acc-open{opacity:1;transition-delay:.6s;pointer-events:auto}
-.acc.is-open .acc-ic-lg,.acc:hover .acc-ic-lg,.acc:focus-visible .acc-ic-lg{opacity:1;transition-delay:.65s}
-.acc.is-open .acc-open h3,.acc:hover .acc-open h3,.acc:focus-visible .acc-open h3{opacity:1;transition-delay:.75s}
-.acc.is-open .acc-open p,.acc:hover .acc-open p,.acc:focus-visible .acc-open p{opacity:1;transition-delay:.88s}
-.acc.is-open .acc-cta,.acc:hover .acc-cta,.acc:focus-visible .acc-cta{opacity:1;transition-delay:1s}
-.acc.is-open img,.acc:hover img,.acc:focus-visible img{transform:scale(1.05);filter:brightness(.78) saturate(1.1)}
-/* Override: si on hover une autre carte, la carte par défaut se rétracte proprement */
-.accordion:hover .acc.is-open:not(:hover):not(:focus-visible){flex:1}
-.accordion:hover .acc.is-open:not(:hover):not(:focus-visible) .acc-rail{opacity:1;transform:none;transition-delay:.22s,.22s}
-.accordion:hover .acc.is-open:not(:hover):not(:focus-visible) .acc-open{opacity:0;transition-delay:0s;pointer-events:none}
-.accordion:hover .acc.is-open:not(:hover):not(:focus-visible) .acc-open>*{opacity:0;transition-delay:0s}
-.accordion:hover .acc.is-open:not(:hover):not(:focus-visible) img{transform:none;filter:brightness(.86) saturate(1.05)}
-/* === Section réalisations (BounceCards vanilla) === */
-.band-real{scroll-snap-align:none;padding:clamp(36px,5vh,64px) clamp(20px,4vw,48px);background:radial-gradient(60% 80% at 50% 0%,rgba(20,87,255,.06),transparent 60%),linear-gradient(180deg,#fff,#f6f9ff);color:var(--ink);border-top:1px solid rgba(20,87,255,.06);position:relative;overflow:hidden}
-.sec-real{max-width:1080px;margin:auto;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center;gap:clamp(16px,2.2vw,26px)}
-.real-head{max-width:600px}
-.real-head .eyebrow{margin-bottom:12px}
-.real-head h2{font-size:clamp(26px,3.6vw,40px);font-weight:800;letter-spacing:-.035em;line-height:1.04}
-.real-head h2 em{font-style:normal;background:linear-gradient(110deg,var(--blue),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
-.real-head .sub{margin:10px auto 0;font-size:clamp(14px,1.5vw,15.5px);color:var(--ink-soft);max-width:480px;line-height:1.5}
-.bc-stage{width:100%;display:flex;justify-content:center;align-items:center;padding:clamp(6px,1.4vw,16px) 0}
-.bc-cards{position:relative;width:clamp(300px,70vw,560px);height:clamp(150px,20vw,200px);display:flex;justify-content:center;align-items:center}
-.bc-card{position:absolute;width:clamp(110px,14vw,160px);aspect-ratio:1;border:4px solid #fff;border-radius:20px;overflow:hidden;box-shadow:0 12px 26px rgba(20,60,140,.20),0 2px 6px rgba(20,60,140,.08);will-change:transform;transform-origin:center;cursor:pointer}
-.bc-card img{width:100%;height:100%;object-fit:cover;display:block}
-.bc-card.bc-init{transform:scale(0) !important}
-.real-cta{display:inline-flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.real-cta .btn{min-height:46px;font-size:14.5px;padding:11px 22px}
-@media (max-width:760px){.bc-cards{width:88vw;height:38vw;max-height:170px}.bc-card{width:26vw;max-width:130px;border-width:3px;border-radius:16px}.real-cta .btn{width:100%;justify-content:center}}
-@media (max-width:480px){.bc-card{width:28vw;max-width:100px}}
-@media (prefers-reduced-motion:reduce){.bc-card.bc-init{transform:none !important}}
-/* === Carrousel avis Google (compact, hors snap) === */
-.band-reviews{scroll-snap-align:none;padding:clamp(36px,5vh,64px) clamp(18px,4vw,48px);background:radial-gradient(60% 100% at 50% 0%,rgba(20,87,255,.06),transparent 60%),linear-gradient(180deg,#fff,#f5f9ff);color:var(--ink);border-top:1px solid rgba(20,87,255,.06);border-bottom:1px solid rgba(20,87,255,.06)}
-.sec-reviews{max-width:1080px;margin:auto;width:100%;text-align:center}
-.g-head{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:clamp(18px,2.4vw,28px)}
-.g-logo{font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(26px,3vw,34px);letter-spacing:-.02em;line-height:1;display:inline-flex}
-.g-stars-big{color:#FBBC05;font-size:clamp(16px,1.8vw,20px);letter-spacing:3px;line-height:1}
-.g-sub-big{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft)}
-.g-carousel{position:relative;padding:0 clamp(0px,3vw,44px)}
-.g-track{display:flex;gap:clamp(12px,1.4vw,18px);overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:4px 4px 10px;scrollbar-width:none}
-.g-track::-webkit-scrollbar{display:none}
-.g-card{flex:0 0 clamp(240px,24vw,300px);scroll-snap-align:center;background:#fff;border-radius:14px;padding:16px 18px;text-align:left;border:1px solid rgba(15,40,90,.08);box-shadow:0 10px 22px -12px rgba(20,60,140,.16),0 1px 4px rgba(20,60,140,.05);transition:transform .3s var(--ease,cubic-bezier(.22,.61,.36,1)),box-shadow .3s ease;display:flex;flex-direction:column}
-.g-card:hover{transform:translateY(-3px);box-shadow:0 22px 38px -18px rgba(20,60,140,.22)}
-.g-card header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.g-avatar{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;flex:none;font-family:'Inter',sans-serif}
-.g-meta{display:flex;flex-direction:column;line-height:1.2;min-width:0}
-.g-name{font-weight:600;font-size:13.5px;color:var(--ink)}
-.g-sub{font-size:11.5px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.g-stars-small{color:#FBBC05;font-size:13px;letter-spacing:2px;margin-bottom:6px;line-height:1}
-.g-card blockquote{margin:0;font-size:13px;line-height:1.5;color:var(--ink)}
-.g-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:#fff;border:1px solid rgba(15,40,90,.1);color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:22px;line-height:1;box-shadow:0 6px 14px rgba(20,60,140,.12);transition:.2s;z-index:5;font-family:inherit;padding:0 0 3px}
-.g-nav:hover{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 8px 18px rgba(20,87,255,.28)}
-.g-prev{left:-2px}.g-next{right:-2px}
-.g-dots{display:flex;gap:7px;justify-content:center;margin-top:10px}
-.g-dots button{width:7px;height:7px;border-radius:50%;border:none;background:rgba(120,140,175,.4);cursor:pointer;padding:0;transition:.25s}
-.g-dots button.on{background:var(--blue);transform:scale(1.5);box-shadow:0 0 0 3px rgba(20,87,255,.14)}
-@media (max-width:760px){.g-carousel{padding:0}.g-nav{display:none}.g-card{flex:0 0 78vw;max-width:280px}.g-track{padding-left:11vw;padding-right:11vw;scroll-padding-left:11vw;scroll-padding-right:11vw}}
-.cta-band{scroll-snap-align:start;padding:clamp(40px,6vw,80px) clamp(20px,5vw,80px);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;background:radial-gradient(60% 120% at 80% 0%,rgba(20,87,255,.12),transparent 60%),linear-gradient(160deg,#fff,#e9f1ff);border-top:1px solid rgba(20,87,255,.1);color:var(--ink)}
-.cta-band h2{font-size:clamp(22px,3vw,34px);font-weight:700;letter-spacing:-.02em;line-height:1.08}
-.cta-band p{color:var(--ink-soft);margin-top:8px;font-size:15px}
-.cta-actions{display:flex;gap:12px;flex-wrap:wrap}
-footer.site{scroll-snap-align:none;color:#dfe8f7;padding:clamp(40px,5vw,64px) clamp(20px,5vw,80px) 0;background:radial-gradient(60% 80% at 85% 0%,rgba(20,87,255,.18),transparent 60%),linear-gradient(160deg,#0c2750,#0a1c39 55%,#06101f)}
-footer.site .fgrid{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:clamp(18px,1.8vw,32px)}
-footer.site .blogo{height:44px;width:auto;filter:drop-shadow(0 2px 12px rgba(0,0,0,.5));margin-bottom:16px;display:block}
-footer.site .brand p{font-size:14px;line-height:1.6;color:#a9bcd9;max-width:300px}
-footer.site .nap{margin-top:16px;font-size:14px;line-height:1.9}
-footer.site .nap a{color:#fff;text-decoration:none;font-weight:600}footer.site .nap .muted{color:#8ea3c6}
-footer.site h4{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#7fb0ff;margin-bottom:16px;font-weight:700}
-footer.site ul{list-style:none;display:flex;flex-direction:column;gap:11px}
-footer.site .fcol a{color:#bccbe4;text-decoration:none;font-size:14px;min-height:24px;display:inline-flex;align-items:center;transition:.2s}
-footer.site .fcol a:hover{color:#fff}
-footer.site .soc{display:inline-flex;gap:8px;margin-top:16px}
-footer.site .soc a{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;color:#fff;text-decoration:none;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2)}
-footer.site .legal{max-width:1200px;margin:clamp(30px,4vw,48px) auto 0;border-top:1px solid rgba(255,255,255,.1);padding:20px 0 26px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12.5px;color:#8ea3c6}
-footer.site .legal a{color:#a9bcd9;text-decoration:none}footer.site .legal a:hover{color:#fff}
-.dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:6px}
-.dots button{position:relative;width:40px;height:30px;border:none;cursor:pointer;padding:0;background:transparent}
-.dots button::before{content:"";position:absolute;inset:0;margin:auto;width:9px;height:9px;border-radius:50%;background:rgba(120,140,175,.55);transition:.3s}
-.dots button.on::before{background:var(--blue);transform:scale(1.5);box-shadow:0 0 0 4px rgba(20,87,255,.16)}
-a:focus-visible,button:focus-visible{outline:2px solid var(--blue);outline-offset:3px;border-radius:14px}
-#hero a:focus-visible{outline-color:#fff}
-@media (max-width:980px){.sec-split{grid-template-columns:1fr;gap:32px;max-width:560px}.lead-col{max-width:100%;text-align:center;margin:0 auto}.lead-col .trade-list{text-align:center;align-items:center;font-size:clamp(46px,12vw,78px)}.lead-actions{justify-content:center}.accordion{flex-direction:column;height:auto;gap:14px}.acc{flex:none!important;height:230px}.acc .acc-rail{opacity:0!important;transform:none!important;width:100%;height:auto;flex-direction:row;justify-content:flex-start;gap:14px;padding:14px 18px;background:linear-gradient(90deg,rgba(6,18,38,.55),rgba(6,18,38,.15));border-right:none;border-bottom:1px solid rgba(255,255,255,.1)}.acc .acc-vt{writing-mode:horizontal-tb;transform:none}.acc .acc-open{left:0;right:0;padding:20px;opacity:1!important;transform:none!important}.acc .acc-open>*{opacity:1!important;transition:none}.acc img{transform:scale(1.02);filter:brightness(.72) saturate(1.12)}.reviews{grid-template-columns:1fr;max-width:520px;margin:0 auto}footer.site .fgrid{grid-template-columns:1fr 1fr}footer.site .brand{grid-column:1/-1}}
-@media (max-width:900px){.navlinks{display:none}.burger{display:flex}.nav>.btn{display:none}.desc{text-align:left}}
-@media (max-width:760px){.dots{display:none}.scrollhint{display:none}}
-@media (max-width:560px){.topline{flex-direction:column;align-items:stretch}.topline .btn.primary{width:100%}.bottom{flex-direction:column-reverse;gap:18px}.desc{text-align:left;max-width:100%}h1{font-size:clamp(30px,9vw,46px)}.cta-band{flex-direction:column;align-items:flex-start}.cta-actions{width:100%}.cta-band .btn{flex:1}}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.001ms!important;scroll-behavior:auto!important}.reveal{opacity:1!important;transform:none!important}.bg{transform:none!important;opacity:1!important}}
-
-/* ===== SUBPAGES (Traaction-inspired) ===== */
-.sub-shell{background:var(--paper);min-height:100vh}
-.subnav{position:sticky;top:0;z-index:40;backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);background:rgba(255,255,255,.78);border-bottom:1px solid rgba(15,40,90,.08);padding:12px clamp(18px,4vw,40px);display:flex;align-items:center;justify-content:space-between;gap:16px}
-.subnav .logo-dark{height:38px;width:auto;display:block}
-.subnav nav{display:flex;align-items:center;gap:4px}
-.subnav nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;text-decoration:none;color:var(--ink);font-size:14px;font-weight:500;transition:.2s}
-.subnav nav a:hover,.subnav nav a[aria-current]{background:rgba(20,87,255,.08);color:var(--blue)}
-.subnav .ctas{display:flex;gap:10px;align-items:center}
-.subnav .ctas a.tel{font-size:14px;font-weight:600;color:var(--ink);text-decoration:none;padding:0 10px;min-height:44px;display:inline-flex;align-items:center}
-.subnav .ctas a.tel:hover{color:var(--blue)}
-.subhero{padding:clamp(40px,7vh,90px) clamp(18px,5vw,80px) clamp(40px,6vh,80px);background:radial-gradient(42% 60% at 12% -10%,rgba(20,87,255,.055),transparent 60%),radial-gradient(40% 50% at 95% 110%,rgba(11,176,255,.055),transparent 60%),var(--paper);position:relative;overflow:hidden}
-.subhero .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(28px,5vw,60px);align-items:center}
-.crumb{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px}
-.crumb a{color:var(--ink-soft);text-decoration:none}.crumb a:hover{color:var(--blue)}
-.eyebrow-blue{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--blue);padding:7px 14px;border-radius:999px;background:rgba(20,87,255,.07);border:1px solid rgba(20,87,255,.14);margin-bottom:18px}
-.subhero h1{font-size:clamp(34px,5.6vw,64px);line-height:1.02;letter-spacing:-.035em;color:var(--ink);text-shadow:none;font-weight:600}
-.subhero h1 b{font-weight:800;color:var(--ink)}
-.subhero .lead{margin-top:18px;font-size:clamp(15px,1.8vw,17.5px);color:var(--ink-soft);line-height:1.6;max-width:520px}
-.subhero .lead a{color:var(--blue);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px;font-weight:600;transition:color .2s}
-.subhero .lead a:hover{color:#0a3eb8;text-decoration-thickness:2px}
-.feat p a{color:var(--blue);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px;font-weight:600;transition:color .2s}
-.feat p a:hover{color:#0a3eb8}
-.subhero .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
-.imgcard{position:relative;border-radius:28px;overflow:hidden;background:linear-gradient(165deg,rgba(255,255,255,.7),rgba(255,255,255,.42));border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 30px 60px -28px rgba(20,60,140,.26)}
-.imgcard img{width:100%;height:100%;object-fit:cover;display:block}
-.imgcard::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(10,20,40,.25),transparent 50%)}
-.subhero .imgcard{aspect-ratio:4/5}
-.subhero .float{position:absolute;left:-18px;bottom:24px;padding:12px 16px;border-radius:16px;font-size:13px;font-weight:600;color:var(--ink);background:linear-gradient(165deg,rgba(255,255,255,.9),rgba(255,255,255,.62));backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(255,255,255,.95);box-shadow:0 18px 36px rgba(20,60,140,.22);display:flex;align-items:center;gap:8px}
-.subhero .float .stars{color:#ffb400}
-.trust{padding:22px clamp(18px,5vw,80px);background:#fff;border-top:1px solid rgba(15,40,90,.06);border-bottom:1px solid rgba(15,40,90,.06)}
-.trust .wrap{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px}
-.trust .item{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:var(--ink)}
-.trust .item .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(20,87,255,.1);color:var(--blue);font-size:14px;font-weight:800}
-.feat{padding:clamp(50px,8vh,100px) clamp(18px,5vw,80px)}
-.feat:nth-of-type(even){background:linear-gradient(180deg,rgba(20,87,255,.018),transparent)}
-.feat .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,70px);align-items:center}
-.feat.flip .wrap > :first-child{order:2}
-.feat .num{display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;letter-spacing:.16em;color:var(--blue);padding:8px 14px;border-radius:999px;background:linear-gradient(165deg,rgba(255,255,255,.78),rgba(255,255,255,.46));backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1px solid rgba(20,87,255,.22);box-shadow:inset 0 1px 0 #fff,0 8px 18px rgba(20,60,140,.10);margin-bottom:16px}
-.feat h2{font-size:clamp(28px,3.6vw,40px);font-weight:700;letter-spacing:-.025em;line-height:1.08;margin-bottom:16px;color:var(--ink)}
-.feat p{font-size:16px;line-height:1.65;color:var(--ink-soft);margin-bottom:22px;max-width:520px}
-.feat ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:11px 18px;max-width:560px}
-.feat li{display:flex;gap:9px;align-items:flex-start;font-size:14.5px;color:var(--ink);font-weight:500;line-height:1.45}
-.feat li::before{content:"";width:7px;height:7px;border-radius:50%;background:#16c172;margin-top:7px;flex:none;box-shadow:0 0 0 3px rgba(22,193,114,.16)}
-.feat .imgcard{aspect-ratio:5/4}
-.feat .tag{position:absolute;top:18px;left:18px;font-size:12px;font-weight:700;padding:7px 12px;border-radius:999px;color:#0c2a5e;background:linear-gradient(165deg,rgba(255,255,255,.92),rgba(255,255,255,.7));backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.9);z-index:2}
-.recap{padding:clamp(50px,8vh,90px) clamp(18px,5vw,80px);text-align:center;background:radial-gradient(60% 80% at 50% 0%,rgba(20,87,255,.08),transparent 60%),linear-gradient(160deg,#fff,#edf3ff)}
-.recap h2{font-size:clamp(28px,4vw,46px);font-weight:700;letter-spacing:-.03em;line-height:1.04;max-width:780px;margin:0 auto 16px;color:var(--ink)}
-.recap p{font-size:16px;color:var(--ink-soft);max-width:560px;margin:0 auto 28px;line-height:1.55}
-.recap .actions{display:inline-flex;gap:12px;flex-wrap:wrap;justify-content:center}
-.faq{padding:clamp(50px,8vh,90px) clamp(18px,5vw,80px);background:#fff;border-top:1px solid rgba(15,40,90,.06)}
-.faq .wrap-faq{max-width:860px;margin:0 auto}
-.faq .eyebrow-blue{margin-bottom:10px}
-.faq h2{font-size:clamp(26px,3.6vw,40px);font-weight:700;letter-spacing:-.028em;line-height:1.1;color:var(--ink);margin-bottom:28px}
+p{margin:0}
+ul{margin:0;padding:0;list-style:none}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:8px}
+.dk :focus-visible,.hero :focus-visible,.cta-card :focus-visible,.footer :focus-visible,.drawer :focus-visible{outline-color:var(--lime)}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 24px}
+.sec{padding:120px 0}
+.sec.tight{padding:72px 0}
+.ic{width:20px;height:20px;flex:none;display:inline-block}
+.tbd{white-space:nowrap}
+/* --- typo --- */
+.h1{font-size:clamp(40px,5vw,68px);line-height:1.02;font-weight:300;letter-spacing:-.035em;margin:0}
+.h2{font-size:clamp(32px,3.4vw,48px);line-height:1.08;font-weight:300;letter-spacing:-.03em;margin:0}
+.h1 b,.h2 b{font-weight:300;color:var(--muted)}
+.dk .h1 b,.dk .h2 b,.hero .h1 b,.cta-card .h2 b{color:rgba(255,255,255,.55)}
+.h3{font-size:22px;line-height:1.25;font-weight:400;letter-spacing:-.015em;margin:0}
+.lead{font-size:18px;line-height:1.55;color:var(--muted);letter-spacing:-.005em}
+.lead a,.prose a,.feat-txt p a{color:var(--ink);text-decoration-thickness:1px;text-underline-offset:3px}
+.small{font-size:15px;line-height:1.6;color:var(--muted)}
+.label{display:inline-flex;align-items:center;gap:8px;padding:7px 14px 7px 12px;border-radius:100px;background:#fff;border:1px solid var(--line);font-family:var(--mono);font-size:12px;font-weight:500;line-height:1.2;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
+.label::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ink);flex:none}
+.label.dark{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.18);color:#fff;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.label.dark::before{background:var(--lime)}
+.label.on-mist{border-color:transparent}
+.mono{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.head{display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+.head.center{align-items:center;text-align:center;margin:0 auto;max-width:820px}
+.split-head{display:grid;grid-template-columns:1.25fr 1fr;gap:40px;align-items:end}
+.split-head .side{display:flex;flex-direction:column;align-items:flex-start;gap:20px;max-width:420px;justify-self:end}
+/* --- boutons --- */
+.btn{position:relative;display:inline-flex;align-items:center;gap:12px;min-height:48px;padding:6px 22px 6px 6px;border-radius:100px;font:500 15px/1 var(--font);letter-spacing:-.01em;text-decoration:none;white-space:nowrap;cursor:pointer;border:0;transition:transform .35s var(--ease),background .3s,box-shadow .3s}
+.btn:hover{transform:translateY(-1px)}
+.btn .chip{width:36px;height:36px;border-radius:100px;display:grid;place-items:center;flex:none;transition:transform .45s var(--ease)}
+.btn .chip .ic{width:17px;height:17px}
+.btn:hover .chip{transform:rotate(45deg)}
+.btn.no-rot:hover .chip{transform:scale(1.06)}
+.btn.plain{padding:12px 22px}
+.btn-dark{background:var(--ink);color:#fff}.btn-dark .chip{background:var(--lime);color:var(--ink)}
+.btn-glass{background:rgba(255,255,255,.14);color:#fff;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}.btn-glass .chip{background:#fff;color:var(--ink)}
+.btn-light{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}.btn-light .chip{background:var(--ink);color:var(--lime)}
+.btn-lime{background:var(--lime);color:var(--ink)}.btn-lime .chip{background:var(--ink);color:var(--lime)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+/* --- nav --- */
+.nav{position:fixed;top:12px;left:0;right:0;z-index:50;padding:0 16px;pointer-events:none}
+.nav-in{pointer-events:auto;max-width:1200px;margin:0 auto;height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 8px 0 18px;border-radius:20px;background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%);box-shadow:0 0 0 1px rgba(18,18,17,.05),0 8px 24px rgba(18,18,17,.06);transition:box-shadow .4s var(--ease),background .4s}
+.nav.scrolled .nav-in{background:rgba(255,255,255,.96);box-shadow:0 0 0 1px rgba(18,18,17,.06),0 14px 40px rgba(18,18,17,.12)}
+.brand{display:flex;align-items:center;min-height:44px}
+.brand img{height:34px;width:auto}
+.nav-links{display:flex;gap:2px}
+.nav-links a{padding:10px 14px;border-radius:100px;font-size:14px;color:var(--muted);text-decoration:none;transition:color .2s,background .2s}
+.nav-links a:hover{color:var(--ink);background:var(--mist)}
+.nav-links a[aria-current]{color:var(--ink);font-weight:500}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-tel{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;font-size:14px;color:var(--ink);text-decoration:none;border-radius:100px}
+.nav-tel:hover{background:var(--mist)}
+.nav-tel .ic{width:16px;height:16px}
+.burger{display:none;width:48px;height:48px;border-radius:100px;border:0;background:var(--mist);cursor:pointer;place-items:center;padding:0;color:var(--ink)}
+.burger span,.burger span::before{display:block;width:18px;height:1.5px;background:currentColor;border-radius:2px;position:relative}
+.burger span::before{content:"";position:absolute;top:6px;left:0}
+.burger span{transform:translateY(-3px)}
+/* --- tiroir mobile --- */
+.drawer{position:fixed;inset:0;z-index:70;background:var(--ink);color:#fff;display:flex;flex-direction:column;gap:28px;padding:calc(20px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom));overflow-y:auto;opacity:0;transform:translateY(-12px);transition:opacity .35s var(--ease),transform .35s var(--ease)}
+.drawer.open{opacity:1;transform:none}
+.drawer[hidden]{display:none}
+.drawer-head{display:flex;align-items:center;justify-content:space-between}
+.drawer-head img{height:34px;width:auto}
+.drawer-close{width:48px;height:48px;border-radius:100px;border:0;background:rgba(255,255,255,.1);color:#fff;font-size:26px;line-height:1;cursor:pointer}
+.drawer nav{display:flex;flex-direction:column}
+.drawer nav a{display:flex;justify-content:space-between;align-items:center;padding:16px 4px;font-size:30px;font-weight:300;letter-spacing:-.03em;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.1)}
+.drawer nav a .ic{color:var(--lime)}
+.drawer-foot{margin-top:auto;display:flex;flex-direction:column;gap:12px}
+.drawer-foot .btn{justify-content:space-between}
+.drawer-tel{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.75);text-decoration:none;font-size:15px;min-height:44px}
+body.menu-open{overflow:hidden}
+/* --- apparitions au scroll --- */
+.js .r{opacity:0;transform:translateY(28px);filter:blur(8px);transition:opacity 1s var(--ease),transform 1s var(--ease),filter 1s var(--ease);transition-delay:var(--d,0s)}
+.js .r.in{opacity:1;transform:none;filter:none}
+/* --- hero accueil --- */
+.hero{padding:12px 12px 0}
+.hero-card{position:relative;isolation:isolate;overflow:hidden;border-radius:32px;min-height:max(720px,calc(100svh - 24px));display:flex;align-items:flex-end;padding:170px 56px 56px;color:#fff}
+.hero-bg{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;transform:scale(1.08);animation:heroZoom 2.6s var(--ease) .1s forwards}
+@keyframes heroZoom{to{transform:scale(1)}}
+.hero-card::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(18,18,17,.78) 0%,rgba(18,18,17,.35) 50%,rgba(18,18,17,.05) 100%),linear-gradient(0deg,rgba(18,18,17,.6) 0%,rgba(18,18,17,0) 50%)}
+.hero-grid{width:100%;display:flex;align-items:flex-end;justify-content:space-between;gap:40px}
+.hero-content{max-width:760px;display:flex;flex-direction:column;align-items:flex-start;gap:24px}
+.hero-content .lead{color:rgba(255,255,255,.8);max-width:540px}
+.trust-line{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:4px}
+.trust-line span{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.82)}
+.trust-line .ic{width:18px;height:18px;padding:3px;border-radius:50%;background:var(--lime);color:var(--ink)}
+.avail{width:300px;flex:none;padding:10px 10px 18px;border-radius:24px;background:rgba(255,255,255,.12);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}
+.avail img{width:100%;height:150px;object-fit:cover;border-radius:16px}
+.avail .status{display:flex;align-items:center;gap:8px;margin:14px 8px 6px;font-size:15px;font-weight:500}
+.pulse{width:9px;height:9px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 0 rgba(227,255,74,.6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 10px rgba(227,255,74,0)}100%{box-shadow:0 0 0 0 rgba(227,255,74,0)}}
+.avail p{margin:0 8px;font-size:13px;line-height:1.5;color:rgba(255,255,255,.72)}
+.avail p a{color:#fff}
+/* --- bandeau logos --- */
+.logos{padding:44px 0 8px}
+.logos .wrap{display:flex;align-items:center;gap:48px}
+.logos-intro{flex:none;width:250px;display:flex;flex-direction:column;gap:6px}
+.logos-intro .small{font-size:13px;line-height:1.5}
+.ticker{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.ticker-track{display:flex;gap:56px;width:max-content;animation:marquee 32s linear infinite}
+.ticker-item{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500;letter-spacing:-.02em;color:#9a978e;white-space:nowrap}
+.ticker-item .ic{width:22px;height:22px}
+@keyframes marquee{to{transform:translateX(-50%)}}
+/* --- chiffres --- */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:64px}
+.stat{border-top:1px solid var(--line);padding-top:22px}
+.stat-n{font-size:56px;line-height:1;font-weight:300;letter-spacing:-.04em}
+.stat-l{font-size:13px;color:var(--muted);margin-top:14px}
+/* --- pourquoi nous --- */
+.why{padding:0 12px}
+.why-card{position:relative;isolation:isolate;overflow:hidden;border-radius:32px;padding:80px 40px}
+.why-card>img{position:absolute;inset:0;z-index:-1;width:100%;height:100%;object-fit:cover}
+.why-card::after{content:"";position:absolute;inset:0;z-index:-1;background:rgba(18,18,17,.18)}
+.why-inner{max-width:1120px;margin:0 auto;background:#fff;border-radius:28px;box-shadow:0 30px 60px rgba(18,18,17,.12);padding:56px 48px 48px}
+.why-body{display:grid;grid-template-columns:1fr 1.15fr;gap:16px;margin-top:48px}
+.why-body>img{width:100%;height:100%;min-height:420px;object-fit:cover;border-radius:20px}
+.feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mist-card{background:var(--mist);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:24px}
+.mist-card .txt{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.icon-chip{width:48px;height:48px;border-radius:100px;background:#fff;display:grid;place-items:center;color:var(--ink);flex:none}
+.on-white .icon-chip{background:var(--mist)}
+/* --- services --- */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+.svc{position:relative;isolation:isolate;overflow:hidden;border-radius:24px;min-height:460px;display:flex;align-items:flex-end;padding:12px;color:#fff;text-decoration:none}
+.svc>img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;transition:transform 1.1s var(--ease)}
+.svc:hover>img{transform:scale(1.06)}
+.svc::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(18,18,17,.55),rgba(18,18,17,0) 60%)}
+.svc .num{position:absolute;top:14px;left:14px;padding:8px 12px;border-radius:100px;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.svc-body{width:100%;padding:20px;border-radius:18px;background:rgba(18,18,17,.32);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);display:flex;flex-direction:column;gap:8px}
+.svc-body p{font-size:14px;line-height:1.55;color:rgba(255,255,255,.75)}
+.svc-more{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--lime);margin-top:4px}
+.svc-more .ic{width:15px;height:15px}
+/* --- réalisation à la une --- */
+.story-card{background:var(--mist);border-radius:32px;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.story-img{position:relative;min-height:560px}
+.story-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:24px}
+.tag{position:absolute;top:16px;left:16px;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:100px;color:#fff;background:rgba(18,18,17,.35);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.tag .ic{width:14px;height:14px}
+.story-txt{padding:40px 24px 8px 0;display:flex;flex-direction:column;align-items:flex-start;gap:20px}
+.quote-card{width:100%;margin-top:auto;background:#fff;border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:18px}
+.quote-card .q{font-size:18px;line-height:1.55;letter-spacing:-.005em}
+.author{display:flex;align-items:center;gap:12px}
+.avatar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex:none;background:var(--ink);color:var(--lime);font:500 13px var(--mono)}
+.author>div>b{display:block;font-size:15px;font-weight:500}
+.author>div>span{display:block;font-size:13px;color:var(--muted)}
+.quote-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px}
+/* --- note --- */
+.rating-card{border:1px solid var(--line);border-radius:32px;padding:16px 16px 16px 56px;display:grid;grid-template-columns:1fr 440px;gap:48px;align-items:center}
+.rating-panel{background:var(--ink);color:#fff;border-radius:24px;padding:36px}
+.score{display:flex;align-items:baseline;gap:6px}
+.score b{font-size:68px;line-height:1;font-weight:300;letter-spacing:-.035em}
+.score>span{font-size:20px;color:rgba(255,255,255,.55)}
+.stars{display:flex;gap:4px;color:var(--lime);margin:18px 0}
+.stars .ic{width:18px;height:18px}
+.stars.ink{color:var(--ink)}
+.rating-panel hr{border:0;border-top:1px solid rgba(255,255,255,.12);margin:22px 0}
+.rating-panel p{font-size:15px;color:rgba(255,255,255,.72)}
+/* --- carte sombre (sécurité) --- */
+.dark-wrap{padding:0 12px}
+.dark-card{background:var(--ink2);color:#fff;border-radius:32px;padding:16px 16px 16px 56px;display:grid;grid-template-columns:1fr 1fr;gap:56px}
+.dark-txt{padding:48px 0;display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+.dark-txt .lead{color:rgba(255,255,255,.7)}
+.points{display:flex;flex-direction:column;gap:12px;width:100%}
+.points li{display:flex;align-items:center;gap:14px;font-size:16px}
+.points .icon-chip{width:40px;height:40px;background:rgba(255,255,255,.1);color:var(--lime)}
+.points .icon-chip .ic{width:18px;height:18px}
+.note{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;color:rgba(255,255,255,.55)}
+.note .ic{width:16px;height:16px;color:var(--lime);margin-top:1px}
+.dark-img{position:relative;min-height:600px}
+.dark-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:24px}
+.badge{position:absolute;left:16px;bottom:16px;right:16px;max-width:340px;padding:16px 18px;border-radius:18px;background:rgba(18,18,17,.45);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);font-size:14px;line-height:1.45;color:rgba(255,255,255,.88);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.badge b{display:block;color:#fff;font-weight:500;margin-bottom:2px}
+/* --- étapes --- */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:64px}
+.step-top{display:flex;align-items:center;gap:12px}
+.step-n{padding:8px 12px;border-radius:100px;background:var(--ink);color:#fff}
+.step-line{flex:1;height:1px;background:var(--line);transform-origin:left;transform:scaleX(0);transition:transform 1.2s var(--ease) calc(var(--d,0s) + .3s)}
+.r.in .step-line,.no-js .step-line{transform:scaleX(1)}
+.step h3{margin:28px 0 10px}
+/* --- témoignages --- */
+.rate-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:100px;background:var(--mist);font-size:13px}
+.rate-chip .ic{width:15px;height:15px}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+.testi{background:var(--mist);border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:22px}
+.testi .stars{margin:0}
+.testi .q{font-size:17px;line-height:1.55;letter-spacing:-.005em}
+.testi .author{margin-top:auto}
+/* --- zones --- */
+.areas-card{background:var(--mist);border-radius:32px;padding:56px;display:grid;grid-template-columns:1.2fr 1fr;gap:56px;align-items:start}
+.areas-txt{display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.area-chip{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px 10px 12px;border-radius:100px;background:#fff;font-size:14px;text-decoration:none;transition:background .2s,color .2s}
+.area-chip .ic{width:16px;height:16px}
+a.area-chip:hover{background:var(--ink);color:#fff}
+.coverage{display:flex;flex-direction:column;gap:12px}
+.cov{background:#fff;border-radius:20px;padding:22px;display:flex;gap:16px;align-items:flex-start}
+.cov .icon-chip{background:var(--mist)}
+.cov b{display:block;font-size:18px;font-weight:400;letter-spacing:-.01em;margin-bottom:4px}
+.cov p{font-size:14px;color:var(--muted);line-height:1.55}
+/* --- FAQ --- */
+.faq-grid{display:grid;grid-template-columns:400px 1fr;gap:72px;align-items:start}
+.faq-intro{position:sticky;top:120px;display:flex;flex-direction:column;align-items:flex-start;gap:20px}
 .faq-list{display:flex;flex-direction:column;gap:10px}
-.faq-q{border:1px solid rgba(15,40,90,.1);border-radius:14px;background:linear-gradient(180deg,#fff,#fafcff);transition:border-color .2s}
-.faq-q[open]{border-color:rgba(20,87,255,.32);box-shadow:0 4px 18px rgba(20,87,255,.06)}
-.faq-q summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 22px;font-weight:600;font-size:clamp(15.5px,1.6vw,17px);color:var(--ink);line-height:1.4;min-height:44px}
+.faq-q{background:var(--mist);border-radius:18px;padding:0 24px}
+.faq-q summary{list-style:none;cursor:pointer;min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:17px;letter-spacing:-.01em}
 .faq-q summary::-webkit-details-marker{display:none}
-.faq-q-icon{flex:0 0 auto;width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(20,87,255,.08);color:var(--blue);font-weight:700;font-size:18px;line-height:1;transition:transform .25s}
-.faq-q[open] .faq-q-icon{transform:rotate(45deg);background:var(--blue);color:#fff}
-.faq-a{padding:0 22px 20px;font-size:15.5px;line-height:1.65;color:var(--ink-soft)}
-@media (max-width:560px){.faq-q summary{padding:16px 18px;font-size:15px}.faq-a{padding:0 18px 18px;font-size:14.5px}}
-@media (max-width:980px){.subnav nav{display:none}.subhero .wrap,.feat .wrap{grid-template-columns:1fr}.subhero .imgcard{aspect-ratio:16/11;max-width:560px;margin:0 auto}.feat .imgcard{aspect-ratio:16/11}.feat.flip .wrap > :first-child{order:0}.feat ul{grid-template-columns:1fr}.feat .num{font-size:88px}}
-@media (max-width:560px){.subhero{padding-left:18px;padding-right:18px}.recap .actions .btn{width:100%}}
-.areas{padding:clamp(50px,8vh,90px) clamp(18px,5vw,80px);background:#fff;border-top:1px solid rgba(15,40,90,.06)}
-.areas .wrap{max-width:900px;margin:0 auto;text-align:center}
-.areas h2{font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:-.025em;line-height:1.12;margin-bottom:18px;color:var(--ink)}
-.areas p{font-size:clamp(15.5px,1.9vw,17.5px);line-height:1.75;color:var(--ink-soft);max-width:720px;margin:0 auto 12px}
-.areas p a{color:var(--blue);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1.5px;font-weight:600;transition:color .2s}
-.areas p a:hover{color:#0a3eb8;text-decoration-thickness:2px}
-.areas .pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:22px}
-.areas .pills a{font-size:14px;font-weight:600;color:var(--blue);padding:9px 16px;border-radius:999px;background:rgba(20,87,255,.08);border:1px solid rgba(20,87,255,.18);text-decoration:none;transition:.2s}
-.areas .pills a:hover{background:var(--blue);color:#fff}
-.topnav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px clamp(18px,4vw,40px);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);background:rgba(255,255,255,.78);border-bottom:1px solid rgba(15,40,90,.08);transform:translateY(-100%);transition:transform .45s cubic-bezier(.2,.7,.2,1);will-change:transform}
-.topnav.visible{transform:translateY(0)}
-.topnav .logo-dark{height:36px;width:auto;display:block}
-.topnav nav{display:flex;align-items:center;gap:4px}
-.topnav nav a{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;text-decoration:none;color:var(--ink);font-size:14px;font-weight:500;transition:.2s}
-.topnav nav a:hover{background:rgba(20,87,255,.08);color:var(--blue)}
-.topnav .ctas{display:flex;gap:10px;align-items:center}
-.topnav .ctas .tel{font-size:14px;font-weight:600;color:var(--ink);text-decoration:none;padding:0 10px;min-height:44px;display:inline-flex;align-items:center}
-.topnav .ctas .tel:hover{color:var(--blue)}
-@media (max-width:980px){.topnav nav{display:none}.topnav .burger{display:flex}.subnav .burger{display:flex}}
-@media (max-width:560px){.topnav .ctas .tel span.tel-label,.subnav .ctas .tel span.tel-label{display:none}.topnav .ctas .tel,.subnav .ctas .tel{min-width:44px;justify-content:center;padding:0 8px}
-  /* Bottom CTA bar prend déjà tel+estimer en mobile → on libère la place dans la nav */
-  .topnav .ctas .tel,.subnav .ctas .tel,.topnav .ctas .btn.solid,.subnav .ctas .btn.solid{display:none}
-  .topnav,.subnav{padding-left:14px;padding-right:14px}
-}
-.contact-hero{padding:clamp(50px,8vh,90px) clamp(18px,5vw,80px) clamp(20px,4vh,40px);text-align:center;background:radial-gradient(42% 60% at 50% 0%,rgba(20,87,255,.06),transparent 60%),var(--paper)}
-.contact-hero .wrap-c{max-width:760px;margin:0 auto}
-.contact-hero .crumb{justify-content:center;display:flex;margin-bottom:14px}
-.contact-hero h1{font-size:clamp(34px,5.2vw,58px);line-height:1.04;letter-spacing:-.035em;color:var(--ink);font-weight:600;text-shadow:none}
-.contact-hero h1 b{font-weight:800;color:var(--ink)}
-.contact-hero .lead{margin-top:16px;font-size:clamp(15px,1.8vw,17px);color:var(--ink-soft);line-height:1.55}
-.contact-methods{padding:clamp(20px,3vh,40px) clamp(18px,5vw,80px) clamp(40px,5vh,60px);background:var(--paper)}
-.contact-methods .wrap-c{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,24px)}
-.cmethod{display:flex;align-items:center;gap:18px;padding:clamp(20px,2.2vw,28px);border-radius:24px;text-decoration:none;color:var(--ink);
- background:linear-gradient(165deg,rgba(255,255,255,.66),rgba(255,255,255,.4));backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);
- border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 24px 50px -28px rgba(20,60,140,.28);
- transition:transform .3s cubic-bezier(.2,.7,.2,1),box-shadow .3s ease}
-.cmethod:hover{transform:translateY(-4px);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 36px 64px -30px rgba(20,60,140,.36)}
-.cm-icon{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-size:24px;flex:none;background:linear-gradient(160deg,rgba(20,87,255,.12),rgba(11,176,255,.12));border:1px solid rgba(20,87,255,.18);color:var(--blue)}
-.cmethod-whatsapp .cm-icon{background:linear-gradient(160deg,rgba(37,211,102,.18),rgba(37,211,102,.10));border-color:rgba(37,211,102,.30);color:#22a85a}
-.cm-label{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;margin-bottom:4px}
-.cm-value{font-size:17px;font-weight:700;color:var(--ink)}
-.ic{flex:none;display:inline-block;vertical-align:middle}
-.cm-icon .ic{width:26px;height:26px;display:block}
-.soc a .ic{width:18px;height:18px;display:block}
-.chip .ic,.tel .ic{width:14px;height:14px;display:inline-block}
-.btn .ic,.mca .ic,.md-tel-ic .ic{width:16px;height:16px;display:inline-block;flex:none}
-.contact-form-section{padding:clamp(40px,6vh,80px) clamp(18px,5vw,80px) clamp(60px,8vh,100px);background:linear-gradient(180deg,rgba(20,87,255,.025),transparent),var(--paper)}
-.contact-form-section .wrap-c{max-width:720px;margin:0 auto;text-align:center}
-.contact-form-section h2{font-size:clamp(26px,3.6vw,38px);font-weight:700;letter-spacing:-.025em;line-height:1.12;margin-bottom:12px;color:var(--ink)}
-.contact-form-section .sub{font-size:15px;color:var(--ink-soft);margin-bottom:32px}
-.cform{display:flex;flex-direction:column;gap:16px;text-align:left}
-.cfrow{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.cform label{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--ink);letter-spacing:.02em}
-.cform input,.cform textarea{font:inherit;font-size:16px;font-weight:400;padding:13px 16px;min-height:48px;border-radius:14px;border:1px solid rgba(15,40,90,.12);background:rgba(255,255,255,.85);color:var(--ink);transition:border .2s,box-shadow .2s,background .2s;outline:none}
-.cform input:focus,.cform textarea:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(20,87,255,.12);background:#fff}
-.cform textarea{resize:vertical;min-height:130px;line-height:1.5;font-family:inherit}
-.cform button{align-self:flex-start;margin-top:8px;font-size:15px}
-.cform-foot{font-size:12.5px;color:var(--ink-soft);text-align:center;margin-top:8px}
-@media (max-width:880px){.contact-methods .wrap-c{grid-template-columns:1fr;max-width:520px}}
-@media (max-width:560px){.cfrow{grid-template-columns:1fr}.cform button{align-self:stretch;width:100%}}
-.gallery-section{position:relative;padding:clamp(40px,6vh,80px) clamp(18px,5vw,80px) clamp(60px,8vh,100px);background:var(--paper)}
-.gallery-section .wrap-g{max-width:1280px;margin:0 auto;position:relative;z-index:1}
-.gradual-blur{isolation:isolate;overflow:hidden;pointer-events:none}
-.gradual-blur[data-target="page"]{opacity:0;transition:opacity .28s ease-out}
-.gradual-blur[data-target="page"].on{opacity:1}
-.gradual-blur-inner{position:relative;width:100%;height:100%;pointer-events:none}
-.gradual-blur-inner>div{position:absolute;inset:0;pointer-events:none}
-@media (max-width:760px){.gradual-blur[data-pos="bottom"],.gradual-blur[data-pos="top"]{height:7rem!important}.gradual-blur[data-target="page"]{display:none!important}}
-@media (max-width:560px){.gradual-blur[data-pos="bottom"],.gradual-blur[data-pos="top"]{height:5rem!important}}
-.gallery{column-count:3;column-gap:clamp(16px,1.8vw,24px)}
-.rcard{break-inside:avoid;margin:0 0 clamp(16px,1.8vw,24px);border-radius:22px;overflow:hidden;
- background:linear-gradient(165deg,rgba(255,255,255,.66),rgba(255,255,255,.4));backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);
- border:1px solid rgba(255,255,255,.85);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 22px 44px -24px rgba(20,60,140,.24);
- transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s ease;position:relative;display:block}
-.rcard:hover{transform:translateY(-6px);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 36px 60px -24px rgba(20,60,140,.34)}
-.rcard img{display:block;width:100%;height:auto}
-.rcard figcaption{padding:14px 18px 16px;display:flex;flex-direction:column;gap:4px}
-.rcard .rkind{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--blue)}
-.rcard .rloc{font-size:14px;color:var(--ink);font-weight:600;line-height:1.4}
-@media (max-width:880px){.gallery{column-count:2}}
-@media (max-width:560px){.gallery{column-count:1;max-width:480px;margin:0 auto}}
-
-/* ===== FALLING TEXT PANEL (matter-js physics on panel background) ===== */
-.panel.falling{height:clamp(360px,46vh,480px);min-height:360px;max-height:520px;justify-content:stretch;align-items:stretch;overflow:hidden;padding:0;position:relative;flex-shrink:0}
-.panel.falling .falling-stage{position:absolute;inset:0;pointer-events:none}
-.panel.falling .falling-text{position:absolute;inset:0;padding:clamp(32px,5vh,60px) clamp(32px,6vw,100px);font-size:clamp(20px,2.8vw,38px);font-weight:700;letter-spacing:-.02em;line-height:1.25;color:var(--ink);display:flex;align-items:flex-start;justify-content:center;flex-wrap:wrap;text-align:center;pointer-events:none;z-index:2;gap:6px 12px}
-.panel.falling .falling-text .word{display:inline-block;user-select:none;will-change:transform;pointer-events:none}
-.panel.falling .falling-text .word.hl{background:linear-gradient(110deg,var(--blue),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
-.panel.falling .falling-stage canvas{position:absolute;inset:0;z-index:1;pointer-events:auto;display:block;cursor:grab;touch-action:none}
-.panel.falling .falling-stage.grabbing canvas{cursor:grabbing}
-@media (max-width:760px){.panel.falling{height:clamp(320px,42vh,420px)}.panel.falling .falling-text{font-size:clamp(18px,4.4vw,28px);padding:24px 20px;gap:5px 10px}}
-@media (max-width:560px){.panel.falling{height:clamp(280px,38vh,360px)}.panel.falling .falling-text{font-size:clamp(16px,5vw,22px);padding:20px 14px;gap:4px 8px}}
-
-/* ===== MOBILE: scroll naturel (snap désactivé) + section physics masquée ===== */
-@media (max-width:760px){
-  .snap{height:auto;overflow:visible;scroll-snap-type:none;scroll-behavior:auto}
-  .panel{height:auto;min-height:auto;scroll-snap-align:none;scroll-snap-stop:normal;overflow:visible}
-  #hero{min-height:100svh}
-  .panel.light{padding-top:clamp(56px,9vh,90px);padding-bottom:clamp(56px,9vh,90px)}
-  .panel.falling{display:none}
-  .cta-band,footer.site,.band-reviews{scroll-snap-align:none}
-}
-
-/* ===== MOBILE DRAWER (refonte premium ARELEC) ===== */
-.mdrawer{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;gap:18px;padding:calc(18px + env(safe-area-inset-top)) 16px calc(18px + env(safe-area-inset-bottom));background:radial-gradient(60% 40% at 90% -10%,rgba(20,87,255,.24),transparent 62%),radial-gradient(50% 40% at -10% 105%,rgba(11,176,255,.18),transparent 62%),linear-gradient(160deg,#0c2750,#0a1c39 55%,#06101f);backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%);transform:translateY(-100%);transition:transform .38s cubic-bezier(.2,.7,.2,1);overflow-y:auto;will-change:transform;color:#fff}
-.mdrawer.open{transform:translateY(0)}
-.md-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none}
-.md-logo{height:32px;width:auto;filter:drop-shadow(0 2px 12px rgba(0,0,0,.5));display:block}
-.mdrawer-close{position:static;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center;padding:0 0 2px;transition:background .2s,border-color .2s}
-.mdrawer-close:hover,.mdrawer-close:focus-visible{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.32)}
-.md-tagline{font-size:11.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);display:flex;align-items:center;gap:9px;padding:0 4px}
-.md-tagline .pulse{width:7px;height:7px;border-radius:50%;background:#36e07f;box-shadow:0 0 0 3px rgba(54,224,127,.22);flex:none}
-.md-section{display:flex;flex-direction:column;gap:8px}
-.md-label{font-size:11px;font-weight:700;letter-spacing:.20em;text-transform:uppercase;color:#7fb0ff;padding:0 6px 4px;display:flex;align-items:center;gap:10px}
-.md-label::after{content:"";flex:1;height:1px;background:linear-gradient(to right,rgba(127,176,255,.35),transparent)}
-.md-trade{display:flex;align-items:center;gap:14px;padding:12px 14px 12px 12px;border-radius:18px;text-decoration:none;color:#fff;background:linear-gradient(165deg,rgba(255,255,255,.10),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 6px 14px rgba(0,0,0,.18);transition:transform .25s cubic-bezier(.2,.7,.2,1),background .25s,border-color .25s;min-height:64px}
-.md-trade:active{transform:scale(.985)}
-.md-trade:hover,.md-trade:focus-visible{background:linear-gradient(165deg,rgba(255,255,255,.16),rgba(255,255,255,.05));border-color:rgba(255,255,255,.22)}
-.md-ic{width:44px;height:44px;flex:none;border-radius:13px;display:grid;place-items:center;font-size:20px;background:linear-gradient(160deg,rgba(20,87,255,.42),rgba(11,176,255,.20));border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.30),0 4px 10px rgba(20,87,255,.18)}
-.md-trade-txt{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
-.md-trade-name{font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
-.md-trade-sub{font-size:12.5px;color:rgba(255,255,255,.6);line-height:1.3;letter-spacing:.005em}
-.md-arr{font-size:18px;color:rgba(255,255,255,.45);flex:none;transition:transform .25s,color .25s;line-height:1}
-.md-trade:hover .md-arr,.md-trade:focus-visible .md-arr{transform:translateX(4px);color:#7fb0ff}
-.md-link{display:flex;align-items:center;justify-content:space-between;min-height:48px;padding:0 16px;border-radius:14px;text-decoration:none;color:rgba(255,255,255,.88);font-size:15px;font-weight:500;letter-spacing:-.005em;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025);transition:background .2s,color .2s,border-color .2s}
-.md-link:hover,.md-link:focus-visible{background:rgba(255,255,255,.09);color:#fff;border-color:rgba(255,255,255,.14)}
-.md-link .md-arr{font-size:15px}
-.md-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:14px;border-top:1px solid rgba(255,255,255,.10)}
-.md-cta{justify-content:center;min-height:54px;font-size:16px;letter-spacing:-.01em}
-.md-tel{display:flex;align-items:center;gap:14px;padding:10px 14px;border-radius:16px;text-decoration:none;color:#fff;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);transition:background .2s,border-color .2s;min-height:60px}
-.md-tel:hover,.md-tel:focus-visible{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.20)}
-.md-tel-ic{width:42px;height:42px;flex:none;border-radius:12px;display:grid;place-items:center;background:linear-gradient(160deg,rgba(54,224,127,.24),rgba(54,224,127,.06));border:1px solid rgba(54,224,127,.32);color:#52e896}
-.md-tel-txt{display:flex;flex-direction:column;gap:1px;line-height:1.15;flex:1;min-width:0}
-.md-tel-num{font-size:16.5px;font-weight:700;letter-spacing:.005em}
-.md-tel-sub{font-size:11.5px;color:rgba(255,255,255,.55);letter-spacing:.04em;margin-top:2px}
-body.menu-open{overflow:hidden;touch-action:none}
-
-/* ===== ASSISTANT : bulle discrète + panneau de discussion ===== */
-.chat-fab{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:1200;width:58px;height:58px;padding:0;border-radius:999px;display:grid;place-items:center;cursor:pointer;color:#fff;font:inherit;overflow:hidden;background:linear-gradient(180deg,rgba(58,125,255,.9),rgba(22,84,216,.9));backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border:1px solid rgba(255,255,255,.45);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 12px 30px rgba(20,60,140,.35);transition:transform .2s,opacity .2s}
-.chat-fab::after{content:"";position:absolute;left:1px;right:1px;top:1px;height:50%;border-radius:999px 999px 40% 40%;background:linear-gradient(180deg,rgba(255,255,255,.32),transparent);pointer-events:none}
+.toggle{width:34px;height:34px;border-radius:100px;background:#fff;display:grid;place-items:center;flex:none;transition:transform .35s var(--ease),background .3s}
+.toggle .ic{width:16px;height:16px}
+.faq-q[open] .toggle{transform:rotate(45deg);background:var(--lime)}
+.faq-a{padding:0 48px 24px 0;font-size:15px;line-height:1.65;color:var(--muted)}
+.faq-q[open] .faq-a{animation:fadeUp .45s var(--ease)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* --- CTA image --- */
+.cta{padding:0 12px}
+.cta-card{position:relative;isolation:isolate;overflow:hidden;border-radius:32px;min-height:560px;display:grid;place-items:center;text-align:center;color:#fff;padding:96px 24px}
+.cta-card>img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover}
+.cta-card::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(70% 80% at 50% 50%,rgba(18,18,17,.55),rgba(18,18,17,.78))}
+.cta-in{max-width:760px;display:flex;flex-direction:column;align-items:center;gap:24px}
+.cta-in .mark{height:58px;width:auto;margin-bottom:8px}
+.cta-in .lead{color:rgba(255,255,255,.78);max-width:560px}
+/* --- footer (carte crème, logo-texte pixel) --- */
+.footer{padding:120px 12px 12px}
+.footer-card{background:var(--mist);color:var(--ink);border-radius:32px;padding:72px 56px 28px;overflow:hidden}
+.f-top{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;gap:40px}
+.f-brand{display:flex;flex-direction:column;gap:18px;align-items:flex-start;max-width:400px}
+.f-brand img{height:40px;width:auto}
+.f-brand .tagline{font-size:22px;line-height:1.3;font-weight:400;letter-spacing:-.015em}
+.f-contact{display:flex;flex-direction:column;gap:12px;font-size:14px;margin-top:4px}
+.f-contact a,.f-contact>span{display:inline-flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none}
+.f-contact a:hover{text-decoration:underline;text-underline-offset:3px}
+.f-ic{width:32px;height:32px;border-radius:100px;background:#fff;display:grid;place-items:center;flex:none}
+.f-ic .ic{width:15px;height:15px}
+.f-col h4{margin:6px 0 18px;color:var(--muted)}
+.f-col li{margin:0 0 12px}
+.f-col a,.f-col span{font-size:14px;color:var(--ink);text-decoration:none}
+.f-col a:hover{color:var(--muted)}
+.f-seo{display:grid;grid-template-columns:repeat(3,1fr);gap:24px 40px;margin-top:56px;padding-top:32px;border-top:1px solid var(--line)}
+.f-seo h4{margin:0 0 10px;color:var(--muted)}
+.f-seo ul{display:flex;flex-wrap:wrap;gap:4px 0}
+.f-seo li{font-size:13px;color:var(--muted)}
+.f-seo li:not(:last-child)::after{content:"·";margin:0 8px;color:#b9b6ad}
+.f-seo a{color:var(--muted);text-decoration:none}
+.f-seo a:hover{color:var(--ink)}
+.f-mark{margin:64px 0 32px;font-family:'Doto',var(--mono);font-weight:900;font-size:clamp(64px,17.5vw,268px);line-height:.8;letter-spacing:.02em;color:var(--line);text-align:center;white-space:nowrap;user-select:none}
+.f-legal{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
+.f-legal nav{display:flex;gap:20px}
+.f-legal a{color:var(--muted);text-decoration:none}
+.f-legal a:hover{color:var(--ink)}
+.f-social{display:flex;gap:8px;justify-content:flex-end}
+.f-social a{width:36px;height:36px;border-radius:100px;background:#fff;display:grid;place-items:center;color:var(--ink)}
+.f-social a:hover{background:var(--ink);color:var(--lime)}
+.f-social .ic{width:16px;height:16px}
+/* --- hero des pages intérieures --- */
+.phero{padding:12px 12px 0}
+.phero-card{background:var(--mist);border-radius:32px;padding:150px 56px 56px;display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center}
+.phero-card.solo{grid-template-columns:1fr;padding-bottom:72px}
+.phero-txt{display:flex;flex-direction:column;align-items:flex-start;gap:22px}
+.phero-card.solo .phero-txt{max-width:820px}
+.crumb{font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--muted)}
+.crumb a{color:var(--muted);text-decoration:none}
+.crumb a:hover{color:var(--ink)}
+.phero-img{position:relative}
+.phero-img img{width:100%;aspect-ratio:4/3.6;object-fit:cover;border-radius:24px}
+.float{position:absolute;left:16px;bottom:16px;padding:12px 16px;border-radius:16px;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px}
+.float .stars{margin:0;color:var(--ink)}
+.float .stars .ic{width:14px;height:14px}
+/* --- bandeau de confiance --- */
+.trust{padding:28px 0;border-bottom:1px solid var(--line)}
+.trust .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px 32px}
+.trust span{display:inline-flex;align-items:center;gap:10px;font-size:15px}
+.trust .ic{width:20px;height:20px;padding:4px;border-radius:50%;background:var(--ink);color:var(--lime)}
+/* --- sections métier (alternées) --- */
+.feat-rows{display:flex;flex-direction:column;gap:16px}
+.feat-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:stretch}
+.feat-row.flip .feat-img{order:2}
+.feat-img{position:relative;min-height:480px}
+.feat-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:24px}
+.feat-txt{background:var(--mist);border-radius:24px;padding:48px;display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+.feat-txt .kicker{display:flex;align-items:center;gap:12px;color:var(--muted)}
+.feat-txt p{font-size:16px;line-height:1.65;color:var(--muted)}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;margin-top:6px;width:100%}
+.checks li{display:flex;align-items:flex-start;gap:10px;font-size:15px;line-height:1.4}
+.checks .ic{width:18px;height:18px;padding:3px;border-radius:50%;background:var(--ink);color:var(--lime);margin-top:1px}
+/* --- cartes génériques --- */
+.cards-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:56px}
+.cards-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+.cards-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:56px}
+.img-card{position:relative;isolation:isolate;overflow:hidden;border-radius:24px;min-height:520px;display:flex;align-items:flex-end;padding:12px;color:#fff}
+.img-card>img{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover}
+.img-card::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(18,18,17,.6),rgba(18,18,17,0) 55%)}
+.img-card .svc-body{gap:12px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.two-col>img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:24px}
+.steps-v{display:flex;flex-direction:column;gap:12px;margin-top:8px;width:100%}
+.steps-v li{display:flex;gap:16px;align-items:flex-start;padding:20px;border-radius:18px;background:var(--mist)}
+.steps-v .step-n{flex:none}
+.steps-v b{display:block;font-size:17px;font-weight:400;margin-bottom:4px}
+.steps-v p{font-size:14px;color:var(--muted);line-height:1.55}
+.team-card{background:var(--mist);border-radius:24px;padding:12px 12px 24px;display:flex;flex-direction:column;gap:16px}
+.ph{aspect-ratio:4/4.4;border-radius:18px;background:repeating-linear-gradient(135deg,#e9e7e1 0 12px,#e4e2dc 12px 24px);display:grid;place-items:center;color:var(--muted);text-align:center;padding:16px}
+.team-card .who{padding:0 12px}
+.team-card .who b{display:block;font-size:20px;font-weight:400;letter-spacing:-.015em}
+.team-card .who span{font-size:14px;color:var(--muted)}
+/* --- blog --- */
+.post-feat{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;background:var(--mist);border-radius:32px;padding:16px}
+.post-feat .img{position:relative;min-height:460px}
+.post-feat .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:24px}
+.post-feat .txt{padding:40px 32px;display:flex;flex-direction:column;align-items:flex-start;gap:18px;justify-content:center}
+.posts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px}
+.post{display:flex;flex-direction:column;gap:16px}
+.post .img{position:relative}
+.post .img img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:20px}
+.post .meta{display:flex;gap:10px;align-items:center;color:var(--muted)}
+.post h3{font-size:20px}
+.pill{display:inline-flex;align-items:center;padding:6px 10px;border-radius:100px;background:var(--mist);color:var(--ink)}
+.pill.lime{background:var(--lime)}
+/* --- contact --- */
+.contact-grid{display:grid;grid-template-columns:1fr 1.15fr;gap:16px;align-items:start}
+.panel{border-radius:24px;padding:40px;display:flex;flex-direction:column;gap:20px}
+.panel.mist{background:var(--mist)}
+.panel.ink{background:var(--ink);color:#fff}
+.method{display:flex;align-items:center;gap:16px;padding:16px;border-radius:18px;background:#fff;text-decoration:none;color:var(--ink);transition:transform .3s var(--ease);border:0;font:inherit;text-align:left;cursor:pointer;width:100%}
+.method:hover{transform:translateX(4px)}
+.method .icon-chip{background:var(--mist)}
+.method.wa .icon-chip{background:#25D366;color:#fff}
+.method.ai .icon-chip{background:var(--ink);color:var(--lime)}
+.method>div>b{display:block;font-size:16px;font-weight:500}
+.method>div>span{font-size:14px;color:var(--muted)}
+.method .go{margin-left:auto;color:var(--muted)}
+.cform{display:flex;flex-direction:column;gap:14px}
+.cform .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cform label{display:flex;flex-direction:column;gap:8px;font-size:13px;color:rgba(255,255,255,.7)}
+.cform input,.cform textarea,.cform select{font:inherit;font-size:16px;color:#fff;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:13px 14px;min-height:48px}
+.cform select option{color:var(--ink)}
+.cform input:focus,.cform textarea:focus,.cform select:focus{outline:none;border-color:var(--lime)}
+.cform .btn{align-self:flex-start;margin-top:6px}
+.cform-foot{font-size:12px;color:rgba(255,255,255,.5)}
+/* --- galerie --- */
+.gallery{columns:3;column-gap:16px}
+.gcard{position:relative;break-inside:avoid;margin:0 0 16px;border-radius:20px;overflow:hidden}
+.gcard img{width:100%;height:auto;transition:transform 1s var(--ease)}
+.gcard:hover img{transform:scale(1.04)}
+.gcard figcaption{position:absolute;left:10px;right:10px;bottom:10px;padding:12px 14px;border-radius:14px;color:#fff;background:rgba(18,18,17,.4);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.gcard figcaption .mono{color:var(--lime);font-size:11px}
+.gcard figcaption span{display:block;font-size:14px;margin-top:3px}
+/* --- texte long --- */
+.prose{max-width:760px;font-size:16px;line-height:1.75;color:var(--muted)}
+.prose h2{font-size:24px;font-weight:400;letter-spacing:-.02em;color:var(--ink);margin:40px 0 12px}
+.prose p{margin:0 0 14px}
+/* --- assistant : bulle discrète + panneau --- */
+.chat-fab{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:1200;width:58px;height:58px;padding:0;border-radius:999px;display:grid;place-items:center;cursor:pointer;color:var(--lime);font:inherit;background:var(--ink);border:0;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 14px 34px rgba(18,18,17,.35);transition:transform .3s var(--ease),opacity .2s}
 .chat-fab:hover{transform:translateY(-2px)}
-.chat-fab:focus-visible,.chat button:focus-visible,.chat a:focus-visible,.chat textarea:focus-visible{outline:3px solid #0BB0FF;outline-offset:2px}
-.chat-fab .ic{width:25px;height:25px}
-.chat-fab .live{position:absolute;top:6px;right:7px;width:11px;height:11px;border-radius:50%;background:#36E07F;border:2px solid #fff;z-index:1}
+.chat-fab:focus-visible,.chat button:focus-visible,.chat a:focus-visible,.chat textarea:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.chat-fab .ic{width:24px;height:24px}
+.chat-fab .live{position:absolute;top:6px;right:7px;width:11px;height:11px;border-radius:50%;background:var(--lime);border:2px solid var(--ink)}
 body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;transform:scale(.8)}
-.chat{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:1201;width:min(390px,calc(100vw - 36px));height:min(600px,calc(100vh - 36px));height:min(600px,calc(100dvh - 36px));display:flex;flex-direction:column;border-radius:24px;overflow:hidden;color:#11233F;background:linear-gradient(165deg,rgba(255,255,255,.96),rgba(255,255,255,.88));backdrop-filter:blur(26px) saturate(180%);-webkit-backdrop-filter:blur(26px) saturate(180%);border:1px solid rgba(255,255,255,.95);box-shadow:0 24px 60px rgba(10,30,70,.32);transform-origin:bottom right;animation:chatIn .22s cubic-bezier(.2,.7,.2,1)}
+.chat{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:1201;width:min(390px,calc(100vw - 36px));height:min(600px,calc(100vh - 36px));height:min(600px,calc(100dvh - 36px));display:flex;flex-direction:column;border-radius:24px;overflow:hidden;color:var(--ink);background:#fff;box-shadow:0 0 0 1px rgba(18,18,17,.06),0 30px 70px rgba(18,18,17,.28);transform-origin:bottom right;animation:chatIn .25s var(--ease)}
 .chat[hidden]{display:none}
 @keyframes chatIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-.chat-head{display:flex;align-items:center;gap:12px;padding:14px 14px 14px 18px;color:#fff;background:radial-gradient(80% 120% at 100% 0,rgba(11,176,255,.35),transparent 60%),linear-gradient(160deg,#0c2750,#0a1c39 60%,#06101f)}
-.chat-id{flex:1;min-width:0;line-height:1.2}
-.chat-id b{display:block;font-size:15.5px;font-weight:700;letter-spacing:-.01em}
-.chat-id span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.7)}
-.chat-id span::before{content:"";width:7px;height:7px;border-radius:50%;background:#36E07F}
-.chat-hbtn{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;color:#fff;text-decoration:none;cursor:pointer;padding:0;font:inherit;font-size:24px;line-height:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22)}
+.chat-head{display:flex;align-items:center;gap:10px;padding:14px 14px 14px 18px;color:#fff;background:var(--ink)}
+.chat-id{flex:1;min-width:0;line-height:1.25}
+.chat-id b{display:block;font-size:15px;font-weight:500}
+.chat-id span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.6)}
+.chat-id span::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime)}
+.chat-hbtn{width:44px;height:44px;flex:none;border-radius:100px;display:grid;place-items:center;color:#fff;text-decoration:none;cursor:pointer;padding:0;font:inherit;font-size:24px;line-height:1;background:rgba(255,255,255,.1);border:0}
 .chat-hbtn:hover{background:rgba(255,255,255,.18)}
 .chat-hbtn .ic{width:18px;height:18px}
 .chat-msgs{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:16px;display:flex;flex-direction:column;gap:10px}
 .chat-msg{max-width:86%;padding:10px 14px;border-radius:18px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
-.chat-msg.bot{align-self:flex-start;background:#eef3fc;border:1px solid rgba(20,87,255,.10);border-bottom-left-radius:6px}
-.chat-msg.me{align-self:flex-end;color:#fff;background:linear-gradient(180deg,#3a7dff,#1654d8);border-bottom-right-radius:6px}
-.chat-typing{align-self:flex-start;display:flex;gap:4px;padding:14px 16px;border-radius:18px;background:#eef3fc}
-.chat-typing i{width:7px;height:7px;border-radius:50%;background:#7d95c4;animation:chatDot 1s infinite ease-in-out}
+.chat-msg.bot{align-self:flex-start;background:var(--mist);border-bottom-left-radius:6px}
+.chat-msg.me{align-self:flex-end;color:#fff;background:var(--ink);border-bottom-right-radius:6px}
+.chat-typing{align-self:flex-start;display:flex;gap:4px;padding:14px 16px;border-radius:18px;background:var(--mist)}
+.chat-typing i{width:7px;height:7px;border-radius:50%;background:#a5a29a;animation:chatDot 1s infinite ease-in-out}
 .chat-typing i:nth-child(2){animation-delay:.15s}.chat-typing i:nth-child(3){animation-delay:.3s}
 @keyframes chatDot{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
-.chat-wa{align-self:stretch;display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;border-radius:16px;text-decoration:none;color:#fff;background:linear-gradient(180deg,#2bd46b,#1fa952);border:1px solid rgba(255,255,255,.4);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 10px 22px rgba(31,169,82,.28)}
+.chat-wa{align-self:stretch;display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;border-radius:16px;text-decoration:none;color:#fff;background:#1fa952}
 .chat-wa .ic{width:24px;height:24px;flex:none}
-.chat-wa b{display:block;font-size:15px}
+.chat-wa b{display:block;font-size:15px;font-weight:500}
 .chat-wa small{display:block;font-size:12px;opacity:.9;line-height:1.3}
 .chat-sugg{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 10px}
 .chat-sugg[hidden]{display:none}
-.chat-sugg button{min-height:44px;padding:8px 14px;border-radius:999px;cursor:pointer;font:inherit;font-size:13.5px;font-weight:600;color:#0c2a5e;background:rgba(20,87,255,.07);border:1px solid rgba(20,87,255,.2)}
-.chat-sugg button:hover{background:rgba(20,87,255,.13)}
-.chat-form{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;border-top:1px solid rgba(15,40,90,.08);background:rgba(255,255,255,.7)}
-.chat-form textarea{flex:1;resize:none;min-height:44px;max-height:120px;padding:11px 14px;border-radius:16px;font:inherit;font-size:16px;line-height:1.35;color:#11233F;background:#fff;border:1px solid rgba(15,40,90,.16)}
-.chat-send{width:44px;height:44px;flex:none;border-radius:999px;display:grid;place-items:center;cursor:pointer;padding:0;color:#fff;background:linear-gradient(180deg,#3a7dff,#1654d8);border:1px solid rgba(255,255,255,.3);box-shadow:0 6px 14px rgba(20,87,255,.3)}
+.chat-sugg button{min-height:44px;padding:8px 14px;border-radius:100px;cursor:pointer;font:inherit;font-size:13.5px;color:var(--ink);background:#fff;border:1px solid var(--line)}
+.chat-sugg button:hover{background:var(--mist)}
+.chat-form{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.chat-form textarea{flex:1;resize:none;min-height:44px;max-height:120px;padding:11px 14px;border-radius:16px;font:inherit;font-size:16px;line-height:1.35;color:var(--ink);background:var(--mist);border:1px solid transparent}
+.chat-form textarea:focus{outline:none;border-color:var(--ink)}
+.chat-send{width:44px;height:44px;flex:none;border-radius:100px;display:grid;place-items:center;cursor:pointer;padding:0;color:var(--lime);background:var(--ink);border:0}
 .chat-send:disabled{opacity:.5;cursor:default}
 .chat-send .ic{width:18px;height:18px}
-.chat-note{margin:0;padding:0 14px 10px;font-size:11px;color:#6b7b96;text-align:center;background:rgba(255,255,255,.7)}
+.chat-note{margin:0;padding:0 14px 10px;font-size:11px;color:var(--muted);text-align:center}
 .chat-note a{color:inherit}
+/* --- responsive --- */
+@media (max-width:1100px){
+  .svc-grid,.cards-3,.testi-grid,.posts{grid-template-columns:repeat(2,1fr)}
+  .steps,.cards-4{grid-template-columns:repeat(2,1fr);row-gap:40px}
+  .f-top{grid-template-columns:1fr 1fr 1fr}
+  .f-brand{grid-column:1/-1}
+  .rating-card{grid-template-columns:1fr 380px;padding-left:40px}
+}
+@media (max-width:960px){
+  .nav-links,.nav-tel{display:none}
+  .burger{display:grid}
+  .nav-cta{padding-right:16px}
+  .sec{padding:88px 0}
+  .hero-card{padding:140px 28px 28px}
+  .hero-grid{flex-direction:column;align-items:flex-start}
+  .avail{width:100%;max-width:420px;display:flex;gap:14px;align-items:center;padding:10px}
+  .avail img{width:110px;height:84px;flex:none}
+  .avail .status{margin:0 0 4px}
+  .avail p{margin:0}
+  .split-head,.why-body,.story-card,.rating-card,.dark-card,.areas-card,.faq-grid,.phero-card,.feat-row,.two-col,.contact-grid,.post-feat{grid-template-columns:1fr}
+  .split-head .side{justify-self:start}
+  .faq-intro{position:static}
+  .faq-grid{gap:40px}
+  .story-img,.dark-img{min-height:380px}
+  .story-txt{padding:16px 8px 8px}
+  .rating-card{padding:16px}
+  .rating-card>div:first-child{padding:24px 16px 8px}
+  .dark-card{padding:16px;gap:16px}
+  .dark-txt{padding:24px 8px 8px}
+  .dark-img{order:-1}
+  .feat-row.flip .feat-img{order:0}
+  .feat-img{min-height:340px}
+  .phero-card{padding:120px 28px 28px;gap:32px}
+  .logos .wrap{flex-direction:column;align-items:flex-start;gap:20px}
+  .logos-intro{width:auto}
+  .ticker{width:100%}
+  .gallery{columns:2}
+}
 @media (max-width:560px){
+  .wrap{padding:0 16px}
+  .sec{padding:72px 0}
+  .hero,.phero,.why,.dark-wrap,.cta{padding-left:8px;padding-right:8px}
+  .hero{padding-top:8px}
+  .nav{top:8px;padding:0 8px}
+  .nav-in{height:60px;padding:0 6px 0 14px;border-radius:18px}
+  .brand img{height:30px}
+  .nav-cta{display:none}
+  .hero-card{border-radius:24px;min-height:max(640px,calc(100svh - 16px));padding:112px 18px 18px}
+  .hero-content .actions{width:100%}
+  .hero-content .actions .btn{flex:1 1 auto}
+  .avail img{width:84px;height:72px}
+  .stats-grid{grid-template-columns:1fr 1fr;row-gap:32px;margin-top:44px}
+  .stat-n{font-size:44px}
+  .why-card{padding:8px;border-radius:24px}
+  .why-inner{padding:32px 18px 18px;border-radius:20px}
+  .why-body>img{min-height:260px}
+  .feat-grid,.svc-grid,.cards-3,.cards-2,.cards-4,.testi-grid,.steps,.posts,.checks,.cform .row{grid-template-columns:1fr}
+  .svc{min-height:400px}
+  .story-card,.areas-card{border-radius:24px}
+  .areas-card{padding:28px 18px}
+  .feat-txt{padding:28px 20px}
+  .phero-card{border-radius:24px;padding:104px 18px 18px}
+  .cta-card{border-radius:24px;min-height:480px;padding:72px 18px}
+  .footer{padding:72px 8px 8px}
+  .footer-card{border-radius:24px;padding:48px 20px 24px}
+  .f-mark{margin:48px 0 24px}
+  .f-top{grid-template-columns:1fr 1fr}
+  .f-seo{grid-template-columns:1fr}
+  .f-legal{grid-template-columns:1fr;justify-items:start}
+  .f-social{justify-content:flex-start}
+  .panel{padding:24px 18px}
+  .gallery{columns:1}
   .chat-fab{width:52px;height:52px;right:calc(14px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom))}
   .chat-fab .ic{width:22px;height:22px}
   .chat{left:8px;right:8px;width:auto;bottom:calc(8px + env(safe-area-inset-bottom));height:min(640px,calc(100vh - 70px));height:min(640px,calc(100dvh - 70px));border-radius:22px}
 }
-@media (prefers-reduced-motion:reduce){.chat,.chat-typing i{animation:none}.chat-fab{transition:none}}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .r{opacity:1;transform:none;filter:none;transition:none}
+  .hero-bg{animation:none;transform:none}
+  .ticker-track,.pulse,.chat,.chat-typing i{animation:none}
+  .step-line{transform:none;transition:none}
+  .btn,.svc>img,.gcard img,.method{transition:none}
+}
 """
 (CSS/"styles.css").write_text(CSS_TXT)
 
-# ---------- composants HOME ----------
-NAV_LINKS=[("/electricite","Électricité"),("/chauffage","Chauffage"),("/plomberie","Plomberie"),
-           ("/realisations","Réalisations"),("/entreprise","L'entreprise"),("/contact","Contact")]
-def nav_home(active):
+# ---------- icônes ----------
+_IC = {
+ "arrow":'<path d="M7 17 17 7M8 7h9v9"/>',
+ "right":'<path d="M5 12h14M13 6l6 6-6 6"/>',
+ "check":'<path d="M20 6 9 17l-5-5"/>',
+ "plus":'<path d="M12 5v14M5 12h14"/>',
+ "pin":'<path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ "bolt":'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+ "flame":'<path d="M12 22c4 0 7-3 7-7 0-5-4-7-5-12-2 3-3 5-3 7-1-1-2-2-2-4-2 2-4 5-4 9 0 4 3 7 7 7z"/>',
+ "drop":'<path d="M12 2.7s-6 6.3-6 11.3a6 6 0 0 0 12 0c0-5-6-11.3-6-11.3z"/>',
+ "shield":'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
+ "user":'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+ "users":'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18.5 14.8c2 .7 3 2.4 3 5.2"/>',
+ "clock":'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+ "cal":'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ "home":'<path d="M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ "alert":'<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',
+ "spark":'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+ "broom":'<path d="M14 4 8.5 13.5M5 14h8l1 7H4z"/><path d="M8 17v4M11 17v4"/>',
+ "chat":'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 12 3a8.5 8.5 0 0 1 9 8.5z"/>',
+ "doc":'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+ "eye":'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ "tool":'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+ "logo":'<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M8 15l4-8 4 8M9.5 12.5h5"/>',
+}
+def ic(name, extra=""):
+    fill = ' fill="currentColor" stroke="none"' if name == "star" else ' fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"'
+    path = '<path d="m12 2.5 2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"/>' if name == "star" else _IC[name]
+    return f'<svg class="ic{(" "+extra) if extra else ""}" viewBox="0 0 24 24"{fill} aria-hidden="true">{path}</svg>'
+STARS = '<div class="stars" aria-label="5 étoiles sur 5">' + ic("star")*5 + '</div>'
+def tbd(s):
+    # Information inconnue : laissée visible, entre astérisques, à compléter avec ARélec
+    return f'<span class="tbd" title="Information à compléter">*{s}*</span>'
+def label(t, cls=""): return f'<span class="label{(" "+cls) if cls else ""}">{t}</span>'
+def btn(t, href, kind="dark", icon="arrow", attrs=""):
+    return f'<a class="btn btn-{kind}" href="{href}"{attrs}><span class="chip">{ic(icon)}</span>{t}</a>'
+def btn_contact(kind="dark", t="Prendre contact"): return btn(t, "/contact", kind, "arrow", " data-chat")
+def btn_call(kind="light"): return btn(PHONE_DISP, f"tel:{PHONE_TEL}", kind, "bolt", ' aria-label="Appeler le '+PHONE_DISP+'"').replace('class="btn ', 'class="btn no-rot ')
+def R(d=0, cls=""):
+    # élément révélé au scroll (fondu + flou), d = délai en secondes
+    return f' class="r{(" "+cls) if cls else ""}"' + (f' style="--d:{d}s"' if d else "")
+
+YEARS = datetime.date.today().year - 2010
+
+# ---------- navigation ----------
+NAV_LINKS=[("/","Accueil"),("/services","Services"),("/entreprise","À propos"),
+           ("/realisations","Réalisations"),("/blog","Blog"),("/contact","Contact")]
+def nav(active):
     links="".join(f'<a href="{u}"{" aria-current=\"page\"" if u==active else ""}>{t}</a>' for u,t in NAV_LINKS)
-    return ('<nav class="nav reveal d1"><a href="/"><img class="brand-img" alt="ARELEC" src="/assets/img/logo.png"></a>'
-            f'<div class="navlinks">{links}</div>'
-            '<a href="/contact" class="btn" data-chat>Prendre contact</a>'
-            '<button class="burger" type="button" aria-expanded="false" aria-controls="mdrawer" aria-label="Ouvrir le menu"><span></span></button></nav>')
+    return ('<header class="nav"><div class="nav-in">'
+            '<a class="brand" href="/" aria-label="ARélec, accueil"><img src="/assets/img/logo-dark.png" alt="ARélec" width="120" height="34"></a>'
+            f'<nav class="nav-links" aria-label="Navigation principale">{links}</nav>'
+            '<div class="nav-right">'
+            f'<a class="nav-tel" href="tel:{PHONE_TEL}">{ic("bolt")}{PHONE_DISP}</a>'
+            + btn("Prendre contact","/contact","dark","arrow"," data-chat").replace('class="btn ','class="btn nav-cta ') +
+            '<button class="burger" type="button" aria-expanded="false" aria-controls="drawer" aria-label="Ouvrir le menu"><span></span></button>'
+            '</div></div></header>')
 
 def mobile_drawer():
-    trades=[
-        ("/electricite","⚡","Électricité","Tableau, rénovation, éclairage LED"),
-        ("/chauffage","🌡️","Chauffage","Installation, remplacement, entretien"),
-        ("/plomberie","💧","Plomberie","Sanitaire, salle de bain, fuites"),
-    ]
-    trade_html="".join(
-        f'<a class="md-trade" href="{u}"><span class="md-ic" aria-hidden="true">{ic}</span>'
-        f'<span class="md-trade-txt"><span class="md-trade-name">{n}</span>'
-        f'<span class="md-trade-sub">{s}</span></span>'
-        f'<span class="md-arr" aria-hidden="true">→</span></a>'
-        for u,ic,n,s in trades
-    )
-    sec_links=[("/realisations","Réalisations"),("/entreprise","L'entreprise"),("/contact","Contact")]
-    link_html="".join(
-        f'<a class="md-link" href="{u}">{t}<span class="md-arr" aria-hidden="true">→</span></a>'
-        for u,t in sec_links
-    )
-    return ('<div class="mdrawer" id="mdrawer" hidden aria-label="Menu mobile">'
-            '<div class="md-head">'
-            '<img class="md-logo" src="/assets/img/logo.png" alt="ARELEC">'
-            '<button class="mdrawer-close" type="button" aria-label="Fermer le menu">×</button>'
-            '</div>'
-            '<div class="md-tagline"><span class="pulse" aria-hidden="true"></span>Plouzané · Bassin brestois · Devis gratuit</div>'
-            f'<div class="md-section"><div class="md-label">Nos métiers</div>{trade_html}</div>'
-            f'<div class="md-section"><div class="md-label">L\'entreprise</div>{link_html}</div>'
-            '<div class="md-foot">'
-            '<a class="btn solid md-cta" href="/contact" data-chat>Prendre contact →</a>'
-            f'<a class="md-tel" href="tel:{PHONE_TEL}" aria-label="Appeler {PHONE_DISP}">'
-            f'<span class="md-tel-ic" aria-hidden="true">{SVG_PHONE}</span>'
-            f'<span class="md-tel-txt"><span class="md-tel-num">{PHONE_DISP}</span>'
-            '<span class="md-tel-sub">Lun–Ven · 8h–18h</span></span></a>'
+    links="".join(f'<a href="{u}">{t}{ic("arrow")}</a>' for u,t in NAV_LINKS)
+    return ('<div class="drawer" id="drawer" hidden role="dialog" aria-label="Menu">'
+            '<div class="drawer-head"><img src="/assets/img/logo.png" alt="ARélec" width="120" height="34">'
+            '<button class="drawer-close" type="button" aria-label="Fermer le menu">×</button></div>'
+            f'<nav aria-label="Menu mobile">{links}</nav>'
+            '<div class="drawer-foot">'
+            + btn("Prendre contact","/contact","lime","arrow"," data-chat") +
+            f'<a class="drawer-tel" href="tel:{PHONE_TEL}">{ic("bolt")} {PHONE_DISP} · Lun–Ven 8h–18h</a>'
+            f'<a class="drawer-tel" href="https://wa.me/{WHATSAPP_INT}" target="_blank" rel="noopener">{SVG_WA} WhatsApp · {PHONE_MOBILE_DISP}</a>'
             '</div></div>')
 
+# ---------- sections de l'accueil ----------
+def hero_home():
+    return ('<section class="hero"><div class="hero-card">'
+            '<img class="hero-bg" src="/assets/img/hero.jpg" alt="Maison rénovée à l\'heure bleue, chantier ARélec" fetchpriority="high">'
+            '<div class="hero-grid"><div class="hero-content">'
+            f'<span{R(.05)}>{label("Électricité · Chauffage · Plomberie — depuis 2010","dark")}</span>'
+            f'<h1{R(.12,"h1")}>Une maison bien câblée,<br>bien chauffée.</h1>'
+            f'<p{R(.2,"lead")}>À Plouzané et dans tout le bassin brestois, on s\'occupe de l\'électricité, du chauffage et de la plomberie, en neuf comme en rénovation. Un seul artisan, du devis à la mise en route.</p>'
+            f'<div{R(.28,"actions")}>{btn_contact("dark")}{btn("Nos services","/services","glass","right")}</div>'
+            f'<div{R(.36,"trust-line")}><span>{ic("check")}Artisan depuis 2010</span><span>{ic("check")}Devis gratuit, sur place</span><span>{ic("check")}Un seul interlocuteur</span></div>'
+            '</div>'
+            f'<aside{R(.45,"avail")}><img src="/assets/img/escalier-led.jpg" alt="Escalier à LED intégrées, réalisation ARélec" loading="lazy">'
+            '<div><div class="status"><span class="pulse" aria-hidden="true"></span>On vous répond</div>'
+            f'<p>Dépannage, rénovation, salle de bain. Appelez le <a href="tel:{PHONE_TEL}">{PHONE_DISP}</a> ou écrivez-nous.</p></div></aside>'
+            '</div></div></section>')
+
+def logos_band():
+    items="".join(f'<span class="ticker-item">{ic("logo")}{tbd("Partenaire "+str(i))}</span>' for i in range(1,7))
+    return ('<section class="logos"><div class="wrap">'
+            f'<div{R(0,"logos-intro")}><span class="mono">Ils nous font confiance</span>'
+            '<span class="small">Fournisseurs, partenaires et clients pros du bassin brestois.</span></div>'
+            f'<div class="ticker" aria-label="Logos partenaires (à compléter)"><div class="ticker-track">{items}{items}</div></div>'
+            '</div></section>')
+
+def stats_section(title='Un savoir-faire qui se voit.<br><b>Un travail qui dure.</b>',
+                  side="Chaque chantier est mené avec soin, des explications claires et le souci de laisser une installation sûre et propre."):
+    stats=[(tbd("1 200+"),"Chantiers réalisés",None),
+           (f"{YEARS} ans","D'expérience, depuis 2010",(YEARS," ans")),
+           ("3","Métiers, une seule équipe",(3,"")),
+           (str(len(ALL_COMMUNES)),"Communes du bassin brestois",(len(ALL_COMMUNES),""))]
+    cells=""
+    for i,(n,l,c) in enumerate(stats):
+        cnt=f' data-count="{c[0]}" data-suffix="{c[1]}"' if c else ""
+        cells+=f'<div{R(.08*i,"stat")}><div class="stat-n"{cnt}>{n}</div><div class="stat-l">{l}</div></div>'
+    return ('<section class="sec"><div class="wrap">'
+            f'<div class="split-head"><div class="head"><span{R()}>{label("Notre parcours")}</span><h2{R(.08,"h2")}>{title}</h2></div>'
+            f'<div class="side"><p{R(.16,"lead")}>{side}</p></div></div>'
+            f'<div class="stats-grid">{cells}</div></div></section>')
+
+WHY=[("users","Un seul interlocuteur","Élec, chauffage et plomberie par la même équipe : pas de coordination à gérer entre artisans."),
+     ("doc","Un devis clair, gratuit","On se déplace, on regarde, on explique. Le devis détaillé arrive avant le moindre travaux."),
+     ("broom","Un chantier propre","On protège, on range en partant. Pas de tranchée ouverte le week-end."),
+     ("shield","Des conseils honnêtes","On dit ce qui est utile chez vous, et ce qui ne l'est pas. Même si ça réduit le devis.")]
+def why_section():
+    cards="".join(f'<div{R(.08*i,"mist-card")}><span class="icon-chip">{ic(icn)}</span><div class="txt"><h3 class="h3">{t}</h3><p class="small">{p}</p></div></div>'
+                  for i,(icn,t,p) in enumerate(WHY))
+    return ('<section class="why"><div class="why-card"><img src="/assets/img/sdb-marbre.jpg" alt="" loading="lazy">'
+            '<div class="why-inner">'
+            f'<div class="head center"><span{R()}>{label("La différence ARélec")}</span>'
+            f'<h2{R(.08,"h2")}>Un travail d\'artisan,<br><b>sans mauvaise surprise.</b></h2>'
+            f'<p{R(.16,"lead")}>Des travaux qui se passent simplement, du premier appel à la mise en route : on explique les options, on respecte votre maison, on s\'engage sur un résultat durable.</p></div>'
+            f'<div class="why-body"><img{R(.1)} src="/assets/img/chantier-plouider.jpg" alt="Chantier de rénovation ARélec à Plouider" loading="lazy"><div class="feat-grid">{cards}</div></div>'
+            '</div></div></section>')
+
+SERVICES6=[("/electricite","cablage.jpg","Installation &amp; rénovation électrique","Du plan électrique au dernier interrupteur, en neuf comme en rénovation complète."),
+           ("/electricite","reno-cablage.jpg","Mise aux normes NF C 15-100","Diagnostic, remplacement du tableau, protection des personnes — pièce par pièce."),
+           ("/electricite","escalier-led.jpg","Dépannage &amp; éclairage","Disjoncteur qui saute, prise grillée, éclairage soigné : on intervient vite."),
+           ("/chauffage","confort.jpg","Chauffage &amp; eau chaude","Installation, remplacement, réglages et entretien pour un confort juste."),
+           ("/plomberie","sdb-baignoire.jpg","Salle de bain clé en main","Dépose, réseau d'eau, sanitaires, douche et finitions, coordonnés de A à Z."),
+           ("/plomberie","douche-marbre.jpg","Fuites &amp; réseau d'eau","On localise précisément avant d'ouvrir, on répare et on remet en état.")]
+def svc_cards():
+    return "".join(
+        f'<a{R(.06*(i%3),"svc")} href="{u}"><img src="/assets/img/{img}" alt="" loading="lazy">'
+        f'<span class="num mono">{i+1:02d}</span>'
+        f'<span class="svc-body"><h3 class="h3">{t}</h3><p>{p}</p><span class="svc-more">En savoir plus {ic("arrow")}</span></span></a>'
+        for i,(u,img,t,p) in enumerate(SERVICES6))
+def services_section():
+    return ('<section class="sec"><div class="wrap">'
+            f'<div class="split-head"><div class="head"><span{R()}>{label("Ce qu\'on fait")}</span>'
+            f'<h2{R(.08,"h2")}>Des solutions pour<br><b>toute la maison.</b></h2></div>'
+            f'<div class="side"><p{R(.12,"lead")}>De la prise qui claque à la salle de bain complète : électricité, chauffage et plomberie, en neuf comme en rénovation.</p>'
+            f'<span{R(.18)}>{btn("Tous nos services","/services","light","arrow")}</span></div></div>'
+            f'<div class="svc-grid">{svc_cards()}</div></div></section>')
+
+def story_section():
+    q,w,c=REVS[1]
+    init="".join(x[0] for x in w.split()[:2]).upper()
+    return ('<section class="sec" style="padding-top:0"><div class="wrap"><div class="story-card">'
+            f'<div{R(0,"story-img")}><img src="/assets/img/maison-bleue.jpg" alt="Extension bois et pierre à Plouider, à l\'heure bleue" loading="lazy">'
+            f'<span class="tag mono">{ic("pin")}Plouider · 29</span></div>'
+            '<div class="story-txt">'
+            f'<span{R(.05)}>{label("Une réalisation ARélec","on-mist")}</span>'
+            f'<h2{R(.1,"h2")}>Extension bois &amp; pierre,<br><b>à l\'heure bleue.</b></h2>'
+            f'<p{R(.15,"lead")}>Une extension contemporaine à Plouider, bardage bois et pierre, avec un éclairage extérieur chaleureux. {tbd("Détail du chantier à compléter : travaux réalisés par ARélec, durée, contraintes")}</p>'
+            f'<div{R(.2,"quote-card")}><span aria-hidden="true">{ic("chat")}</span><p class="q">« {q} »</p>'
+            f'<div class="quote-foot"><div class="author"><span class="avatar">{init}</span><div><b>{w}</b><span>Avis Google · {c}</span></div></div>'
+            f'{btn("Parler de votre projet","/contact","dark","arrow"," data-chat")}</div></div>'
+            '</div></div></div></section>')
+
+def rating_section():
+    return ('<section class="sec" style="padding-top:0"><div class="wrap"><div class="rating-card">'
+            f'<div class="head"><span{R()}>{label("Avis &amp; notes")}</span>'
+            f'<h2{R(.08,"h2")}>Du bon travail.<br><b>Des retours honnêtes.</b></h2>'
+            f'<p{R(.14,"lead")}>La confiance se gagne chantier après chantier : qualité du travail, chantier propre, réactivité et bons conseils reviennent dans nos avis.</p>'
+            f'<span{R(.2)}>{btn("Lire les avis","/avis","light","arrow")}</span></div>'
+            f'<div{R(.1,"rating-panel")}><div class="score"><b>{RATING}</b><span>/5</span></div>{STARS}'
+            f'<p>Note moyenne sur Google</p><hr><p>Basé sur {RATING_COUNT} avis clients Google</p></div>'
+            '</div></div></section>')
+
+def safety_section():
+    pts=[("eye","Repérer les signaux d'alerte"),("tool","Faire entretenir ses installations"),("shield","Confier les travaux à un professionnel")]
+    li="".join(f'<li><span class="icon-chip">{ic(i)}</span>{t}</li>' for i,t in pts)
+    return ('<section class="dark-wrap dk"><div class="dark-card">'
+            '<div class="dark-txt">'
+            f'<span{R()}>{label("La sécurité d\'abord","dark")}</span>'
+            f'<h2{R(.08,"h2")}>Les petits signes<br><b>méritent qu\'on s\'y arrête.</b></h2>'
+            f'<p{R(.14,"lead")}>Un disjoncteur qui saute souvent, une prise qui chauffe, une odeur de brûlé, une tache d\'humidité qui s\'étend, un radiateur qui reste froid : ce sont des signaux à ne pas laisser traîner. Coupez l\'appareil concerné et faites vérifier.</p>'
+            f'<ul{R(.2,"points")}>{li}</ul>'
+            f'<span{R(.26)}>{btn("Faire vérifier mon installation","/contact","lime","arrow"," data-chat")}</span>'
+            f'<p{R(.3,"note")}>{ic("alert")}<span>Odeur de gaz, fumée, étincelles ou danger immédiat ? Éloignez-vous, coupez si possible le gaz ou le courant et appelez les secours (18 ou 112).</span></p>'
+            '</div>'
+            f'<div{R(.1,"dark-img")}><img src="/assets/img/reno-cablage.jpg" alt="Câblage électrique en cours de rénovation" loading="lazy">'
+            f'<div class="badge"><b>Dépannage</b>Disjoncteur, prise, fuite, panne d\'éclairage : on intervient dans le bassin brestois.</div></div>'
+            '</div></section>')
+
+PROCESS=[("Parlez-nous du projet","Par l'assistant du site, sur WhatsApp ou au téléphone : le besoin, la commune, vos disponibilités."),
+         ("Visite gratuite sur place","On vient voir, on écoute et on vous explique les options possibles chez vous."),
+         ("Devis détaillé","Un devis écrit, clair et sans engagement. Les travaux démarrent seulement après votre accord."),
+         ("Réalisation &amp; mise en route","La même équipe, de la dépose à la mise en route. On vous explique tout avant de partir.")]
+def process_section(h2='Un déroulé clair,<br><b>de l\'appel à la mise en route.</b>'):
+    steps="".join(f'<div{R(.1*i,"step")}><div class="step-top"><span class="step-n mono">{i+1:02d}</span><span class="step-line"></span></div>'
+                  f'<h3 class="h3">{t}</h3><p class="small">{p}</p></div>' for i,(t,p) in enumerate(PROCESS))
+    return ('<section class="sec"><div class="wrap">'
+            f'<div class="head center"><span{R()}>{label("Comment ça se passe")}</span><h2{R(.08,"h2")}>{h2}</h2></div>'
+            f'<div class="steps">{steps}</div></div></section>')
+
+def testi_cards(revs):
+    out=""
+    for i,(q,w,c) in enumerate(revs):
+        init="".join(x[0] for x in w.split()[:2]).upper()
+        out+=(f'<article{R(.06*(i%3),"testi")}><div class="stars ink" aria-label="5 étoiles sur 5">{ic("star")*5}</div>'
+              f'<p class="q">« {q} »</p><div class="author"><span class="avatar">{init}</span><div><b>{w}</b><span>Avis Google · {c}</span></div></div></article>')
+    return out
+def testimonials_section(revs=None):
+    return ('<section class="sec" style="padding-top:0"><div class="wrap">'
+            f'<div class="split-head"><div class="head"><span{R()}>{label("Ils nous recommandent")}</span>'
+            f'<h2{R(.08,"h2")}>Un service<br><b>qui fait la différence.</b></h2></div>'
+            f'<div class="side"><span{R(.12,"rate-chip")}>{ic("star")} {RATING}/5 · {RATING_COUNT} avis Google</span></div></div>'
+            f'<div class="testi-grid">{testi_cards(revs or REVS)}</div></div></section>')
+
+def areas_block(metier_slug="electricien", h2='Un artisan du coin,<br><b>près de chez vous.</b>', lab="Zone d'intervention"):
+    chips="".join(f'<a class="area-chip" href="/{metier_slug}-{s}">{ic("pin")}{l}</a>' for s,l in ALL_COMMUNES)
+    cov=[("pin",f"{len(ALL_COMMUNES)} communes","Plouzané, Brest et tout le bassin brestois, dans un rayon d'environ 30 km."),
+         ("cal","Visite gratuite sur place","Un rendez-vous pour voir le chantier et établir un devis juste."),
+         ("home","Neuf &amp; rénovation","Maisons, appartements, extensions : de la construction à la rénovation complète.")]
+    covh="".join(f'<div{R(.08*i,"cov")}><span class="icon-chip">{ic(a)}</span><div><b>{b}</b><p>{c}</p></div></div>' for i,(a,b,c) in enumerate(cov))
+    return ('<section class="sec" style="padding-top:0"><div class="wrap"><div class="areas-card">'
+            '<div class="areas-txt">'
+            f'<span{R()}>{label(lab,"on-mist")}</span><h2{R(.08,"h2")}>{h2}</h2>'
+            f'<p{R(.14,"lead")}>Installés à Plouzané depuis 2010, on intervient dans tout le bassin brestois. Dites-nous votre commune et le type de travaux : on vous confirme vite.</p>'
+            f'<div{R(.2,"chips")}>{chips}</div>'
+            f'<span{R(.26)}>{btn_contact("dark","Vérifier ma commune")}</span></div>'
+            f'<div class="coverage">{covh}</div></div></div></section>')
+
+def faq_section(qa_pairs, h2="Questions fréquentes"):
+    if not qa_pairs: return ""
+    items="".join(
+        f'<details class="faq-q"><summary><span>{html.escape(q)}</span><span class="toggle">{ic("plus")}</span></summary>'
+        f'<div class="faq-a">{html.escape(a)}</div></details>' for q,a in qa_pairs)
+    return ('<section class="sec"><div class="wrap"><div class="faq-grid">'
+            f'<div class="faq-intro"><span{R()}>{label("FAQ")}</span><h2{R(.08,"h2")}>{html.escape(h2)}</h2>'
+            f'<p{R(.14,"lead")}>Vous ne trouvez pas votre réponse ? Parlez-nous de votre projet, on vous aide pour la suite.</p>'
+            f'<span{R(.2)}>{btn_contact("light","Poser ma question")}</span></div>'
+            f'<div{R(.1,"faq-list")}>{items}</div></div></div></section>')
+
+def cta_section(h2='Votre projet mérite<br><b>un artisan sérieux.</b>', p="Une rénovation, une panne, une salle de bain ? Dites-nous ce dont vous avez besoin : on vous répond et on prépare la visite gratuite.", img="hero.jpg"):
+    return ('<section class="cta"><div class="cta-card">'
+            f'<img src="/assets/img/{img}" alt="" loading="lazy">'
+            '<div class="cta-in">'
+            f'<img{R(0,"mark")} src="/assets/img/logo.png" alt="ARélec" width="160" height="58">'
+            f'<h2{R(.08,"h2")}>{h2}</h2><p{R(.14,"lead")}>{p}</p>'
+            f'<div{R(.2,"actions")} style="justify-content:center">{btn_contact("lime")}{btn("Appeler le "+PHONE_DISP,"tel:"+PHONE_TEL,"glass","bolt")}</div>'
+            '</div></div></section>')
+recap = lambda h2, p=None: cta_section(h2, p) if p else cta_section(h2)
+
+# ---------- pages intérieures ----------
+def phero(crumb_html, lab, h1, lead, img=None, float_html=None, hero_alt=None, actions=None):
+    acts = actions if actions is not None else btn_contact("dark") + btn_call("light")
+    txt=(f'<div class="phero-txt"><div{R(0,"crumb")}>{crumb_html}</div>'
+         f'<span{R(.04)}>{label(lab,"on-mist")}</span>'
+         f'<h1{R(.1,"h1")}>{h1}</h1><p{R(.16,"lead")}>{lead}</p>'
+         + (f'<div{R(.22,"actions")}>{acts}</div>' if acts else "") + '</div>')
+    if not img:
+        return f'<section class="phero"><div class="phero-card solo">{txt}</div></section>'
+    fl=f'<div class="float">{float_html}</div>' if float_html else ""
+    return (f'<section class="phero"><div class="phero-card">{txt}'
+            f'<div{R(.12,"phero-img")}><img src="/assets/img/{img}" alt="{html.escape(hero_alt or "Chantier ARélec dans le bassin brestois")}" fetchpriority="high">{fl}</div>'
+            '</div></section>')
+FLOAT_AVIS = f'<div class="stars">{ic("star")*5}</div> Avis Google'
+
+def trust_strip():
+    items=[("Artisan depuis 2010"),("Bassin brestois"),("Devis gratuit, sur place"),("Un seul interlocuteur")]
+    return '<section class="trust"><div class="wrap">'+"".join(f'<span>{ic("check")}{t}</span>' for t in items)+'</div></section>'
+
+def feat_section(num, eyebrow, h2, p, items, img, tag, flip=False):
+    li="".join(f"<li>{ic('check')}<span>{x}</span></li>" for x in items)
+    tg=f'<span class="tag mono">{tag}</span>' if tag else ""
+    return (f'<div class="feat-row{" flip" if flip else ""}">'
+            f'<div{R(0,"feat-img")}><img src="/assets/img/{img}" alt="{html.escape(re.sub("<[^>]+>","",eyebrow).replace("&amp;","&"))}" loading="lazy">{tg}</div>'
+            f'<div{R(.08,"feat-txt")}><div class="kicker"><span class="step-n mono">{num}</span><span class="mono">{eyebrow}</span></div>'
+            f'<h2 class="h2">{h2}</h2><p>{p}</p><ul class="checks">{li}</ul></div></div>')
+
+# ---------- footer ----------
+EXTRA_COMMUNES=[
+ ("le-conquet","Le Conquet"),("saint-renan","Saint-Renan"),("guipavas","Guipavas"),
+ ("le-relecq-kerhuon","Le Relecq-Kerhuon"),("guilers","Guilers"),("plougonvelin","Plougonvelin"),
+ ("locmaria-plouzane","Locmaria-Plouzané"),("lannilis","Lannilis"),("plabennec","Plabennec"),
+ ("landerneau","Landerneau"),
+]
+EXISTING_COMMUNES=[("brest","Brest"),("plouzane","Plouzané"),("plouider","Plouider")]
+ALL_COMMUNES=sorted(EXISTING_COMMUNES+EXTRA_COMMUNES, key=lambda c:c[1])
+def _li(metier_slug): return "".join(f'<li><a href="/{metier_slug}-{s}">{l}</a></li>' for s,l in ALL_COMMUNES)
+FCITY_E=_li("electricien"); FCITY_P=_li("plombier"); FCITY_C=_li("chauffagiste")
+def _seo_list(metier_slug): return "".join(f'<li><a href="/{metier_slug}-{c}">{l}</a></li>' for c,l in ALL_COMMUNES)
+FOOTER=('<footer class="footer"><div class="footer-card">'
+ '<div class="f-top"><div class="f-brand">'
+ '<a href="/" aria-label="ARélec, accueil"><img src="/assets/img/logo-dark.png" alt="ARélec" width="140" height="40"></a>'
+ '<p class="tagline">Une maison bien câblée, bien chauffée.</p>'
+ '<p class="small">Électricité, chauffage et plomberie pour les maisons du bassin brestois. Un seul interlocuteur, depuis 2010.</p>'
+ '<div class="f-contact">'
+ f'<a href="tel:{PHONE_TEL}"><span class="f-ic">{ic("bolt")}</span>{PHONE_DISP}</a>'
+ f'<a href="https://wa.me/{WHATSAPP_INT}" target="_blank" rel="noopener"><span class="f-ic">{SVG_WA}</span>WhatsApp · {PHONE_MOBILE_DISP}</a>'
+ f'<a href="mailto:{EMAIL}"><span class="f-ic">{SVG_MAIL}</span>{EMAIL}</a>'
+ f'<span><span class="f-ic">{ic("pin")}</span>{ADDRESS}</span>'
+ '</div></div>'
+ '<div class="f-col"><h4 class="mono">Navigation</h4><ul>'+"".join(f'<li><a href="{u}">{t}</a></li>' for u,t in NAV_LINKS)+'</ul></div>'
+ '<div class="f-col"><h4 class="mono">Services</h4><ul><li><a href="/electricite">Électricité</a></li><li><a href="/chauffage">Chauffage</a></li><li><a href="/plomberie">Plomberie</a></li><li><a href="/realisations">Réalisations</a></li><li><a href="/avis">Avis clients</a></li></ul></div>'
+ '<div class="f-col"><h4 class="mono">Horaires</h4><ul><li><span>Lun–Ven : 8h–18h</span></li><li><span>Sam : '+tbd("à compléter")+'</span></li><li><span>Dim : fermé '+tbd("à confirmer")+'</span></li></ul></div>'
+ '</div>'
+ '<div class="f-seo">'
+ f'<div><h4 class="mono">Électricien à…</h4><ul>{_seo_list("electricien")}</ul></div>'
+ f'<div><h4 class="mono">Plombier à…</h4><ul>{_seo_list("plombier")}</ul></div>'
+ f'<div><h4 class="mono">Chauffagiste à…</h4><ul>{_seo_list("chauffagiste")}</ul></div>'
+ '</div>'
+ '<div class="f-mark" aria-hidden="true">ARÉLEC</div>'
+ '<div class="f-legal"><span>© '+str(datetime.date.today().year)+' SARL ARélec — SIREN 790 223 036</span>'
+ '<nav aria-label="Liens légaux"><a href="/mentions-legales">Mentions légales</a><a href="/politique-confidentialite">Confidentialité</a></nav>'
+ '<div class="f-social">'
+ '<a href="https://www.facebook.com/people/AR%C3%A9lec/100089481862657/" target="_blank" rel="noopener" aria-label="Facebook">'+SVG_FB+'</a>'
+ f'<a href="https://wa.me/{WHATSAPP_INT}" target="_blank" rel="noopener" aria-label="WhatsApp">{SVG_WA}</a>'
+ f'<a href="mailto:{EMAIL}" aria-label="Email">{SVG_MAIL}</a>'
+ '</div></div>'
+ '</div></footer>')
+
+SITE_JS = r'''(function(){
+var d=document.documentElement,rm=matchMedia("(prefers-reduced-motion: reduce)").matches;
+// apparitions au scroll (fondu + flou)
+var els=document.querySelectorAll(".r");
+if("IntersectionObserver" in window&&!rm){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}})},{rootMargin:"0px 0px -8% 0px",threshold:.1});els.forEach(function(el){io.observe(el)})}
+else els.forEach(function(el){el.classList.add("in")});
+// compteurs
+if("IntersectionObserver" in window&&!rm){var co=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;co.unobserve(e.target);var el=e.target,to=+el.dataset.count,suf=el.dataset.suffix||"",t0=performance.now();(function step(t){var p=Math.min(1,(t-t0)/1600),v=Math.round(to*(1-Math.pow(1-p,3)));el.textContent=v+suf;if(p<1)requestAnimationFrame(step)})(t0)})},{threshold:.6});document.querySelectorAll("[data-count]").forEach(function(el){co.observe(el)})}
+// navigation
+var nav=document.querySelector(".nav");function onS(){nav&&nav.classList.toggle("scrolled",scrollY>24)}addEventListener("scroll",onS,{passive:true});onS();
+// tiroir mobile
+var dr=document.getElementById("drawer"),bt=document.querySelector(".burger");if(!dr||!bt)return;
+function open(){dr.hidden=false;requestAnimationFrame(function(){dr.classList.add("open")});document.body.classList.add("menu-open");bt.setAttribute("aria-expanded","true");dr.querySelector(".drawer-close").focus()}
+function close(){dr.classList.remove("open");document.body.classList.remove("menu-open");bt.setAttribute("aria-expanded","false");setTimeout(function(){dr.hidden=true},300)}
+bt.addEventListener("click",open);dr.querySelector(".drawer-close").addEventListener("click",close);
+dr.addEventListener("click",function(e){if(e.target.closest("a"))close()});
+addEventListener("keydown",function(e){if(e.key==="Escape"&&!dr.hidden)close()});
+})();
+'''
+
+# ---------- assistant (bulle + panneau) ----------
 SVG_CHAT='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>'
 SVG_SEND='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
 def chat_widget():
@@ -526,338 +880,14 @@ def chat_widget():
             '<p class="chat-note">Assistant automatique · <a href="/politique-confidentialite">confidentialité</a></p></section>'
             f'<template id="chat-wa-ic">{SVG_WA}</template>'
             '<script src="/assets/js/chat.js?v=1" defer></script>')
-def trades_panel(heading_em, sub):
-    cards=[("/electricite","escalier-led.jpg","⚡","Électricité","Du tableau à l'éclairage soigné — le cœur de métier ARélec.",True),
-           ("/chauffage","confort.jpg","🌡️","Chauffage","Le confort toute l'année, sans faire flamber la facture.",False),
-           ("/plomberie","plomb.jpg","💧","Plomberie","Sanitaire et réseau d'eau, propre et durable.",False)]
-    c=""
-    for i,(href,img,ic,t,p,is_open) in enumerate(cards):
-        d=["d2","d3","d4"][i]; oc=" is-open" if is_open else ""
-        c+=(f'<a class="acc reveal {d}{oc}" href="{href}" aria-label="{t}">'
-            f'<img src="/assets/img/{img}" alt="{t} — ARÉLEC" loading="lazy">'
-            f'<div class="acc-shade" aria-hidden="true"></div>'
-            f'<div class="acc-rail" aria-hidden="true"><span class="acc-ic">{ic}</span><span class="acc-vt">{t}</span></div>'
-            f'<div class="acc-open"><div class="acc-ic-lg">{ic}</div><h3>{t}</h3><p>{p}</p>'
-            f'<span class="acc-cta">En savoir plus →</span></div></a>')
-    return (f'<section class="panel light"><div class="sec sec-split">'
-            f'<div class="lead-col">'
-            f'<h2 class="trade-list reveal d1"><span>Électricité.</span><span>Chauffage.</span><span>Plomberie.</span></h2>'
-            f'<div class="lead-actions reveal d3">'
-            f'<a class="btn solid" href="/contact" data-chat>Prendre contact →</a>'
-            f'</div></div>'
-            f'<div class="accordion reveal d2">{c}</div></div></section>')
 
-REAL_IMGS=[
- ("escalier-led.jpg",     "rotate(7deg) translate(-150px)"),
- ("douche-marbre.jpg",    "rotate(3deg) translate(-75px)"),
- ("sdb-bleue.jpg",        "rotate(-2deg)"),
- ("confort.jpg",          "rotate(-7deg) translate(75px)"),
- ("chantier-plouider.jpg","rotate(4deg) translate(150px)"),
-]
-def realisations_panel():
-    cards=""
-    for i,(img,tf) in enumerate(REAL_IMGS):
-        cards+=(f'<div class="bc-card bc-card-{i}" data-tf="{tf}" style="transform:{tf}">'
-                f'<img src="/assets/img/{img}" alt="Réalisation ARÉLEC" loading="lazy"/></div>')
-    return ('<section class="band-real"><div class="sec sec-real">'
-            '<div class="real-head">'
-            '<div class="eyebrow">Nos réalisations</div>'
-            '<h2>Le travail bien fait,<br><em>en vrai.</em></h2>'
-            '<p class="sub">Chantiers réalisés par ARélec : rénovations complètes, salles de bain, tableaux électriques, éclairage soigné.</p>'
-            '</div>'
-            f'<div class="bc-stage"><div class="bc-cards" id="bcCards" data-stagger="0.08" data-delay="0.2" data-ease="elastic.out(1, 0.55)">{cards}</div></div>'
-            '<div class="real-cta">'
-            '<a class="btn solid" href="/realisations">Voir nos réalisations →</a>'
-            '<a class="btn line" href="/contact">Nous contacter</a>'
-            '</div></div></section>')
-REVS=[("Intervention de très bonne qualité. Chantier propre et rapide. Je recommande ARÉLEC.","Philippe C.","Rénovation électrique"),
- ("Super entreprise, travail de qualité et toujours dans la bonne humeur. Merci pour la rénovation de notre maison&nbsp;!","Mélanie Hautecoeur","Rénovation complète"),
- ("Très pro, Arnaud et son collègue font du bon travail, propre, et en plus ils sont sympas.","Yvon Riou","Installation électrique"),
+# ---------- avis Google réels ----------
+REVS=[("Redistribution des prises et des points lumineux dans le cadre du réagencement de notre rez-de-chaussée (maison années 30). Intervention de très bonne qualité, chantier propre et rapide. Je recommande ARÉLEC.","Philippe C.","Rénovation électrique"),
+ ("Super entreprise, travail de qualité et toujours dans la bonne humeur. De bons conseils et toujours à l'écoute. Un grand merci pour la rénovation de notre maison&nbsp;!","Mélanie Hautecoeur","Rénovation complète"),
+ ("Très pro, Arnaud et son collègue font du bon travail, propre, de plus ils sont sympas.","Yvon Riou","Installation électrique"),
  ("Super dépannage… rapide, efficace, au top — avec de l'humour en prime&nbsp;;)","Carole Yven","Dépannage"),
  ("Sympa et efficace, je recommande sans problème.","Ronan Madec","Client ARÉLEC"),
  ("J'ai fait refaire ma salle de bain et l'électricité avec eux. Je conseille.","JL le grand","Salle de bain + élec")]
-AVATAR_COLORS=["#1a73e8","#34a853","#ea4335","#fbbc04","#9334e8","#e8710a"]
-def avis_panel(sub):
-    cards=""
-    for i,(q,w,c) in enumerate(REVS):
-        init=w[0].upper(); col=AVATAR_COLORS[i%len(AVATAR_COLORS)]
-        cards+=(f'<article class="g-card"><header><div class="g-avatar" style="background:{col}">{init}</div>'
-                f'<div class="g-meta"><span class="g-name">{w}</span><span class="g-sub">Avis Google · {c}</span></div></header>'
-                f'<div class="g-stars-small" aria-label="5 sur 5">★★★★★</div><blockquote>{q}</blockquote></article>')
-    logo=('<span class="g-logo" aria-label="Google">'
-          '<span style="color:#4285F4">G</span><span style="color:#EA4335">o</span>'
-          '<span style="color:#FBBC05">o</span><span style="color:#4285F4">g</span>'
-          '<span style="color:#34A853">l</span><span style="color:#EA4335">e</span></span>')
-    return ('<section class="band-reviews"><div class="sec sec-reviews">'
-            f'<div class="g-head">{logo}'
-            '<div class="g-stars-big" aria-hidden="true">★★★★★</div>'
-            '<div class="g-sub-big">Avis clients vérifiés</div></div>'
-            '<div class="g-carousel">'
-            '<button class="g-nav g-prev" aria-label="Avis précédent" type="button">‹</button>'
-            f'<div class="g-track" id="gtrack">{cards}</div>'
-            '<button class="g-nav g-next" aria-label="Avis suivant" type="button">›</button>'
-            '</div><div class="g-dots" id="gdots"></div></div></section>')
-
-FALL_TEXT="Électricité Chauffage Plomberie Tableau Radiateurs Sanitaires Câblage Éclairage Chaudière Robinetterie"
-FALL_HL=["Électricité","Chauffage","Plomberie"]
-def falling_panel():
-    return ('<section class="panel light falling" id="fallingPanel">'
-            '<div class="falling-stage" id="fallingStage">'
-            f'<div class="falling-text" data-text="{html.escape(FALL_TEXT, quote=True)}" data-hl="{html.escape("|".join(FALL_HL), quote=True)}">{html.escape(FALL_TEXT)}</div>'
-            '</div></section>')
-
-# ---------- GradualBlur (vanilla port of React Bits component) ----------
-def gradual_blur(position="bottom", height="11rem", strength=2.5, divCount=6, curve="bezier", exponential=True, opacity=1, target="parent"):
-    direction = {"top":"to top","bottom":"to bottom","left":"to left","right":"to right"}.get(position,"to bottom")
-    def cv(p):
-        if curve == "bezier": return p*p*(3-2*p)
-        if curve == "ease-in": return p*p
-        if curve == "ease-out": return 1-(1-p)**2
-        return p
-    increment = 100/divCount
-    divs = []
-    for i in range(1, divCount+1):
-        progress = cv(i/divCount)
-        if exponential:
-            blur_value = (2**(progress*4))*0.0625*strength
-        else:
-            blur_value = 0.0625*(progress*divCount+1)*strength
-        p1 = round((increment*i - increment)*10)/10
-        p2 = round(increment*i*10)/10
-        p3 = round((increment*i + increment)*10)/10
-        p4 = round((increment*i + increment*2)*10)/10
-        grad = f"transparent {p1}%, black {p2}%"
-        if p3 <= 100: grad += f", black {p3}%"
-        if p4 <= 100: grad += f", transparent {p4}%"
-        mask = f"linear-gradient({direction}, {grad})"
-        bv = f"{blur_value:.3f}rem"
-        st = (f"position:absolute;inset:0;"
-              f"-webkit-mask-image:{mask};mask-image:{mask};"
-              f"-webkit-backdrop-filter:blur({bv});backdrop-filter:blur({bv});"
-              f"opacity:{opacity}")
-        divs.append(f'<div style="{st}"></div>')
-    pos_kind = "fixed" if target == "page" else "absolute"
-    z = 1100 if target == "page" else 5
-    if position in ("top","bottom"):
-        pos = f"position:{pos_kind};left:0;right:0;{position}:0;width:100%;height:{height}"
-    else:
-        pos = f"position:{pos_kind};top:0;bottom:0;{position}:0;height:100%;width:{height}"
-    return (f'<div class="gradual-blur" data-pos="{position}" data-target="{target}" style="{pos};z-index:{z}">'
-            f'<div class="gradual-blur-inner">{"".join(divs)}</div></div>')
-EXTRA_COMMUNES=[
- ("le-conquet","Le Conquet"),("saint-renan","Saint-Renan"),("guipavas","Guipavas"),
- ("le-relecq-kerhuon","Le Relecq-Kerhuon"),("guilers","Guilers"),("plougonvelin","Plougonvelin"),
- ("locmaria-plouzane","Locmaria-Plouzané"),("lannilis","Lannilis"),("plabennec","Plabennec"),
- ("landerneau","Landerneau"),
-]
-EXISTING_COMMUNES=[("brest","Brest"),("plouzane","Plouzané"),("plouider","Plouider")]
-ALL_COMMUNES=sorted(EXISTING_COMMUNES+EXTRA_COMMUNES, key=lambda c:c[1])
-def _li(metier_slug): return "".join(f'<li><a href="/{metier_slug}-{s}">{l}</a></li>' for s,l in ALL_COMMUNES)
-FCITY_E=_li("electricien"); FCITY_P=_li("plombier"); FCITY_C=_li("chauffagiste")
-FOOTER=('<section class="cta-band"><div><h2>Un projet, une panne, une question&nbsp;?</h2>'
- '<p>Posez votre question à notre assistant, on continue sur WhatsApp. Devis gratuit.</p></div>'
- '<div class="cta-actions"><a href="/contact" class="btn solid" data-chat>Prendre contact →</a>'
- f'<a href="tel:{PHONE_TEL}" class="btn line">Contacter</a></div></section>'
- '<footer class="site"><div class="fgrid">'
- '<div class="brand"><a href="/"><img class="blogo" src="/assets/img/logo.png" alt="ARELEC"></a>'
- '<p>Électricité, chauffage et plomberie dans le bassin brestois. Un seul interlocuteur, depuis 2010.</p>'
- f'<div class="nap"><a href="tel:{PHONE_TEL}">{PHONE_DISP}</a><br><span class="muted">{EMAIL}</span><br>'
- '<span class="muted">Plouzané (29280) — Finistère</span></div>'
- f'<div class="soc"><a href="https://www.facebook.com/people/AR%C3%A9lec/100089481862657/" target="_blank" rel="noopener" aria-label="Facebook">{SVG_FB}</a><a href="https://wa.me/33678020424" target="_blank" rel="noopener" aria-label="WhatsApp">{SVG_WA}</a></div></div>'
- '<div class="fcol"><h4>Nos métiers</h4><ul><li><a href="/electricite">Électricité</a></li><li><a href="/chauffage">Chauffage</a></li><li><a href="/plomberie">Plomberie</a></li><li><a href="/realisations">Réalisations</a></li></ul></div>'
- f'<div class="fcol"><h4>Électricien à…</h4><ul>{FCITY_E}</ul></div>'
- f'<div class="fcol"><h4>Plombier à…</h4><ul>{FCITY_P}</ul></div>'
- f'<div class="fcol"><h4>Chauffagiste à…</h4><ul>{FCITY_C}</ul></div>'
- '<div class="fcol"><h4>Entreprise</h4><ul><li><a href="/entreprise">L\'entreprise</a></li><li><a href="/avis">Avis clients</a></li><li><a href="/contact">Contact</a></li></ul></div>'
- '</div><div class="legal"><span>© 2026 SARL ARélec — SIREN 790 223 036 — Plouzané</span>'
- '<span><a href="/mentions-legales">Mentions légales</a> · <a href="/politique-confidentialite">Confidentialité</a></span></div></footer>')
-JS=r'''<script>
-const s=document.getElementById("snap");
-if(s){const ps=[...document.querySelectorAll(".panel")],ds=[...document.querySelectorAll(".dots button")],tn=document.querySelector(".topnav"),hero=document.getElementById("hero");
-const isMobile=window.matchMedia("(max-width: 760px)").matches;
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");const i=ps.indexOf(e.target);ds.forEach((d,k)=>d.classList.toggle("on",k===i));if(tn&&e.target===hero)tn.classList.remove("visible")}else if(tn&&e.target===hero){tn.classList.add("visible")}}),{root:isMobile?null:s,threshold:.55});
-ps.forEach(p=>io.observe(p));ds.forEach(d=>d.addEventListener("click",()=>{const i=+d.dataset.go;if(ps[i])ps[i].scrollIntoView({behavior:"smooth"})}));}
-(function(){
- const burgers=document.querySelectorAll(".burger");
- const drawer=document.getElementById("mdrawer");
- if(!drawer||!burgers.length)return;
- const closeBtn=drawer.querySelector(".mdrawer-close");
- const open=()=>{drawer.hidden=false;requestAnimationFrame(()=>drawer.classList.add("open"));burgers.forEach(b=>b.setAttribute("aria-expanded","true"));document.body.classList.add("menu-open");};
- const close=()=>{drawer.classList.remove("open");burgers.forEach(b=>b.setAttribute("aria-expanded","false"));document.body.classList.remove("menu-open");setTimeout(()=>{if(!drawer.classList.contains("open"))drawer.hidden=true;},350);};
- burgers.forEach(b=>b.addEventListener("click",()=>{b.getAttribute("aria-expanded")==="true"?close():open();}));
- closeBtn&&closeBtn.addEventListener("click",close);
- drawer.addEventListener("click",e=>{const a=e.target.closest("a");if(a&&drawer.contains(a))close();});
- document.addEventListener("keydown",e=>{if(e.key==="Escape")close();});
-})();
-(function(){
- const panel=document.getElementById("fallingPanel");if(!panel)return;
- const stage=document.getElementById("fallingStage");if(!stage)return;
- const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
- const isMobile=window.matchMedia("(max-width: 760px)").matches;
- if(reduce||isMobile)return;
- const textEl=stage.querySelector(".falling-text");
- const text=textEl.dataset.text||"";
- const hl=(textEl.dataset.hl||"").split("|").filter(Boolean);
- textEl.innerHTML=text.split(" ").map(w=>{const k=hl.some(h=>w.startsWith(h));return '<span class="word'+(k?" hl":"")+'">'+w+"</span>";}).join(" ");
- let started=false;
- function loadMatter(){return new Promise(r=>{if(window.Matter)return r();const sc=document.createElement("script");sc.src="https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js";sc.onload=r;document.head.appendChild(sc);});}
- async function start(){if(started)return;started=true;await loadMatter();
-  const M=window.Matter,{Engine,Render,World,Bodies,Runner,Mouse,MouseConstraint,Events}=M;
-  const rect=stage.getBoundingClientRect();const W=rect.width,H=rect.height;if(W<=0||H<=0){started=false;return;}
-  const engine=Engine.create();engine.world.gravity.y=0.9;
-  const render=Render.create({element:stage,engine,options:{width:W,height:H,background:"transparent",wireframes:false,pixelRatio:window.devicePixelRatio||1}});
-  const bo={isStatic:true,render:{fillStyle:"transparent"}};
-  World.add(engine.world,[Bodies.rectangle(W/2,H+25,W,50,bo),Bodies.rectangle(-25,H/2,50,H,bo),Bodies.rectangle(W+25,H/2,50,H,bo),Bodies.rectangle(W/2,-25,W,50,bo)]);
-  const words=[...textEl.querySelectorAll(".word")];
-  const bodies=words.map(el=>{const r=el.getBoundingClientRect();const x=r.left-rect.left+r.width/2;const y=r.top-rect.top+r.height/2;const b=Bodies.rectangle(x,y,r.width,r.height,{render:{fillStyle:"transparent"},restitution:.74,frictionAir:.013,friction:.22,chamfer:{radius:6}});M.Body.setVelocity(b,{x:(Math.random()-.5)*4,y:0});M.Body.setAngularVelocity(b,(Math.random()-.5)*.05);return{el,body:b};});
-  textEl.style.display="block";textEl.style.padding="0";textEl.style.maxWidth="none";textEl.style.margin="0";textEl.style.pointerEvents="none";
-  bodies.forEach(({el,body})=>{el.style.position="absolute";el.style.left=body.position.x+"px";el.style.top=body.position.y+"px";el.style.transform="translate(-50%,-50%)";el.style.margin="0";el.style.pointerEvents="none";});
-  World.add(engine.world,bodies.map(o=>o.body));
-  const mouse=Mouse.create(render.canvas);
-  mouse.pixelRatio=window.devicePixelRatio||1;
-  if(mouse.element){mouse.element.removeEventListener("mousewheel",mouse.mousewheel);mouse.element.removeEventListener("DOMMouseScroll",mouse.mousewheel);}
-  const mc=MouseConstraint.create(engine,{mouse,constraint:{stiffness:.22,damping:.08,render:{visible:false}}});
-  World.add(engine.world,mc);render.mouse=mouse;
-  Events.on(mc,"startdrag",()=>{stage.classList.add("grabbing")});
-  Events.on(mc,"enddrag",()=>{stage.classList.remove("grabbing")});
-  Runner.run(Runner.create(),engine);Render.run(render);
-  (function loop(){bodies.forEach(({body,el})=>{el.style.left=body.position.x+"px";el.style.top=body.position.y+"px";el.style.transform="translate(-50%,-50%) rotate("+body.angle+"rad)";});requestAnimationFrame(loop);})();
- }
- const snapRoot=document.getElementById("snap")||null;
- const io2=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting && e.intersectionRatio>=0.85){setTimeout(start,400);io2.disconnect();}}),{root:snapRoot,threshold:[0.85,0.95]});
- io2.observe(panel);
-})();
-(function(){
- const track=document.getElementById("gtrack");if(!track)return;
- const dotsWrap=document.getElementById("gdots");
- const cards=[...track.querySelectorAll(".g-card")];
- if(!cards.length)return;
- cards.forEach((_,i)=>{const b=document.createElement("button");b.type="button";b.dataset.i=i;b.setAttribute("aria-label","Avis "+(i+1));dotsWrap.appendChild(b);});
- const dots=[...dotsWrap.querySelectorAll("button")];
- const setActive=i=>dots.forEach((b,j)=>b.classList.toggle("on",j===i));
- const step=()=>cards[0].getBoundingClientRect().width+parseFloat(getComputedStyle(track).columnGap||"24");
- dots.forEach(b=>b.addEventListener("click",()=>{const i=+b.dataset.i;cards[i].scrollIntoView({inline:"center",behavior:"smooth",block:"nearest"});}));
- const prev=document.querySelector(".g-prev"),next=document.querySelector(".g-next");
- prev&&prev.addEventListener("click",()=>track.scrollBy({left:-step(),behavior:"smooth"}));
- next&&next.addEventListener("click",()=>track.scrollBy({left:step(),behavior:"smooth"}));
- const io3=new IntersectionObserver(es=>{let best=null;es.forEach(e=>{if(e.isIntersecting&&(!best||e.intersectionRatio>best.intersectionRatio))best=e;});if(best){const i=cards.indexOf(best.target);if(i>=0)setActive(i);}},{root:track,threshold:[.5,.7,.9]});
- cards.forEach(c=>io3.observe(c));
- setActive(0);
-})();
-(function(){
- const wrap=document.getElementById("bcCards");if(!wrap)return;
- const cards=[...wrap.querySelectorAll(".bc-card")];if(!cards.length)return;
- cards.forEach(c=>c.classList.add("bc-init"));
- const stagger=parseFloat(wrap.dataset.stagger||"0.08");
- const delay=parseFloat(wrap.dataset.delay||"0.2");
- const ease=wrap.dataset.ease||"elastic.out(1, 0.55)";
- const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
- function loadJS(src){return new Promise((res,rej)=>{const s=document.createElement("script");s.src=src;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
- function getNoRot(t){if(/rotate\([^)]*\)/.test(t))return t.replace(/rotate\([^)]*\)/,"rotate(0deg)");return t==="none"?"rotate(0deg)":t+" rotate(0deg)";}
- function getPushed(t,off){const re=/translate\(([-0-9.]+)px\)/;const m=t.match(re);if(m){return t.replace(re,`translate(${parseFloat(m[1])+off}px)`);}return t==="none"?`translate(${off}px)`:`${t} translate(${off}px)`;}
- function fallbackAnim(){
-  cards.forEach((c,i)=>{
-   c.style.transition=`transform .9s cubic-bezier(.34,1.56,.64,1) ${delay+i*stagger}s`;
-   requestAnimationFrame(()=>c.classList.remove("bc-init"));
-  });
- }
- function bindHover(gsap){
-  cards.forEach((c,i)=>{
-   c.addEventListener("mouseenter",()=>{
-    cards.forEach((c2,j)=>{
-     const base=c2.dataset.tf||"none";
-     gsap.killTweensOf(c2);
-     if(j===i){gsap.to(c2,{transform:getNoRot(base),duration:.4,ease:"back.out(1.4)",overwrite:"auto"});}
-     else{const off=j<i?-160:160;const dist=Math.abs(i-j);gsap.to(c2,{transform:getPushed(base,off),duration:.4,delay:dist*0.05,ease:"back.out(1.4)",overwrite:"auto"});}
-    });
-   });
-   c.addEventListener("mouseleave",()=>{
-    cards.forEach(c2=>{const base=c2.dataset.tf||"none";gsap.killTweensOf(c2);gsap.to(c2,{transform:base,duration:.4,ease:"back.out(1.4)",overwrite:"auto"});});
-   });
-  });
- }
- async function init(){
-  if(reduce){cards.forEach(c=>c.classList.remove("bc-init"));return;}
-  try{
-   if(typeof window.gsap==="undefined"){await loadJS("https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js");}
-   if(typeof window.gsap==="undefined"){fallbackAnim();return;}
-   cards.forEach(c=>c.classList.remove("bc-init"));
-   window.gsap.fromTo(cards,{scale:0},{scale:1,stagger,ease,delay});
-   bindHover(window.gsap);
-  }catch(e){fallbackAnim();}
- }
- const ioBC=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>=0.25){init();ioBC.disconnect();}}),{threshold:[.25,.4]});
- ioBC.observe(wrap);
-})();
-</script>'''
-
-def hero_home(kicker,h1,desc):
-    return ('<section class="panel visible" id="hero"><div class="bg"></div>'+nav_home("")+
-     '<div class="spacer"></div><div class="content"><div class="topline"><div>'
-     f'<div class="kicker reveal d2"><span class="dot"></span>{kicker}</div>'
-     f'<h1 class="reveal d2">{h1}</h1></div>'
-     '<a href="/contact" class="btn primary reveal d3" data-chat>Prendre contact →</a></div>'
-     '<div class="hr reveal d3"></div><div class="bottom"><div class="meta reveal d4">'
-     f'<a class="chip" href="tel:{PHONE_TEL}">{SVG_PHONE} {PHONE_DISP}</a><span class="chip">📍 Plouzané · bassin brestois</span><span class="chip">✓ Devis gratuit</span></div>'
-     f'<p class="desc reveal d4">{desc}</p></div></div>'
-     '<div class="scrollhint">Nos métiers<div class="arr"></div></div></section>')
-
-# ---------- SUBPAGE (Traaction-inspired) ----------
-def subnav(active):
-    nv="".join(f'<a href="{u}"{" aria-current=\"page\"" if u==active else ""}>{t}</a>' for u,t in NAV_LINKS)
-    return (f'<header class="subnav"><a href="/" aria-label="ARELEC accueil"><img class="logo-dark" src="/assets/img/logo-dark.png" alt="ARELEC"></a>'
-            f'<nav>{nv}</nav>'
-            f'<div class="ctas"><a class="tel" href="tel:{PHONE_TEL}" aria-label="Appeler {PHONE_DISP}">{SVG_PHONE} <span class="tel-label">{PHONE_DISP}</span></a>'
-            '<a class="btn solid" href="/contact" data-chat>Prendre contact</a>'
-            '<button class="burger" type="button" aria-expanded="false" aria-controls="mdrawer" aria-label="Ouvrir le menu"><span></span></button></div></header>')
-
-def trust_strip():
-    items=[("✓","Artisan depuis 2010"),("📍","Bassin brestois"),("✓","Devis gratuit"),("★","Avis Google 5/5")]
-    inner="".join(f'<div class="item"><span class="ic">{i}</span>{t}</div>' for i,t in items)
-    return f'<section class="trust"><div class="wrap">{inner}</div></section>'
-
-def subhero(crumb_html, eyebrow, h1, lead, img, float_html, hero_alt=None):
-    fl = f'<div class="float">{float_html}</div>' if float_html else ""
-    return ('<section class="subhero"><div class="wrap"><div>'
-            f'<div class="crumb">{crumb_html}</div>'
-            f'<div class="eyebrow-blue">{eyebrow}</div>'
-            f'<h1>{h1}</h1><p class="lead">{lead}</p>'
-            '<div class="actions"><a class="btn solid" href="/contact" data-chat>Prendre contact →</a>'
-            f'<a class="btn line" href="tel:{PHONE_TEL}">Contacter</a></div></div>'
-            f'<div class="imgcard"><img src="/assets/img/{img}" alt="{html.escape(hero_alt or "ARÉLEC, chantier en Bretagne")}" loading="eager">{fl}</div></div></section>')
-
-def feat_section(num, eyebrow, h2, p, items, img, tag, flip=False):
-    li="".join(f"<li>{x}</li>" for x in items)
-    cls="feat flip" if flip else "feat"
-    tg = f'<span class="tag">{tag}</span>' if tag else ""
-    return (f'<section class="{cls}"><div class="wrap"><div>'
-            f'<div class="num">{num}</div><div class="eyebrow-blue">{eyebrow}</div>'
-            f'<h2>{h2}</h2><p>{p}</p><ul>{li}</ul></div>'
-            f'<div class="imgcard"><img src="/assets/img/{img}" alt="{eyebrow}" loading="lazy">{tg}</div></div></section>')
-
-def recap(h2, p="Une question, un projet ? On vous répond tout de suite, puis on continue sur WhatsApp. Devis gratuit."):
-    return (f'<section class="recap"><h2>{h2}</h2><p>{p}</p>'
-            '<div class="actions"><a class="btn solid" href="/contact" data-chat>Prendre contact →</a>'
-            f'<a class="btn line" href="tel:{PHONE_TEL}">Contacter</a></div></section>')
-
-def faq_section(qa_pairs, h2="Questions fréquentes"):
-    if not qa_pairs: return ""
-    items = "".join(
-        f'<details class="faq-q"><summary><span class="faq-q-text">{html.escape(q)}</span><span class="faq-q-icon" aria-hidden="true">+</span></summary>'
-        f'<div class="faq-a">{html.escape(a)}</div></details>'
-        for q, a in qa_pairs
-    )
-    return (f'<section class="faq"><div class="wrap-faq">'
-            f'<div class="eyebrow-blue">FAQ</div><h2>{html.escape(h2)}</h2>'
-            f'<div class="faq-list">{items}</div></div></section>')
-
-def areas_section(eyebrow, h2, paragraph_html, pills=None):
-    pills_html=""
-    if pills:
-        pills_html='<div class="pills">'+"".join(f'<a href="{u}">{t}</a>' for u,t in pills)+'</div>'
-    return (f'<section class="areas"><div class="wrap">'
-            f'<div class="eyebrow-blue">{eyebrow}</div>'
-            f'<h2>{h2}</h2><p>{paragraph_html}</p>{pills_html}</div></section>')
 
 # ---------- JSON-LD + Shells ----------
 # --- Données de référence pour LocalBusiness enrichi ---
@@ -981,7 +1011,7 @@ def jsonld(path,h1_text,area,reviews=True,breadcrumb_name=None,faq=None,service=
         blocks.append(_dump(_faq_schema(faq)))
     return "".join(f'<script type="application/ld+json">{b}</script>' for b in blocks)
 
-def head_common(path,title,desc,jl):
+def head_common(path,title,desc,jl,noindex=False):
     canon=DOMAIN+("/" if path=="" else "/"+path+"/")
     t_esc=html.escape(title); d_esc=html.escape(desc); og_img=f"{DOMAIN}/assets/img/hero.jpg"
     og=(f'<meta property="og:type" content="website"><meta property="og:locale" content="fr_FR">'
@@ -995,28 +1025,22 @@ def head_common(path,title,desc,jl):
     icons=('<link rel="icon" href="/favicon.ico" sizes="any">'
            '<link rel="icon" type="image/png" sizes="32x32" href="/assets/img/favicon-32.png">'
            '<link rel="apple-touch-icon" sizes="180x180" href="/assets/img/apple-touch-icon.png">'
-           '<meta name="theme-color" content="#0A1322">')
+           '<meta name="theme-color" content="#121211">')
+    robots='<meta name="robots" content="noindex, follow">' if noindex else ""
+    fonts=('<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+           '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@900&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@500&display=swap">')
     return ('<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">'
-            '<meta name="viewport" content="width=device-width, initial-scale=1">'
-            f'<title>{t_esc}</title><meta name="description" content="{d_esc}">'
-            f'<link rel="canonical" href="{canon}">{og}{icons}{jl}'
-            '<link rel="stylesheet" href="/assets/css/styles.css?v=44"></head>')
+            '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
+            f'<title>{t_esc}</title><meta name="description" content="{d_esc}">{robots}'
+            f'<link rel="canonical" href="{canon}">{og}{icons}{jl}{fonts}'
+            '<link rel="stylesheet" href="/assets/css/styles.css?v=51">'
+            '<script>document.documentElement.classList.add("js")</script></head>')
 
-def shell_home(path,title,desc,body,jl,dots=4):
-    dotbtns="".join(f'<button{" class=\"on\"" if i==0 else ""} data-go="{i}"></button>' for i in range(dots))
-    dotsdiv=f'<div class="dots">{dotbtns}</div>'
-    topnav=""
-    if path=="":
-        nl="".join(f'<a href="{u}">{t}</a>' for u,t in NAV_LINKS)
-        topnav=('<header class="topnav">'
-            '<a href="/" aria-label="ARELEC accueil"><img class="logo-dark" src="/assets/img/logo-dark.png" alt="ARELEC"></a>'
-            f'<nav>{nl}</nav>'
-            f'<div class="ctas"><a class="tel" href="tel:{PHONE_TEL}" aria-label="Appeler {PHONE_DISP}">{SVG_PHONE} <span class="tel-label">{PHONE_DISP}</span></a>'
-            '<a class="btn solid" href="/contact" data-chat>Prendre contact</a>'
-            '<button class="burger" type="button" aria-expanded="false" aria-controls="mdrawer" aria-label="Ouvrir le menu"><span></span></button></div></header>')
-    return head_common(path,title,desc,jl)+f'<body>{topnav}{mobile_drawer()}{chat_widget()}{dotsdiv}<main class="snap" id="snap" role="main">{body}</main>{JS}</body></html>'
-def shell_sub(path,title,desc,body,jl):
-    return head_common(path,title,desc,jl)+f'<body class="sub-shell">{mobile_drawer()}{chat_widget()}<main role="main">{body}</main>{JS}</body></html>'
+NOINDEX = {"blog"}  # pages encore en maquette (contenu à rédiger)
+def shell(path,title,desc,body,jl,active):
+    return (head_common(path,title,desc,jl,noindex=path in NOINDEX)
+            + f'<body>{nav(active)}{mobile_drawer()}{chat_widget()}<main id="main">{body}</main>{FOOTER}'
+            + '<script src="/assets/js/site.js?v=1" defer></script></body></html>')
 
 def write(path,h):
     d=SITE/(path.strip("/")); d.mkdir(parents=True,exist_ok=True)
@@ -1095,25 +1119,27 @@ SERVICE_PLOMB = {
 
 # ---------- PAGES ----------
 SECT_HOME="De la prise qui claque à la salle de bain complète : on s'occupe de toute la maison, en neuf comme en rénovation."
-AVIS_HOME="Qualité, chantier propre, réactivité et bons conseils, dans tout le bassin brestois."
-pages=[]
+pages=[]  # (slug, title, desc, body, jsonld, nav actif)
 
 # HOME
-home_body=(hero_home("Électricité · Chauffage · Plomberie — Finistère, depuis 2010","Une maison bien câblée,<br><b>bien chauffée.</b>",
-  "À Plouzané et dans tout le bassin brestois depuis 2010 : électricité, chauffage et plomberie, en neuf comme en rénovation.<br><b>Parlez-nous de votre projet</b> — devis gratuit, sur place.")
- +trades_panel("Trois métiers, <em>un seul interlocuteur.</em>",SECT_HOME)+avis_panel(AVIS_HOME)+realisations_panel()
- +faq_section(FAQ_HOME, h2="Vos questions, nos réponses.")+falling_panel()+FOOTER)
+home_body=(hero_home()+logos_band()+stats_section()+why_section()+services_section()+story_section()
+ +rating_section()+safety_section()+process_section()+testimonials_section(REVS[:3])+areas_block()
+ +faq_section(FAQ_HOME, h2="Vos questions, nos réponses.")+cta_section())
 pages.append(("","ARélec — Électricien, chauffagiste & plombier à Plouzané (29)",
   "Électricité, chauffage et plomberie dans le bassin brestois depuis 2010. Devis gratuit, travail soigné. Parlez-nous de votre projet.",
-  home_body, jsonld("/","Accueil",None,faq=FAQ_HOME), "home"))
+  home_body, jsonld("/","Accueil",None,faq=FAQ_HOME), "/"))
 
-# Helper subpage build
+# Gabarit des pages métier et des pages locales SEO (contenu inchangé, nouvelle DA)
+METIER_OF = {"/electricite":"electricien","/chauffage":"chauffagiste","/plomberie":"plombier"}
 def gen_sub(slug,title,desc,active,crumb,eyebrow,h1,lead,hero_img,hero_float,sections,recap_h2,area,extra="",breadcrumb_name=None,hero_alt=None,faq=None,service=None):
-    faq_html = faq_section(faq) if faq else ""
-    body = (subnav(active) + subhero(crumb,eyebrow,h1,lead,hero_img,hero_float,hero_alt) + trust_strip()
-            + "".join(feat_section(*s, flip=(i%2==1)) for i,s in enumerate(sections))
-            + extra + faq_html + recap(recap_h2) + FOOTER)
-    pages.append((slug,title,desc,body,jsonld("/"+slug,h1,area,breadcrumb_name=breadcrumb_name,faq=faq,service=service),"sub"))
+    rows="".join(feat_section(*s, flip=(i%2==1)) for i,s in enumerate(sections))
+    metier=METIER_OF.get(active,"electricien")
+    area_h2=(f'On intervient à {area}<br><b>et dans tout le bassin brestois.</b>' if area else None)
+    body=(phero(crumb,eyebrow,h1,lead,hero_img,FLOAT_AVIS,hero_alt)+trust_strip()
+          +f'<section class="sec"><div class="wrap"><div class="feat-rows">{rows}</div></div></section>'
+          +extra+(areas_block(metier,area_h2) if area_h2 else areas_block(metier))
+          +(faq_section(faq) if faq else "")+cta_section(recap_h2))
+    pages.append((slug,title,desc,body,jsonld("/"+slug,h1,area,breadcrumb_name=breadcrumb_name,faq=faq,service=service),"/services"))
 
 CRUMB_M = '<a href="/">Accueil</a> › {label}'
 CRUMB_L = '<a href="/">Accueil</a> › <a href="/{metier_url}">{metier}</a> › {commune}'
@@ -1387,65 +1413,145 @@ for m_slug,m_label,m_url,hero_img,sec01_img,noun,desc_short,prest_lower,sec01_it
                   h1, lead, hero_img, sec01, sec02, SEC_INTERLO,
                   f"Un projet de {noun.lower()} à {c_label} ?")
 
-# ---------- STUBS ----------
-def stub(slug,title,desc,h1,inner,breadcrumb_name=None):
-    body=('<section class="panel visible" id="hero"><div class="bg"></div>'+nav_home("/"+slug)+
-      '<div class="spacer"></div><div class="content"><h1 class="reveal d2">'+h1+'</h1>'
-      '<div class="hr reveal d3"></div><div class="reveal d4" style="max-width:640px;color:rgba(255,255,255,.92);line-height:1.6">'+inner+'</div></div>'
-      '<div class="scrollhint">Suite<div class="arr"></div></div></section>'+FOOTER)
-    pages.append((slug,title,desc,body,jsonld("/"+slug,h1,None,reviews=False,breadcrumb_name=breadcrumb_name),"home"))
+# ---------- /services ----------
+services_body=(phero(CRUMB_M.format(label="Services"),"Nos services",
+  "Électricité, chauffage, plomberie.<br><b>Une seule équipe.</b>", SECT_HOME+" Un seul devis, un seul interlocuteur, du début à la fin.",
+  "plomb.jpg",FLOAT_AVIS,"Salle de bain bois et marbre rénovée par ARélec")
+ +trust_strip()
+ +('<section class="sec"><div class="wrap">'
+   f'<div class="split-head"><div class="head"><span{R()}>{label("Ce qu\'on fait")}</span>'
+   f'<h2{R(.08,"h2")}>Six façons de garder<br><b>votre maison au top.</b></h2></div>'
+   f'<div class="side"><p{R(.12,"lead")}>Choisissez le service qui correspond à votre besoin, ou décrivez-nous la situation : on vous oriente.</p></div></div>'
+   f'<div class="svc-grid">{svc_cards()}</div></div></section>')
+ +('<section class="sec" style="padding-top:0"><div class="wrap"><div class="two-col">'
+   f'<img{R()} src="/assets/img/reno-cablage.jpg" alt="Câblage et isolation en cours de rénovation" loading="lazy">'
+   f'<div class="head"><span{R(.05)}>{label("Notre méthode")}</span><h2{R(.1,"h2")}>Un travail soigné.<br><b>Des conseils clairs.</b></h2>'
+   f'<p{R(.15,"lead")}>On ne se lance jamais sans avoir compris. On arrive, on regarde, on explique — quitte à dire qu\'un truc n\'est pas utile chez vous.</p>'
+   f'<ul{R(.2,"steps-v")}>'
+   '<li><span class="step-n mono">01</span><div><b>Comprendre le besoin</b><p>Ce qui ne va pas, ce que vous voulez, vos contraintes et votre budget.</p></div></li>'
+   '<li><span class="step-n mono">02</span><div><b>Étudier les options</b><p>On vérifie l\'existant sur place et on vous présente les solutions possibles.</p></div></li>'
+   '<li><span class="step-n mono">03</span><div><b>Expliquer avant d\'agir</b><p>Un devis détaillé, écrit, sans engagement. Rien ne démarre sans votre accord.</p></div></li>'
+   '</ul></div></div></div></section>')
+ +('<section class="sec" style="padding-top:0"><div class="wrap">'
+   f'<div class="head"><span{R()}>{label("Neuf &amp; rénovation")}</span><h2{R(.08,"h2")}>De la construction<br><b>à la rénovation complète.</b></h2></div>'
+   '<div class="cards-2">'
+   f'<div{R(0,"img-card")}><img src="/assets/img/cablage.jpg" alt="" loading="lazy"><div class="svc-body"><h3 class="h3">Construction neuve</h3>'
+   '<p>On conçoit l\'installation, on tire les gaines, on pose le tableau, le chauffage et les sanitaires, et on met tout en route.</p></div></div>'
+   f'<div{R(.08,"img-card")}><img src="/assets/img/sdb-bois.jpg" alt="" loading="lazy"><div class="svc-body"><h3 class="h3">Rénovation</h3>'
+   '<p>Mise aux normes, remplacement du chauffage, salle de bain refaite : pièce par pièce, sans tout casser.</p></div></div>'
+   '</div></div></section>')
+ +process_section()+faq_section(FAQ_HOME[2:6], h2="Des questions sur votre projet ?")+cta_section('Besoin d\'un artisan ?<br><b>Commencez ici.</b>'))
+pages.append(("services","Nos services : électricité, chauffage, plomberie | ARélec",
+  "Installation et rénovation électrique, mise aux normes, dépannage, chauffage, salle de bain et plomberie dans le bassin brestois. Devis gratuit — ARélec.",
+  services_body, jsonld("/services","Services",None,faq=FAQ_HOME[2:6],breadcrumb_name="Services"), "/services"))
 
-# ---------- /contact : page simple (3 boutons + formulaire) ----------
-contact_body=(subnav("/contact")+
- '<section class="contact-hero"><div class="wrap-c">'
- '<div class="crumb"><a href="/">Accueil</a> › Contact</div>'
- '<div class="eyebrow-blue">Contact</div>'
- '<h1>Parlons de <b>votre projet.</b></h1>'
- '<p class="lead">Trois options pour nous joindre. Le plus rapide, c\'est l\'appel ou WhatsApp.</p>'
- '</div></section>'
- '<section class="contact-methods"><div class="wrap-c">'
- f'<a class="cmethod" href="tel:{PHONE_MOBILE_TEL}"><div class="cm-icon">{SVG_PHONE}</div><div class="cm-body"><div class="cm-label">Appeler</div><div class="cm-value">{PHONE_MOBILE_DISP}</div></div></a>'
- f'<a class="cmethod cmethod-whatsapp" href="https://wa.me/{WHATSAPP_INT}" target="_blank" rel="noopener"><div class="cm-icon">{SVG_WA}</div><div class="cm-body"><div class="cm-label">WhatsApp</div><div class="cm-value">{PHONE_MOBILE_DISP}</div></div></a>'
- f'<a class="cmethod" href="mailto:{EMAIL}"><div class="cm-icon">{SVG_MAIL}</div><div class="cm-body"><div class="cm-label">Email</div><div class="cm-value">{EMAIL}</div></div></a>'
- '</div></section>'
- '<section class="contact-form-section"><div class="wrap-c">'
- '<h2>Ou laissez-nous un message.</h2>'
- '<p class="sub">On revient vers vous sous 24 à 48 h.</p>'
- '<form class="cform" id="cform" action="mailto:contact@entreprise-arelec.fr" method="POST" enctype="text/plain">'
- '<div class="cfrow">'
- '<label>Nom <input name="nom" type="text" required autocomplete="name"></label>'
- '<label>Téléphone <input name="tel" type="tel" autocomplete="tel"></label>'
- '</div>'
- '<label>Email <input name="email" type="email" required autocomplete="email"></label>'
- '<label>Votre projet <textarea name="message" rows="5" required placeholder="Type de travaux (élec, chauffage, plomberie), commune, délais..."></textarea></label>'
- '<button type="submit" class="btn solid">Envoyer →</button>'
- '<p class="cform-foot">Vos informations servent uniquement à vous répondre.</p>'
- '</form>'
- '</div></section>'+FOOTER+
- '<script>document.getElementById("cform")?.addEventListener("submit",function(e){e.preventDefault();const f=e.target;const body=`Nom: ${f.nom.value}\\nTéléphone: ${f.tel.value}\\nEmail: ${f.email.value}\\n\\nMessage:\\n${f.message.value}`;const subject=`Demande ARélec — ${f.nom.value}`;window.location.href=`mailto:contact@entreprise-arelec.fr?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;});</script>')
+# ---------- /entreprise (À propos) ----------
+VALUES=[("broom","On bosse propre","On protège, on range en partant. Votre maison reste votre maison pendant le chantier."),
+        ("chat","On dit ce qu'on pense","Des conseils francs, quitte à dire qu'un équipement n'est pas utile chez vous."),
+        ("tool","On revient si besoin","Un souci après le chantier ? On revient, c'est la base du métier."),
+        ("check","On finit ce qu'on commence","Un chantier se termine proprement, mis en route et expliqué.")]
+about_body=(phero(CRUMB_M.format(label="L'entreprise"),"À propos d'ARélec",
+  "Un artisan d'ici,<br><b>depuis 2010.</b>",
+  "Installés à Plouzané, on s'occupe de l'élec, du chauffage et de la plomberie dans le bassin brestois. En neuf, en rénovation, en dépannage. Un seul interlocuteur, de A à Z.",
+  "maison-bleue.jpg",FLOAT_AVIS,"Maison rénovée à l'heure bleue, chantier ARélec")
+ +('<section class="sec"><div class="wrap"><div class="two-col">'
+   f'<div class="head"><span{R()}>{label("Notre histoire")}</span><h2{R(.08,"h2")}>Une histoire d\'artisan,<br><b>à Plouzané.</b></h2>'
+   f'<p{R(.14,"lead")}>On a démarré ARélec en 2010, ici, dans le bassin brestois. Le principe de base : qu\'un même artisan puisse refaire la maison de bout en bout — élec, chauffage, plomberie — sans qu\'il faille jongler avec trois entreprises. Quinze ans plus tard, on fait toujours comme ça.</p>'
+   f'<p{R(.18,"lead")}>Le pont sur le logo, c\'est le pont de l\'Iroise. On est d\'ici, on y reste.</p></div>'
+   f'<img{R(.1)} src="/assets/img/chantier-plouider.jpg" alt="Chantier ARélec à Plouider" loading="lazy">'
+   '</div></div></section>')
+ +stats_section('Quelques repères<br><b>sur ARélec.</b>',"SARL ARélec, gérée par Arnaud Roncey, basée à Plouzané (29280) et immatriculée sous le SIREN 790 223 036.")
+ +('<section class="sec" style="padding-top:0"><div class="wrap">'
+   f'<div class="head center"><span{R()}>{label("Nos valeurs")}</span><h2{R(.08,"h2")}>Ce qui guide<br><b>chaque intervention.</b></h2></div>'
+   '<div class="cards-4">'+"".join(f'<div{R(.08*i,"mist-card")}><span class="icon-chip">{ic(a)}</span><div class="txt"><h3 class="h3">{b}</h3><p class="small">{c}</p></div></div>' for i,(a,b,c) in enumerate(VALUES))+
+   '</div></div></section>')
+ +('<section class="sec" style="padding-top:0"><div class="wrap">'
+   f'<div class="split-head"><div class="head"><span{R()}>{label("L\'équipe")}</span><h2{R(.08,"h2")}>Les gens derrière<br><b>ARélec.</b></h2></div>'
+   f'<div class="side"><p{R(.12,"lead")}>Une petite équipe d\'artisans qui fait les trois métiers elle-même.</p></div></div>'
+   '<div class="cards-3">'
+   f'<div{R(0,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>Arnaud Roncey</b><span>Gérant · électricité, chauffage, plomberie</span></div></div>'
+   f'<div{R(.08,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>{tbd("Prénom Nom")}</b><span>{tbd("Rôle à compléter")}</span></div></div>'
+   f'<div{R(.16,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>{tbd("Prénom Nom")}</b><span>{tbd("Rôle à compléter")}</span></div></div>'
+   '</div></div></section>')
+ +('<section class="sec" style="padding-top:0"><div class="wrap">'
+   f'<div class="head"><span{R()}>{label("Garanties")}</span><h2{R(.08,"h2")}>Des engagements<br><b>clairement expliqués.</b></h2></div>'
+   '<div class="cards-3">'
+   f'<div{R(0,"mist-card")}><span class="icon-chip">{ic("doc")}</span><div class="txt"><h3 class="h3">Entreprise immatriculée</h3><p class="small">SARL ARélec, SIREN 790 223 036, Plouzané (29280).</p></div></div>'
+   f'<div{R(.08,"mist-card")}><span class="icon-chip">{ic("shield")}</span><div class="txt"><h3 class="h3">Assurances</h3><p class="small">{tbd("Assurance décennale et RC pro : assureur et n° de contrat à compléter")}</p></div></div>'
+   f'<div{R(.16,"mist-card")}><span class="icon-chip">{ic("check")}</span><div class="txt"><h3 class="h3">Qualifications</h3><p class="small">{tbd("Labels et qualifications à compléter")}</p></div></div>'
+   '</div></div></section>')
+ +cta_section('Et si on parlait<br><b>de votre projet ?</b>'))
+pages.append(("entreprise","L'entreprise | ARélec, artisan depuis 2010",
+  "ARélec, artisan électricien-chauffagiste-plombier à Plouzané depuis 2010. Une équipe, un seul interlocuteur, un travail soigné dans tout le bassin brestois.",
+  about_body, jsonld("/entreprise","L'entreprise",None,breadcrumb_name="L'entreprise"), "/entreprise"))
+
+# ---------- /blog (maquette : articles à rédiger, page en noindex) ----------
+POSTS=[("chauffage","confort.jpg","Chauffage : les réglages qui font baisser la facture"),
+       ("plomberie","sdb-bleue.jpg","Rénover sa salle de bain : par où commencer ?"),
+       ("électricité","reno-cablage.jpg","Mise aux normes NF C 15-100 : ce qu'il faut savoir"),
+       ("plomberie","douche-marbre.jpg","Une fuite invisible ? Les signes qui ne trompent pas"),
+       ("électricité","eclairage.jpg","Bien éclairer une pièce : nos conseils d'artisan"),
+       ("chauffage","maison-bleue.jpg","Entretien annuel du chauffage : pourquoi c'est utile")]
+posts="".join(f'<article{R(.06*(i%3),"post")}><div class="img"><img src="/assets/img/{img}" alt="" loading="lazy"><span class="tag mono">{cat}</span></div>'
+              f'<div class="meta mono"><span class="pill lime">À rédiger</span>{tbd("date")}</div><h3 class="h3">{t}</h3>'
+              f'<p class="small">{tbd("Résumé de l\'article à rédiger")}</p></article>' for i,(cat,img,t) in enumerate(POSTS))
+blog_body=(phero(CRUMB_M.format(label="Blog"),"Le journal ARélec",
+  "Des conseils pratiques<br><b>pour une maison sûre et confortable.</b>",
+  "Électricité, chauffage, plomberie : les bons réflexes et les questions qu'on nous pose le plus, expliqués simplement.",actions="")
+ +('<section class="sec"><div class="wrap">'
+   f'<article{R(0,"post-feat")}><div class="img"><img src="/assets/img/cablage.jpg" alt="" loading="lazy"><span class="tag mono">À la une</span></div>'
+   f'<div class="txt"><div class="meta mono"><span class="pill lime">À rédiger</span></div>'
+   '<h2 class="h2">Disjoncteur qui saute :<br><b>les bons réflexes.</b></h2>'
+   f'<p class="lead">{tbd("Introduction de l\'article à rédiger")}</p></div></article>'
+   f'<div class="head" style="margin-top:96px"><span{R()}>{label("Derniers articles")}</span></div>'
+   f'<div class="posts">{posts}</div></div></section>')
+ +cta_section('Une question précise ?<br><b>Posez-la directement.</b>',"Notre assistant vous répond tout de suite, puis l'équipe prend le relais sur WhatsApp."))
+pages.append(("blog","Blog — conseils électricité, chauffage, plomberie | ARélec",
+  "Conseils d'artisan sur l'électricité, le chauffage et la plomberie : bons réflexes, entretien et rénovation, par ARélec.",
+  blog_body, jsonld("/blog","Blog",None,reviews=False,breadcrumb_name="Blog"), "/blog"))
+
+# ---------- /contact ----------
+contact_body=(phero(CRUMB_M.format(label="Contact"),"Contact",
+  "Dites-nous ce dont vous avez besoin.<br><b>On s'occupe de la suite.</b>",
+  "Le plus rapide : notre assistant, WhatsApp ou un coup de fil. Réponse sous 24 à 48 h, devis gratuit sur place.",actions="")
+ +('<section class="sec"><div class="wrap"><div class="contact-grid">'
+   f'<div{R(0,"panel mist")}><span class="mono">Parler à l\'équipe</span>'
+   f'<button class="method ai" type="button" data-chat><span class="icon-chip">{ic("chat")}</span><div><b>Assistant du site</b><span>Réponse immédiate, puis relais WhatsApp</span></div><span class="go">{ic("arrow")}</span></button>'
+   f'<a class="method wa" href="https://wa.me/{WHATSAPP_INT}" target="_blank" rel="noopener"><span class="icon-chip">{SVG_WA}</span><div><b>WhatsApp</b><span>{PHONE_MOBILE_DISP}</span></div><span class="go">{ic("arrow")}</span></a>'
+   f'<a class="method" href="tel:{PHONE_TEL}"><span class="icon-chip">{ic("bolt")}</span><div><b>Téléphone</b><span>{PHONE_DISP} · mobile {PHONE_MOBILE_DISP}</span></div><span class="go">{ic("arrow")}</span></a>'
+   f'<a class="method" href="mailto:{EMAIL}"><span class="icon-chip">{SVG_MAIL}</span><div><b>Email</b><span>{EMAIL}</span></div><span class="go">{ic("arrow")}</span></a>'
+   f'<div class="method" style="cursor:default"><span class="icon-chip">{ic("clock")}</span><div><b>Horaires</b><span>Lun–Ven · 8h–18h · {ADDRESS}</span></div></div>'
+   '</div>'
+   f'<div{R(.08,"panel ink dk")}><span class="mono" style="color:rgba(255,255,255,.55)">Demander une intervention</span>'
+   '<h2 class="h2" style="font-size:32px">Laissez-nous un message.</h2>'
+   '<form class="cform" id="cform">'
+   '<div class="row"><label>Nom <input name="nom" type="text" required autocomplete="name"></label>'
+   '<label>Téléphone <input name="tel" type="tel" autocomplete="tel"></label></div>'
+   '<div class="row"><label>Email <input name="email" type="email" required autocomplete="email"></label>'
+   '<label>Commune <input name="commune" type="text" autocomplete="address-level2"></label></div>'
+   '<label>Type de travaux <select name="metier"><option>Électricité</option><option>Chauffage</option><option>Plomberie</option><option>Plusieurs / je ne sais pas</option></select></label>'
+   '<label>Votre projet <textarea name="message" rows="5" required placeholder="Ce qu\'il faut faire, neuf ou rénovation, urgence, délais…"></textarea></label>'
+   f'<button type="submit" class="btn btn-lime"><span class="chip">{ic("arrow")}</span>Envoyer ma demande</button>'
+   '<p class="cform-foot">Vos informations servent uniquement à vous répondre.</p>'
+   '</form></div>'
+   '</div></div></section>')
+ +('<section class="sec" style="padding-top:0"><div class="wrap">'
+   f'<div class="head center"><span{R()}>{label("Après votre demande")}</span><h2{R(.08,"h2")}>Un chemin simple,<br><b>de la demande à la visite.</b></h2></div>'
+   '<div class="cards-3">'
+   + "".join(f'<div{R(.08*i,"mist-card")}><span class="step-n mono" style="align-self:flex-start">{i+1:02d}</span><div class="txt"><h3 class="h3">{a}</h3><p class="small">{b}</p></div></div>'
+             for i,(a,b) in enumerate([("On lit votre demande","Type de travaux, commune, urgence : on regarde ce qu'il vous faut."),
+                                       ("On vous recontacte","Sous 24 à 48 h, par téléphone ou WhatsApp, pour préciser le besoin."),
+                                       ("On cale la visite","Visite gratuite sur place, puis devis détaillé et sans engagement.")]))
+   + '</div></div></section>')
+ +faq_section([("Sous combien de temps répondez-vous ?","Sous 24 à 48 h en général. L'assistant du site, lui, répond tout de suite et transmet votre demande sur WhatsApp."),
+               ("Faut-il savoir quel métier choisir ?","Non. Décrivez simplement la situation : on fait l'électricité, le chauffage et la plomberie, on saura vous orienter."),
+               FAQ_HOME[3], FAQ_HOME[1]], h2="Avant de nous écrire"))
 pages.append(("contact","Contact & devis gratuit | ARélec — Plouzané (29)",
- "Contactez ARélec : 06 78 02 04 24, WhatsApp ou contact@entreprise-arelec.fr. Devis gratuit dans tout le bassin brestois.",
- contact_body, jsonld("/contact","Contact",None), "sub"))
-gen_sub("entreprise","L'entreprise | ARélec, artisan depuis 2010",
- "ARélec, artisan électricien-chauffagiste-plombier à Plouzané depuis 2010. Une équipe, un seul interlocuteur, un travail soigné dans tout le bassin brestois.",
- "/entreprise", CRUMB_M.format(label="L'entreprise"),
- "L'entreprise", "ARélec, <b>depuis 2010.</b>",
- "Artisan installé à Plouzané, on s'occupe de l'élec, du chauffage et de la plomberie dans le bassin brestois. En neuf, en rénovation, en dépannage. Un seul interlocuteur, de A à Z.",
- "hero.jpg", "<span class='stars'>★★★★★</span> Avis Google",
- [("01","Depuis 2010","Une histoire d'artisan, à Plouzané.",
-   "On a démarré ARélec en 2010, ici, dans le bassin brestois. Le principe de base : qu'un même artisan puisse refaire la maison de bout en bout — élec, chauffage, plomberie — sans qu'il faille jongler avec trois entreprises. Quinze ans plus tard, on fait toujours comme ça. Le pont sur le logo, c'est le pont de l'Iroise. On est d'ici, on y reste.",
-   ["Créée en 2010","Basée à Plouzané (29280)","Bassin brestois &amp; Finistère","Gérée par Arnaud Roncey"],
-   "maison-bleue.jpg","Plouzané, depuis 2010"),
-  ("02","Comment on bosse","Pas de magie, du travail d'artisan.",
-   "On arrive, on regarde, on explique. On bosse propre, on range en partant, et on donne de vrais conseils — quitte à dire qu'un truc n'est pas utile chez vous. Si on doit revenir, on revient. C'est ce qui fait que les gens nous rappellent pour les chantiers suivants.",
-   ["On bosse propre","On dit ce qu'on pense","On revient si besoin","On finit ce qu'on commence"],
-   "chantier-plouider.jpg","Chantier en cours"),
-  ("03","L'avantage","Trois métiers, par la même équipe.",
-   'On fait les trois métiers nous-mêmes : <a href="/electricite">électricité</a>, <a href="/chauffage">chauffage</a> et <a href="/plomberie">plomberie</a>. Pour une rénovation, ça veut dire un seul devis, pas de coordination à faire entre artisans, et personne qui attend l\'autre sur le chantier. Si l\'un dépend de l\'autre, on s\'organise tout seul.',
-   ["Électricité","Chauffage &amp; thermique","Plomberie","Coordination du chantier"],
-   "escalier-led.jpg","Trois métiers, une équipe")],
- "Un projet ? On en parle.", None, breadcrumb_name="L'entreprise")
-# ---------- /realisations : galerie des chantiers ----------
+  "Contactez ARélec : assistant en ligne, WhatsApp 06 78 02 04 24, téléphone 02 98 40 20 43 ou contact@entreprise-arelec.fr. Devis gratuit dans tout le bassin brestois.",
+  contact_body+'<script>document.getElementById("cform")?.addEventListener("submit",function(e){e.preventDefault();const f=e.target;const body=`Nom: ${f.nom.value}\\nTéléphone: ${f.tel.value}\\nEmail: ${f.email.value}\\nCommune: ${f.commune.value}\\nTravaux: ${f.metier.value}\\n\\nMessage:\\n${f.message.value}`;window.location.href=`mailto:'+EMAIL+'?subject=${encodeURIComponent("Demande ARélec — "+f.nom.value)}&body=${encodeURIComponent(body)}`;});</script>',
+  jsonld("/contact","Contact",None,breadcrumb_name="Contact"), "/contact"))
+
+# ---------- /realisations ----------
 GALLERY=[
  ("hero.jpg","Rénovation","Extension bois & pierre, à l'heure bleue · Plouider"),
  ("plomb.jpg","Salle de bain","Bois & marbre — bassin brestois"),
@@ -1460,43 +1566,54 @@ GALLERY=[
  ("douche-marbre.jpg","Plomberie","Douche italienne · marbre"),
  ("sdb-bleue.jpg","Salle de bain","Meuble bleu & finitions blanches"),
  ("reno-cablage.jpg","Électricité","Câblage & isolation phonique"),
+ ("chantier-toiture.jpg","Rénovation","Chantier en bord de mer"),
 ]
-gallery_items="".join(
- f'<figure class="rcard"><img src="/assets/img/{img}" alt="{cap}" loading="lazy">'
- f'<figcaption><div class="rkind">{kind}</div><div class="rloc">{cap}</div></figcaption></figure>'
- for img,kind,cap in GALLERY)
-real_body=(subnav("/realisations")+
- '<section class="contact-hero"><div class="wrap-c">'
- '<div class="crumb"><a href="/">Accueil</a> › Réalisations</div>'
- '<div class="eyebrow-blue">Réalisations</div>'
- '<h1>Nos <b>chantiers.</b></h1>'
- '<p class="lead">Quelques travaux récents dans le bassin brestois — élec, chauffage, plomberie, rénovations complètes.</p>'
- '</div></section>'+trust_strip()+
- '<section class="gallery-section"><div class="wrap-g">'
- f'<div class="gallery">{gallery_items}</div>'
- '</div></section>'
- +recap("Un projet similaire ? On en parle.")+FOOTER)
+gallery_items="".join(f'<figure{R(.05*(i%3),"gcard")}><img src="/assets/img/{img}" alt="{html.escape(cap)}" loading="lazy">'
+                      f'<figcaption><div class="mono">{kind}</div><span>{cap}</span></figcaption></figure>' for i,(img,kind,cap) in enumerate(GALLERY))
+real_body=(phero(CRUMB_M.format(label="Réalisations"),"Réalisations",
+  "Le travail bien fait,<br><b>en vrai.</b>",
+  "Quelques chantiers récents dans le bassin brestois : rénovations complètes, salles de bain, tableaux électriques, éclairage soigné.",actions="")
+ +f'<section class="sec"><div class="wrap"><div class="gallery">{gallery_items}</div></div></section>'
+ +cta_section('Un projet similaire ?<br><b>On en parle.</b>',img="sdb-baignoire.jpg"))
 pages.append(("realisations","Nos réalisations | ARélec — Brest & Finistère",
- "Galerie de nos chantiers à Brest, Plouzané et alentour : salles de bain, rénovations complètes, éclairage et installations électriques.",
- real_body, jsonld("/realisations","Réalisations",None), "sub"))
-stub("avis","Avis clients | ARélec — Brest & Plouzané",
- "Ce que nos clients disent d'ARélec : qualité, propreté, réactivité et bons conseils. Avis vérifiés Google.",
- "Ils nous<br><b>recommandent.</b>",
- "Qualité du travail, chantier propre, réactivité et bons conseils reviennent dans nos avis Google. Retrouvez-les en bas de chaque page.",
- breadcrumb_name="Avis clients")
-stub("mentions-legales","Mentions légales | ARélec","Mentions légales du site ARélec (SARL ARélec, Plouzané).",
- "Mentions<br><b>légales.</b>","SARL ARélec — SIREN 790 223 036 — Plouzané (29280). Directeur de la publication : Arnaud Roncey. <em>(À compléter : hébergeur, capital, TVA.)</em>",
- breadcrumb_name="Mentions légales")
-stub("politique-confidentialite","Politique de confidentialité | ARélec","Politique de confidentialité et gestion des données du site ARélec.",
- "Confidentialité.","Les données envoyées via le formulaire de contact servent uniquement à répondre à votre demande. Les messages écrits à l'assistant du site sont transmis à un service d'IA (via OpenRouter) uniquement pour générer la réponse ; le site ne les enregistre pas. <em>(À compléter avec Arnaud.)</em>",
- breadcrumb_name="Confidentialité")
+  "Galerie de nos chantiers à Brest, Plouzané et alentour : salles de bain, rénovations complètes, éclairage et installations électriques.",
+  real_body, jsonld("/realisations","Réalisations",None,breadcrumb_name="Réalisations"), "/realisations"))
+
+# ---------- /avis ----------
+avis_body=(phero(CRUMB_M.format(label="Avis clients"),"Avis clients",
+  "Ils nous<br><b>recommandent.</b>",
+  "Qualité du travail, chantier propre, réactivité et bons conseils : voici ce que nos clients disent d'ARélec sur Google.",actions="")
+ +rating_section().replace(btn("Lire les avis","/avis","light","arrow"),btn_contact("dark"))
+ +testimonials_section()+cta_section())
+pages.append(("avis","Avis clients | ARélec — Brest & Plouzané",
+  "Ce que nos clients disent d'ARélec : qualité, propreté, réactivité et bons conseils. Avis vérifiés Google.",
+  avis_body, jsonld("/avis","Avis clients",None,breadcrumb_name="Avis clients"), "/"))
+
+# ---------- pages légales ----------
+def legal(slug,title,desc,h1,inner,breadcrumb_name):
+    body=(phero(CRUMB_M.format(label=breadcrumb_name),breadcrumb_name,h1,"Informations légales du site entreprise-arelec.fr.",actions="")
+          +f'<section class="sec"><div class="wrap"><div class="prose">{inner}</div></div></section>')
+    pages.append((slug,title,desc,body,jsonld("/"+slug,breadcrumb_name,None,reviews=False,breadcrumb_name=breadcrumb_name),"/"))
+legal("mentions-legales","Mentions légales | ARélec","Mentions légales du site ARélec (SARL ARélec, Plouzané).",
+  "Mentions<br><b>légales.</b>",
+  "<h2>Éditeur</h2><p>SARL ARélec — SIREN 790 223 036 — Plouzané (29280).<br>Directeur de la publication : Arnaud Roncey.<br>"
+  f"Contact : {EMAIL} · {PHONE_DISP}</p>"
+  f"<h2>Informations à compléter</h2><p>{tbd('Capital social')} · {tbd('N° de TVA intracommunautaire')} · {tbd('Adresse du siège')}</p>"
+  "<h2>Hébergement</h2><p>Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.</p>",
+  "Mentions légales")
+legal("politique-confidentialite","Politique de confidentialité | ARélec","Politique de confidentialité et gestion des données du site ARélec.",
+  "Confidentialité.",
+  "<h2>Formulaire de contact</h2><p>Les données envoyées via le formulaire de contact servent uniquement à répondre à votre demande.</p>"
+  "<h2>Assistant du site</h2><p>Les messages écrits à l'assistant du site sont transmis à un service d'IA (via OpenRouter) uniquement pour générer la réponse ; le site ne les enregistre pas. Si vous poursuivez sur WhatsApp, la conversation est traitée par ARélec et son agent WhatsApp pour préparer votre demande.</p>"
+  f"<h2>Vos droits</h2><p>Pour toute question ou demande de suppression : {EMAIL}. {tbd('Durées de conservation et détails RGPD à compléter avec Arnaud')}</p>",
+  "Confidentialité")
 
 # ---------- écriture ----------
-for slug,t,d,body,jl,kind in pages:
-    if kind=="sub": write(slug, shell_sub(slug,t,d,body,jl))
-    else: write(slug, shell_home(slug,t,d,body,jl, dots=(4 if slug=="" else 0)))
+(JS_DIR/"site.js").write_text(SITE_JS)
+for slug,t,d,body,jl,active in pages:
+    write(slug, shell(slug,t,d,body,jl,active))
 
-urls=[p[0] for p in pages]
+urls=[p[0] for p in pages if p[0] not in NOINDEX]
 TODAY=datetime.date.today().isoformat()
 def url_meta(u):
     if u=="": return ("1.0","weekly")
