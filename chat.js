@@ -41,7 +41,7 @@
   }
 
   function open() {
-    if (document.body.classList.contains("menu-open")) document.querySelector(".mdrawer-close")?.click();
+    if (document.body.classList.contains("menu-open")) document.querySelector(".drawer-close")?.click();
     box.hidden = false;
     document.body.classList.add("chat-open");
     fab.setAttribute("aria-expanded", "true");
