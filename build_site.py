@@ -232,6 +232,21 @@ body.menu-open{overflow:hidden}
 .rate-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:100px;background:var(--mist);font-size:13px}
 .rate-chip .ic{width:15px;height:15px}
 .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+.carousel{margin-top:56px}
+.c-track{display:flex;gap:16px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab}
+.c-track::-webkit-scrollbar{display:none}
+.c-track.drag{scroll-snap-type:none;scroll-behavior:auto;cursor:grabbing;user-select:none}
+.c-track>*{flex:0 0 calc((100% - 32px)/3);scroll-snap-align:start}
+.c-foot{display:flex;align-items:center;gap:24px;margin-top:28px}
+.c-bar{flex:1;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.c-fill{height:100%;background:var(--ink);transform-origin:left;transform:scaleX(.33);transition:transform .45s var(--ease)}
+.c-count{min-width:52px;color:var(--muted)}
+.c-nav{display:flex;gap:8px}
+.c-btn{width:48px;height:48px;border-radius:100px;border:0;background:var(--mist);color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:background .25s,color .25s,opacity .25s}
+.c-btn:hover:not(:disabled){background:var(--ink);color:var(--lime)}
+.c-btn:disabled{opacity:.35;cursor:default}
+.c-btn .ic{width:18px;height:18px}
+.c-btn.prev .ic{transform:scaleX(-1)}
 .testi{background:var(--mist);border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:22px}
 .testi .stars{margin:0}
 .testi .q{font-size:17px;line-height:1.55;letter-spacing:-.005em}
@@ -443,6 +458,7 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
 /* --- responsive --- */
 @media (max-width:1100px){
   .svc-grid,.cards-3,.testi-grid,.posts{grid-template-columns:repeat(2,1fr)}
+  .c-track>*{flex-basis:calc((100% - 16px)/2)}
   .steps,.cards-4{grid-template-columns:repeat(2,1fr);row-gap:40px}
   .f-top{grid-template-columns:1fr 1fr 1fr}
   .f-brand{grid-column:1/-1}
@@ -498,6 +514,8 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
   .why-body>img{min-height:260px}
   .feat-grid,.svc-grid,.cards-3,.cards-2,.cards-4,.testi-grid,.steps,.posts,.checks,.cform .row{grid-template-columns:1fr}
   .svc{min-height:400px}
+  .c-track>*{flex-basis:86%}
+  .c-foot{gap:16px}
   .story-card,.areas-card{border-radius:24px}
   .areas-card{padding:28px 18px}
   .feat-txt{padding:28px 20px}
@@ -521,6 +539,7 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
   .js .r{opacity:1;transform:none;filter:none;transition:none}
   .hero-bg{animation:none;transform:none}
   .ticker-track,.pulse,.chat,.chat-typing i{animation:none}
+  .c-track{scroll-behavior:auto}
   .step-line{transform:none;transition:none}
   .btn,.svc>img,.gcard img,.method{transition:none}
 }
@@ -727,7 +746,7 @@ def testi_cards(revs):
     out=""
     for i,(q,w,c) in enumerate(revs):
         init="".join(x[0] for x in w.split()[:2]).upper()
-        out+=(f'<article{R(.06*(i%3),"testi")}><div class="stars ink" aria-label="5 étoiles sur 5">{ic("star")*5}</div>'
+        out+=(f'<article class="testi"><div class="stars ink" aria-label="5 étoiles sur 5">{ic("star")*5}</div>'
               f'<p class="q">« {q} »</p><div class="author"><span class="avatar">{init}</span><div><b>{w}</b><span>Avis Google · {c}</span></div></div></article>')
     return out
 def testimonials_section(revs=None):
@@ -735,7 +754,15 @@ def testimonials_section(revs=None):
             f'<div class="split-head"><div class="head"><span{R()}>{label("Ils nous recommandent")}</span>'
             f'<h2{R(.08,"h2")}>Un service<br><b>qui fait la différence.</b></h2></div>'
             f'<div class="side"><span{R(.12,"rate-chip")}>{ic("star")} {RATING}/5 · {RATING_COUNT} avis Google</span></div></div>'
-            f'<div class="testi-grid">{testi_cards(revs or REVS)}</div></div></section>')
+            + carousel(testi_cards(revs or REVS), "Avis clients") + '</div></section>')
+def carousel(items_html, name):
+    # Carrousel : défilement aimanté natif (doigt, trackpad, souris) + flèches, barre de progression, défilement auto (site.js)
+    return (f'<div class="carousel" role="region" aria-roledescription="carrousel" aria-label="{name}">'
+            f'<div class="c-track" tabindex="0">{items_html}</div>'
+            '<div class="c-foot"><div class="c-bar" aria-hidden="true"><div class="c-fill"></div></div>'
+            '<span class="c-count mono" aria-live="polite"></span>'
+            f'<div class="c-nav"><button class="c-btn prev" type="button" aria-label="Avis précédent">{ic("right")}</button>'
+            f'<button class="c-btn next" type="button" aria-label="Avis suivant">{ic("right")}</button></div></div></div>')
 
 def areas_block(metier_slug="electricien", h2='Un artisan du coin,<br><b>près de chez vous.</b>', lab="Zone d'intervention"):
     chips="".join(f'<a class="area-chip" href="/{metier_slug}-{s}">{ic("pin")}{l}</a>' for s,l in ALL_COMMUNES)
@@ -849,6 +876,34 @@ if("IntersectionObserver" in window&&!rm){var io=new IntersectionObserver(functi
 else els.forEach(function(el){el.classList.add("in")});
 // compteurs
 if("IntersectionObserver" in window&&!rm){var co=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting)return;co.unobserve(e.target);var el=e.target,to=+el.dataset.count,suf=el.dataset.suffix||"",t0=performance.now();(function step(t){var p=Math.min(1,(t-t0)/1600),v=Math.round(to*(1-Math.pow(1-p,3)));el.textContent=v+suf;if(p<1)requestAnimationFrame(step)})(t0)})},{threshold:.6});document.querySelectorAll("[data-count]").forEach(function(el){co.observe(el)})}
+// carrousels
+document.querySelectorAll(".carousel").forEach(function(c){
+ var t=c.querySelector(".c-track"),pv=c.querySelector(".prev"),nx=c.querySelector(".next"),fill=c.querySelector(".c-fill"),cnt=c.querySelector(".c-count"),items=t.children,n=items.length,timer=null,hover=false;
+ function step(){return items.length>1?items[1].offsetLeft-items[0].offsetLeft:t.clientWidth}
+ function perView(){return Math.max(1,Math.round(t.clientWidth/step()))}
+ function idx(){return Math.round(t.scrollLeft/step())}
+ function max(){return t.scrollWidth-t.clientWidth-2}
+ function upd(){var i=idx(),pvw=perView(),last=Math.min(n,i+pvw);pv.disabled=t.scrollLeft<=2;nx.disabled=t.scrollLeft>=max();fill.style.transform="scaleX("+(last/n)+")";cnt.textContent=String(last).padStart(2,"0")+" / "+String(n).padStart(2,"0")}
+ function go(d){t.scrollBy({left:d*step(),behavior:rm?"auto":"smooth"})}
+ pv.addEventListener("click",function(){go(-1);rest()});nx.addEventListener("click",function(){go(1);rest()});
+ t.addEventListener("scroll",function(){requestAnimationFrame(upd)},{passive:true});addEventListener("resize",upd);
+ t.addEventListener("keydown",function(e){if(e.key==="ArrowRight"){e.preventDefault();go(1)}if(e.key==="ArrowLeft"){e.preventDefault();go(-1)}});
+ // glisser à la souris (le tactile défile nativement)
+ var down=false,x0=0,s0=0,moved=false;
+ t.addEventListener("pointerdown",function(e){if(e.pointerType!=="mouse")return;down=true;moved=false;x0=e.clientX;s0=t.scrollLeft});
+ addEventListener("pointermove",function(e){if(!down)return;var dx=e.clientX-x0;if(Math.abs(dx)>4){moved=true;t.classList.add("drag")}t.scrollLeft=s0-dx});
+ addEventListener("pointerup",function(){if(!down)return;down=false;if(!moved)return;t.classList.remove("drag");var i=Math.round(t.scrollLeft/step());t.scrollTo({left:i*step(),behavior:"smooth"});rest()});
+ t.addEventListener("click",function(e){if(moved){e.preventDefault();e.stopPropagation();moved=false}},true);
+ // défilement automatique, en pause au survol, au focus, et quand le carrousel n'est pas visible
+ function tick(){if(hover||document.hidden)return;if(t.scrollLeft>=max())t.scrollTo({left:0,behavior:"smooth"});else go(1)}
+ function start(){if(rm||timer)return;timer=setInterval(tick,5500)}
+ function stop(){clearInterval(timer);timer=null}
+ function rest(){stop();start()}
+ c.addEventListener("mouseenter",function(){hover=true});c.addEventListener("mouseleave",function(){hover=false});
+ c.addEventListener("focusin",function(){hover=true});c.addEventListener("focusout",function(){hover=false});
+ if("IntersectionObserver" in window)new IntersectionObserver(function(es){es[0].isIntersecting?start():stop()},{threshold:.3}).observe(c);
+ upd();
+});
 // navigation
 var nav=document.querySelector(".nav");function onS(){nav&&nav.classList.toggle("scrolled",scrollY>24)}addEventListener("scroll",onS,{passive:true});onS();
 // tiroir mobile
@@ -1033,14 +1088,14 @@ def head_common(path,title,desc,jl,noindex=False):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
             f'<title>{t_esc}</title><meta name="description" content="{d_esc}">{robots}'
             f'<link rel="canonical" href="{canon}">{og}{icons}{jl}{fonts}'
-            '<link rel="stylesheet" href="/assets/css/styles.css?v=51">'
+            '<link rel="stylesheet" href="/assets/css/styles.css?v=52">'
             '<script>document.documentElement.classList.add("js")</script></head>')
 
 NOINDEX = {"blog"}  # pages encore en maquette (contenu à rédiger)
 def shell(path,title,desc,body,jl,active):
     return (head_common(path,title,desc,jl,noindex=path in NOINDEX)
             + f'<body>{nav(active)}{mobile_drawer()}{chat_widget()}<main id="main">{body}</main>{FOOTER}'
-            + '<script src="/assets/js/site.js?v=1" defer></script></body></html>')
+            + '<script src="/assets/js/site.js?v=2" defer></script></body></html>')
 
 def write(path,h):
     d=SITE/(path.strip("/")); d.mkdir(parents=True,exist_ok=True)
@@ -1123,7 +1178,7 @@ pages=[]  # (slug, title, desc, body, jsonld, nav actif)
 
 # HOME
 home_body=(hero_home()+logos_band()+stats_section()+why_section()+services_section()+story_section()
- +rating_section()+safety_section()+process_section()+testimonials_section(REVS[:3])+areas_block()
+ +rating_section()+safety_section()+process_section()+testimonials_section()+areas_block()
  +faq_section(FAQ_HOME, h2="Vos questions, nos réponses.")+cta_section())
 pages.append(("","ARélec — Électricien, chauffagiste & plombier à Plouzané (29)",
   "Électricité, chauffage et plomberie dans le bassin brestois depuis 2010. Devis gratuit, travail soigné. Parlez-nous de votre projet.",

@@ -191,6 +191,21 @@ body.menu-open{overflow:hidden}
 .rate-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:100px;background:var(--mist);font-size:13px}
 .rate-chip .ic{width:15px;height:15px}
 .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:56px}
+.carousel{margin-top:56px}
+.c-track{display:flex;gap:16px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;-webkit-overflow-scrolling:touch;cursor:grab}
+.c-track::-webkit-scrollbar{display:none}
+.c-track.drag{scroll-snap-type:none;scroll-behavior:auto;cursor:grabbing;user-select:none}
+.c-track>*{flex:0 0 calc((100% - 32px)/3);scroll-snap-align:start}
+.c-foot{display:flex;align-items:center;gap:24px;margin-top:28px}
+.c-bar{flex:1;height:2px;background:var(--line);border-radius:2px;overflow:hidden}
+.c-fill{height:100%;background:var(--ink);transform-origin:left;transform:scaleX(.33);transition:transform .45s var(--ease)}
+.c-count{min-width:52px;color:var(--muted)}
+.c-nav{display:flex;gap:8px}
+.c-btn{width:48px;height:48px;border-radius:100px;border:0;background:var(--mist);color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:background .25s,color .25s,opacity .25s}
+.c-btn:hover:not(:disabled){background:var(--ink);color:var(--lime)}
+.c-btn:disabled{opacity:.35;cursor:default}
+.c-btn .ic{width:18px;height:18px}
+.c-btn.prev .ic{transform:scaleX(-1)}
 .testi{background:var(--mist);border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:22px}
 .testi .stars{margin:0}
 .testi .q{font-size:17px;line-height:1.55;letter-spacing:-.005em}
@@ -402,6 +417,7 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
 /* --- responsive --- */
 @media (max-width:1100px){
   .svc-grid,.cards-3,.testi-grid,.posts{grid-template-columns:repeat(2,1fr)}
+  .c-track>*{flex-basis:calc((100% - 16px)/2)}
   .steps,.cards-4{grid-template-columns:repeat(2,1fr);row-gap:40px}
   .f-top{grid-template-columns:1fr 1fr 1fr}
   .f-brand{grid-column:1/-1}
@@ -457,6 +473,8 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
   .why-body>img{min-height:260px}
   .feat-grid,.svc-grid,.cards-3,.cards-2,.cards-4,.testi-grid,.steps,.posts,.checks,.cform .row{grid-template-columns:1fr}
   .svc{min-height:400px}
+  .c-track>*{flex-basis:86%}
+  .c-foot{gap:16px}
   .story-card,.areas-card{border-radius:24px}
   .areas-card{padding:28px 18px}
   .feat-txt{padding:28px 20px}
@@ -480,6 +498,7 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
   .js .r{opacity:1;transform:none;filter:none;transition:none}
   .hero-bg{animation:none;transform:none}
   .ticker-track,.pulse,.chat,.chat-typing i{animation:none}
+  .c-track{scroll-behavior:auto}
   .step-line{transform:none;transition:none}
   .btn,.svc>img,.gcard img,.method{transition:none}
 }
