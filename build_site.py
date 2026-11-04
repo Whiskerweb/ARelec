@@ -11,8 +11,8 @@ SITE = ROOT/"site"; IMG = SITE/"assets/img"; CSS = SITE/"assets/css"
 DOMAIN = "https://www.entreprise-arelec.fr"
 PHONE_DISP = "02 98 40 20 43"; PHONE_TEL = "0298402043"; EMAIL = "contact@entreprise-arelec.fr"
 PHONE_MOBILE_DISP="06 78 02 04 24"; PHONE_MOBILE_TEL="0678020424"; WHATSAPP_INT="33678020424"
-# Note publique relevée sur avis-electricien.fr (reprise de la fiche Google) le 03/11/2026
-RATING="4,6"; RATING_COUNT=9
+# Note Google confirmée par Arnaud (questionnaire du 03/11/2026)
+RATING="4,6"; RATING_COUNT=11
 ADDRESS="Rue du Cloître, 29280 Plouzané"
 GOOGLE_URL="https://share.google/32pt95Lpj3xox6rWT"
 SVG_PHONE='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
@@ -38,6 +38,10 @@ for n,name,wpx in [(7,"plomb.jpg",1100),(8,"chantier-plouider.jpg",1100),(10,"ma
 # Logos : blanc (nav photo sombre) + sombre (subnav claire)
 wl = Image.open(ROOT/"assets/logo-arelec-white.png").convert("RGBA"); wl.thumbnail((640,640), Image.LANCZOS); wl.save(IMG/"logo.png")
 alpha = wl.split()[3]; dark = Image.new("RGBA", wl.size, (18,18,17,255)); dark.putalpha(alpha); dark.save(IMG/"logo-dark.png")
+# Logos partenaires (fournis par Arnaud) : hauteur 80 px pour le bandeau
+(IMG/"partenaires").mkdir(exist_ok=True)
+for f in sorted((ROOT/"assets/partenaires").glob("*.png")):
+    im=Image.open(f).convert("RGB"); im=im.resize((round(im.width*80/im.height),80), Image.LANCZOS); im.save(IMG/"partenaires"/f.name, optimize=True)
 
 # ---------- CSS partage (DA inspirée de Voltora : Geist, crème #F3F2EE, encre #121211, accent #E3FF4A) ----------
 CSS_TXT = r""":root{--ink:#121211;--ink2:#191917;--mist:#F3F2EE;--line:#E4E2DC;--muted:#6F6D66;--lime:#E3FF4A;--white:#fff;
@@ -155,6 +159,8 @@ body.menu-open{overflow:hidden}
 .ticker-track{display:flex;gap:56px;width:max-content;animation:marquee 32s linear infinite}
 .ticker-item{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500;letter-spacing:-.02em;color:#9a978e;white-space:nowrap}
 .ticker-item .ic{width:22px;height:22px}
+.ticker-item img{height:40px;width:auto;mix-blend-mode:multiply;filter:grayscale(1);opacity:.65;transition:filter .3s,opacity .3s}
+.ticker-item img:hover{filter:none;opacity:1}
 @keyframes marquee{to{transform:translateX(-50%)}}
 /* --- chiffres --- */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:64px}
@@ -639,12 +645,16 @@ def hero_home():
             f'<p>Dépannage, rénovation, salle de bain. Appelez le <a href="tel:{PHONE_TEL}">{PHONE_DISP}</a> ou écrivez-nous.</p></div></aside>'
             '</div></div></section>')
 
+PARTNERS=[("schneider-electric","Schneider Electric"),("atlantic","Atlantic"),("thermor","Thermor"),("legrand","Legrand"),
+          ("sonepar","Sonepar"),("aubade","Espace Aubade"),("cedeo","Cedeo"),("la-maison-des-travaux","La Maison des Travaux"),
+          (None,"Point A"),("maisons-georges-menez","Les Maisons Georges Ménez"),("georges-menez-evolution","Georges Ménez Évolution")]
 def logos_band():
-    items="".join(f'<span class="ticker-item">{ic("logo")}{tbd("Partenaire "+str(i))}</span>' for i in range(1,7))
+    items="".join(f'<span class="ticker-item"><img src="/assets/img/partenaires/{f}.png" alt="{n}" loading="lazy"></span>' if f
+                  else f'<span class="ticker-item">{n}</span>' for f,n in PARTNERS)
     return ('<section class="logos"><div class="wrap">'
             f'<div{R(0,"logos-intro")}><span class="mono">Ils nous font confiance</span>'
             '<span class="small">Fournisseurs, partenaires et clients pros du bassin brestois.</span></div>'
-            f'<div class="ticker" aria-label="Logos partenaires (à compléter)"><div class="ticker-track">{items}{items}</div></div>'
+            f'<div class="ticker" aria-label="Logos partenaires"><div class="ticker-track">{items}{items}</div></div>'
             '</div></section>')
 
 def stats_section(title='Un savoir-faire qui se voit.<br><b>Un travail qui dure.</b>',
@@ -706,7 +716,7 @@ def story_section():
             '<div class="story-txt">'
             f'<span{R(.05)}>{label("Une réalisation ARélec","on-mist")}</span>'
             f'<h2{R(.1,"h2")}>Extension bois &amp; pierre,<br><b>à l\'heure bleue.</b></h2>'
-            f'<p{R(.15,"lead")}>Une extension contemporaine à Plouider, bardage bois et pierre, avec un éclairage extérieur chaleureux. {tbd("Détail du chantier à compléter : travaux réalisés par ARélec, durée, contraintes")}</p>'
+            f'<p{R(.15,"lead")}>Une extension contemporaine à Plouider, bardage bois et pierre, avec un éclairage extérieur chaleureux. ARélec y a réalisé la plomberie et l\'électricité, sous la maîtrise d\'œuvre de Georges Ménez Évolution.</p>'
             f'<div{R(.2,"quote-card")}><span aria-hidden="true">{ic("chat")}</span><p class="q">« {q} »</p>'
             f'<div class="quote-foot"><div class="author"><span class="avatar">{init}</span><div><b>{w}</b><span>Avis Google · {c}</span></div></div>'
             f'{btn("Parler de votre projet","/contact","dark","arrow"," data-chat")}</div></div>'
@@ -1220,7 +1230,7 @@ gen_sub("electricite","Électricien à Brest & Plouzané | ARélec",
  "escalier-led.jpg", "<span class='stars'>★★★★★</span> Avis Google",
  [("01","Installation &amp; rénovation","Du plan au dernier interrupteur",
    "Que ce soit une construction neuve ou une rénovation complète, on conçoit l'installation, on tire les gaines, on pose le tableau et les appareillages, et on remet la lumière en route. Vous repartez avec une installation propre, sûre et à jour.",
-   ["Réseau et appareillage","Tableau et différentiels","Éclairage intérieur & extérieur","VMC, interphone, visiophone"],
+   ["Conception du plan électrique","Tableau et différentiels","Éclairage intérieur & extérieur","VMC, interphone, visiophone"],
    "cablage.jpg","Chantier en cours"),
   ("02","Mise aux normes","NF C 15-100, sans tout casser",
    "Beaucoup de logements anciens ont une installation qui ne suit plus la norme. On vient diagnostiquer, on remplace ce qui doit l'être et on remet le tableau au propre — pièce par pièce, sans transformer votre maison en chantier.",
@@ -1240,8 +1250,8 @@ gen_sub("chauffage","Chauffagiste à Brest | ARélec",
  'On installe et on remplace votre chauffage à <a href="/chauffagiste-brest">Brest</a>, <a href="/chauffagiste-plouzane">Plouzané</a>, <a href="/chauffagiste-saint-renan">Saint-Renan</a>, <a href="/chauffagiste-landerneau">Landerneau</a> et dans une vingtaine d\'autres communes du bassin brestois. L\'objectif : du confort l\'hiver, des factures sous contrôle.',
  "confort.jpg", "<span class='stars'>★★★★★</span> Avis Google",
  [("01","Installation &amp; remplacement","Un chauffage dimensionné juste",
-   "On installe et on remplace votre chauffage avec un seul but : que vous soyez bien chez vous l'hiver. Radiateurs, distribution, eau chaude sanitaire — on dimensionne ce qui correspond à votre maison.",
-   ["Installation neuve","Remplacement d'appareil","Radiateurs","Eau chaude sanitaire"],
+   "On installe et on remplace votre chauffage avec un seul but : que vous soyez bien chez vous l'hiver. On dimensionne ce qui correspond à votre maison, on règle la régulation et on désemboue le réseau quand il s'encrasse. Avec des conseils pour réduire la facture.",
+   ["Installation neuve","Remplacement d'appareil","Régulation et réglages","Désembouage du réseau"],
    "chantier-plouider.jpg","Chantier rénovation"),
   ("02","Pompe à chaleur &amp; climatisation","Des équipements actuels",
    "Pompe à chaleur air/eau, climatisation réversible (PAC air/air) et chauffe-eau thermodynamique : on vous oriente vers ce qui convient à votre maison, puis on l'installe.",
@@ -1264,9 +1274,9 @@ gen_sub("plomberie","Plombier à Brest | ARélec",
    "Refaire une salle de bain, c'est dépose, réseau d'eau, sanitaires, douche et finitions. On gère tout du début à la fin, sans laisser de tranchée ouverte le week-end.",
    ["Dépose de l'ancienne","Réseau d'eau","Douche / baignoire / WC","Coordination carrelage"],
    "sdb-bois.jpg","Salle de bain — Plouider"),
-  ("02","Recherche de fuite &amp; mise aux normes","On trouve d'où ça vient.",
-   "Une fuite, c'est rarement où on croit. On la localise précisément avant d'ouvrir, sans tout casser. On remet aussi la plomberie aux normes et on fait les raccordements de cuisine.",
-   ["Recherche de fuite","Localisation précise","Mise aux normes plomberie","Raccordements de cuisine"],
+  ("02","Fuites &amp; mise aux normes","On trouve d'où ça vient.",
+   "Une fuite, c'est rarement où on croit. On la localise précisément avant d'ouvrir, sans tout casser, puis on répare et on remet en état. On remet aussi la plomberie aux normes et on fait les raccordements de cuisine.",
+   ["Recherche de fuite","Réparation et remise en état","Mise aux normes plomberie","Raccordements de cuisine"],
    "douche-marbre.jpg","Réno haut de gamme"),
   ("03","Réseau d'eau &amp; sanitaires","Du tuyau à la robinetterie",
    "On reprend le réseau d'eau dans les rénovations, on installe les évacuations et la robinetterie. Pas de bidouille — on remet aux standards d'aujourd'hui.",
@@ -1554,7 +1564,7 @@ about_body=(phero(CRUMB_M.format(label="L'entreprise"),"À propos d'ARélec",
    '<div class="cards-3">'
    f'<div{R(0,"mist-card")}><span class="icon-chip">{ic("doc")}</span><div class="txt"><h3 class="h3">Entreprise immatriculée</h3><p class="small">SARL ARélec, SIREN 790 223 036, Plouzané (29280).</p></div></div>'
    f'<div{R(.08,"mist-card")}><span class="icon-chip">{ic("shield")}</span><div class="txt"><h3 class="h3">Assurances</h3><p class="small">Assurance décennale GROUPAMA (contrat n° 109942100001) et responsabilité civile professionnelle GROUPAMA.</p></div></div>'
-   f'<div{R(.16,"mist-card")}><span class="icon-chip">{ic("check")}</span><div class="txt"><h3 class="h3">Qualifications</h3><p class="small">{tbd("Labels et qualifications à compléter")}</p></div></div>'
+   f'<div{R(.16,"mist-card")}><span class="icon-chip">{ic("check")}</span><div class="txt"><h3 class="h3">Qualifications</h3><p class="small">Qualification IRVE pour l\'installation des bornes de recharge de véhicules électriques.</p></div></div>'
    '</div></div></section>')
  +cta_section('Et si on parlait<br><b>de votre projet ?</b>'))
 pages.append(("entreprise","L'entreprise | ARélec, artisan depuis 2010",
@@ -1672,9 +1682,8 @@ def legal(slug,title,desc,h1,inner,breadcrumb_name):
     pages.append((slug,title,desc,body,jsonld("/"+slug,breadcrumb_name,None,reviews=False,breadcrumb_name=breadcrumb_name),"/"))
 legal("mentions-legales","Mentions légales | ARélec","Mentions légales du site ARélec (SARL ARélec, Plouzané).",
   "Mentions<br><b>légales.</b>",
-  "<h2>Éditeur</h2><p>SARL ARélec — SIREN 790 223 036 — Plouzané (29280).<br>Directeur de la publication : Arnaud Roncey.<br>"
+  f"<h2>Éditeur</h2><p>SARL ARélec au capital de 2 000 € — SIREN 790 223 036 — TVA intracommunautaire FR81790223036.<br>Siège : {ADDRESS}.<br>Directeur de la publication : Arnaud Roncey.<br>"
   f"Contact : {EMAIL} · {PHONE_DISP}</p>"
-  f"<h2>Informations à compléter</h2><p>{tbd('Capital social')} · {tbd('N° de TVA intracommunautaire')} · {tbd('Adresse du siège')}</p>"
   "<h2>Hébergement</h2><p>Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.</p>",
   "Mentions légales")
 legal("politique-confidentialite","Politique de confidentialité | ARélec","Politique de confidentialité et gestion des données du site ARélec.",
@@ -1763,9 +1772,9 @@ LLMS_TXT = f"""# ARélec
 
 ARélec couvre trois métiers du bâtiment, en interne, avec la même équipe :
 
-1. **Électricité** — installation, rénovation, mise aux normes NF C 15-100, dépannage, tableau électrique, éclairage architectural.
-2. **Chauffage / thermique** — installation neuve, remplacement de chaudière ou d'appareil, radiateurs (dont électriques), plancher chauffant, pompe à chaleur air/eau, climatisation et PAC air/air, eau chaude sanitaire, chauffe-eau thermodynamique. Pas d'installation gaz ou fioul.
-3. **Plomberie** — salle de bain complète, recherche de fuite, réseau d'eau, sanitaires, robinetterie, évacuations.
+1. **Électricité** — conception du plan électrique, installation, rénovation, mise aux normes NF C 15-100, dépannage, tableau électrique, éclairage architectural.
+2. **Chauffage / thermique** — installation neuve, remplacement de chaudière ou d'appareil, régulation et réglages, désembouage du réseau, radiateurs (dont électriques), plancher chauffant, pompe à chaleur air/eau, climatisation et PAC air/air, eau chaude sanitaire, chauffe-eau thermodynamique. Pas d'installation gaz ou fioul.
+3. **Plomberie** — salle de bain complète, recherche et réparation de fuite, réseau d'eau, sanitaires, robinetterie, évacuations.
 
 Un seul interlocuteur prend en charge le chantier de A à Z, sans coordination à faire entre plusieurs artisans.
 
@@ -1873,18 +1882,19 @@ Le devis est toujours gratuit. Le premier échange se fait via l'assistant du si
 
 ARélec est avant tout un électricien — c'est le cœur de métier depuis 2010. Les prestations incluent :
 
-- **Installation neuve** : tirage des gaines, pose du tableau, des différentiels et des appareillages, éclairage intérieur et extérieur.
+- **Installation neuve** : conception du plan électrique, tirage des gaines, pose du tableau, des différentiels et des appareillages, éclairage intérieur et extérieur.
 - **Rénovation** : reprise d'installation existante, mise au propre du tableau, remplacement d'appareillage.
 - **Mise aux normes NF C 15-100** : diagnostic complet, remplacement de ce qui n'est plus conforme, sans casser inutilement les murs.
 - **Dépannage** : disjoncteur qui claque, prise grillée, panne d'éclairage, court-circuit.
 - **Éclairage** : intérieur et extérieur, LED intégrées (escaliers, plafonds).
-- **Équipements** : VMC (ventilation), interphone et visiophone, borne de recharge pour véhicule électrique, raccordement au compteur (Enedis).
+- **Équipements** : VMC (ventilation), interphone et visiophone, borne de recharge pour véhicule électrique (qualification IRVE), raccordement au compteur (Enedis).
 
 ### 2.2 Chauffage / thermique
 
 ARélec installe et remplace le chauffage, en neuf comme en rénovation :
 
 - **Installation et remplacement** : chauffage neuf, remplacement de chaudière ou d'appareil, radiateurs (dont radiateurs électriques), plancher chauffant.
+- **Régulation et entretien du réseau** : régulation et réglages, désembouage du réseau de chauffage, conseils pour réduire la facture.
 - **Pompe à chaleur et climatisation** : pompe à chaleur air/eau, climatisation et PAC air/air.
 - **Eau chaude sanitaire** : chauffe-eau, ballon, chauffe-eau thermodynamique.
 - **Énergies** : électricité et pompe à chaleur. ARélec n'installe pas de chauffage au gaz ou au fioul.
@@ -1894,7 +1904,7 @@ ARélec installe et remplace le chauffage, en neuf comme en rénovation :
 ARélec couvre toute la plomberie résidentielle :
 
 - **Salle de bain clé en main** : dépose de l'ancienne, réseau d'eau, douche / baignoire / WC (dont WC suspendu), sanitaires et robinetterie. Le carrelage est fait avec le carreleur habituel d'ARélec.
-- **Recherche de fuite** : localisation précise avant ouverture.
+- **Recherche et réparation de fuite** : localisation précise avant ouverture, réparation et remise en état.
 - **Raccordements de cuisine** et mise aux normes plomberie.
 - **Réseau d'eau et sanitaires** : refonte des canalisations en rénovation, évacuations, mises aux standards actuels.
 
@@ -1968,6 +1978,10 @@ Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00. Fermé
 - **Gérant** : Arnaud Roncey
 - **Assurance décennale** : GROUPAMA, contrat n° 109942100001
 - **Responsabilité civile professionnelle** : GROUPAMA
+- **Qualification** : IRVE (bornes de recharge pour véhicules électriques)
+- **Capital social** : 2 000 €
+- **TVA intracommunautaire** : FR81790223036
+- **Partenaires et fournisseurs** : Schneider Electric, Atlantic, Thermor, Legrand, Sonepar, Espace Aubade, Cedeo, La Maison des Travaux, Point A, Les Maisons Georges Ménez, Georges Ménez Évolution
 
 ---
 

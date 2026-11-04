@@ -17,9 +17,9 @@
 
 ARélec couvre trois métiers du bâtiment, en interne, avec la même équipe :
 
-1. **Électricité** — installation, rénovation, mise aux normes NF C 15-100, dépannage, tableau électrique, éclairage architectural.
-2. **Chauffage / thermique** — installation neuve, remplacement de chaudière ou d'appareil, radiateurs (dont électriques), plancher chauffant, pompe à chaleur air/eau, climatisation et PAC air/air, eau chaude sanitaire, chauffe-eau thermodynamique. Pas d'installation gaz ou fioul.
-3. **Plomberie** — salle de bain complète, recherche de fuite, réseau d'eau, sanitaires, robinetterie, évacuations.
+1. **Électricité** — conception du plan électrique, installation, rénovation, mise aux normes NF C 15-100, dépannage, tableau électrique, éclairage architectural.
+2. **Chauffage / thermique** — installation neuve, remplacement de chaudière ou d'appareil, régulation et réglages, désembouage du réseau, radiateurs (dont électriques), plancher chauffant, pompe à chaleur air/eau, climatisation et PAC air/air, eau chaude sanitaire, chauffe-eau thermodynamique. Pas d'installation gaz ou fioul.
+3. **Plomberie** — salle de bain complète, recherche et réparation de fuite, réseau d'eau, sanitaires, robinetterie, évacuations.
 
 Un seul interlocuteur prend en charge le chantier de A à Z, sans coordination à faire entre plusieurs artisans.
 
@@ -89,4 +89,4 @@ ARélec a une page dédiée pour chaque combinaison métier × commune :
 - Email : contact@entreprise-arelec.fr
 - Formulaire : https://www.entreprise-arelec.fr/contact/
 
-Dernière mise à jour : 2026-11-03
+Dernière mise à jour : 2026-11-04

@@ -22,18 +22,19 @@ Le devis est toujours gratuit. Le premier échange se fait via l'assistant du si
 
 ARélec est avant tout un électricien — c'est le cœur de métier depuis 2010. Les prestations incluent :
 
-- **Installation neuve** : tirage des gaines, pose du tableau, des différentiels et des appareillages, éclairage intérieur et extérieur.
+- **Installation neuve** : conception du plan électrique, tirage des gaines, pose du tableau, des différentiels et des appareillages, éclairage intérieur et extérieur.
 - **Rénovation** : reprise d'installation existante, mise au propre du tableau, remplacement d'appareillage.
 - **Mise aux normes NF C 15-100** : diagnostic complet, remplacement de ce qui n'est plus conforme, sans casser inutilement les murs.
 - **Dépannage** : disjoncteur qui claque, prise grillée, panne d'éclairage, court-circuit.
 - **Éclairage** : intérieur et extérieur, LED intégrées (escaliers, plafonds).
-- **Équipements** : VMC (ventilation), interphone et visiophone, borne de recharge pour véhicule électrique, raccordement au compteur (Enedis).
+- **Équipements** : VMC (ventilation), interphone et visiophone, borne de recharge pour véhicule électrique (qualification IRVE), raccordement au compteur (Enedis).
 
 ### 2.2 Chauffage / thermique
 
 ARélec installe et remplace le chauffage, en neuf comme en rénovation :
 
 - **Installation et remplacement** : chauffage neuf, remplacement de chaudière ou d'appareil, radiateurs (dont radiateurs électriques), plancher chauffant.
+- **Régulation et entretien du réseau** : régulation et réglages, désembouage du réseau de chauffage, conseils pour réduire la facture.
 - **Pompe à chaleur et climatisation** : pompe à chaleur air/eau, climatisation et PAC air/air.
 - **Eau chaude sanitaire** : chauffe-eau, ballon, chauffe-eau thermodynamique.
 - **Énergies** : électricité et pompe à chaleur. ARélec n'installe pas de chauffage au gaz ou au fioul.
@@ -43,7 +44,7 @@ ARélec installe et remplace le chauffage, en neuf comme en rénovation :
 ARélec couvre toute la plomberie résidentielle :
 
 - **Salle de bain clé en main** : dépose de l'ancienne, réseau d'eau, douche / baignoire / WC (dont WC suspendu), sanitaires et robinetterie. Le carrelage est fait avec le carreleur habituel d'ARélec.
-- **Recherche de fuite** : localisation précise avant ouverture.
+- **Recherche et réparation de fuite** : localisation précise avant ouverture, réparation et remise en état.
 - **Raccordements de cuisine** et mise aux normes plomberie.
 - **Réseau d'eau et sanitaires** : refonte des canalisations en rénovation, évacuations, mises aux standards actuels.
 
@@ -209,7 +210,11 @@ Horaires habituels d'intervention : du lundi au vendredi, 8h00 – 18h00. Fermé
 - **Gérant** : Arnaud Roncey
 - **Assurance décennale** : GROUPAMA, contrat n° 109942100001
 - **Responsabilité civile professionnelle** : GROUPAMA
+- **Qualification** : IRVE (bornes de recharge pour véhicules électriques)
+- **Capital social** : 2 000 €
+- **TVA intracommunautaire** : FR81790223036
+- **Partenaires et fournisseurs** : Schneider Electric, Atlantic, Thermor, Legrand, Sonepar, Espace Aubade, Cedeo, La Maison des Travaux, Point A, Les Maisons Georges Ménez, Georges Ménez Évolution
 
 ---
 
-Dernière mise à jour : 2026-11-03
+Dernière mise à jour : 2026-11-04
