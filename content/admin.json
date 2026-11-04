@@ -1,6 +1,42 @@
 {
  "version": 1,
- "media": [],
+ "media": [
+  {
+   "id": "2026-11-04-80sj88",
+   "name": "f 0PbQ71SXiBRJ7TP4PhRQ",
+   "alt": "Mise en securité",
+   "category": "Électricité",
+   "added": "2026-11-04"
+  },
+  {
+   "id": "2026-11-04-9hgiie",
+   "name": "IMG 1409",
+   "alt": "Rénovation salle de bain",
+   "category": "Salle de bain",
+   "added": "2026-11-04"
+  },
+  {
+   "id": "2026-11-04-l4mncq",
+   "name": "IMG 8038",
+   "alt": "Cable chauffant electrique",
+   "category": "Chauffage",
+   "added": "2026-11-04"
+  },
+  {
+   "id": "2026-11-04-a9ybou",
+   "name": "IMG 9369",
+   "alt": "Eclairage piscine intérieur",
+   "category": "Éclairage",
+   "added": "2026-11-04"
+  },
+  {
+   "id": "2026-11-04-ngygdi",
+   "name": "IMG 1382",
+   "alt": "Plancher chauffant",
+   "category": "Chauffage",
+   "added": "2026-11-04"
+  }
+ ],
  "images": {},
  "texts": {}
 }
