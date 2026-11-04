@@ -1704,6 +1704,46 @@ legal("politique-confidentialite","Politique de confidentialité | ARélec","Pol
 for slug,t,d,body,jl,active in pages:
     write(slug, shell(slug,t,d,body,jl,active))
 
+# ---------- page 404 (servie par Vercel pour toute adresse inconnue : site/404.html) ----------
+NF_LINKS=[("bolt","Électricité","Installation, rénovation, dépannage","/electricite"),
+          ("flame","Chauffage","Pompe à chaleur, radiateurs","/chauffage"),
+          ("drop","Plomberie","Salle de bain, fuite","/plomberie"),
+          ("eye","Réalisations","Nos chantiers en photos","/realisations"),
+          ("star","Avis clients",f"{RATING}/5 sur Google","/avis"),
+          ("chat","Contact","Devis gratuit, sur place","/contact")]
+nf_css=("<style>"
+  ".nf-art{position:relative;align-self:stretch;min-height:340px;border-radius:24px;background:#fff;overflow:hidden;display:flex;align-items:center;justify-content:center}"
+  ".nf-num{font-family:'Doto',var(--mono);font-weight:900;font-size:clamp(110px,15vw,210px);line-height:.8;letter-spacing:.02em;color:var(--ink);transform:translateY(-22px);user-select:none}"
+  ".nf-num i{font-style:normal;color:var(--lime);-webkit-text-stroke:2px var(--ink)}"
+  ".nf-art picture{position:absolute;left:50%;bottom:0;width:220px;transform:translateX(-50%)}"
+  ".nf-art img{display:block;width:100%;height:auto}"
+  ".nf-links{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}"
+  ".nf-link{display:flex;align-items:center;gap:14px;padding:18px;border-radius:20px;background:var(--mist);text-decoration:none;color:var(--ink);transition:transform .3s var(--ease),background .3s}"
+  ".nf-link:hover{transform:translateY(-2px);background:var(--line)}"
+  ".nf-link .icon-chip{flex:none}.nf-link b{display:block;font-size:16px;font-weight:500}.nf-link span.s{font-size:13.5px;color:var(--muted)}"
+  ".nf-link .go{margin-left:auto;color:var(--muted)}"
+  "@media (max-width:900px){.nf-links{grid-template-columns:1fr 1fr}.nf-art{min-height:260px}}"
+  "@media (max-width:560px){.nf-links{grid-template-columns:1fr}.nf-art picture{width:170px}}"
+  "</style>")
+nf_txt=(f'<div class="phero-txt"><div{R(0,"crumb")}><a href="/">Accueil</a> › Page introuvable</div>'
+        f'<span{R(.04)}>{label("Erreur 404","on-mist")}</span>'
+        f'<h1{R(.1,"h1")}>Ce circuit ne mène nulle part.<br><b>On vous remet sur la bonne ligne.</b></h1>'
+        f'<p{R(.16,"lead")}>La page que vous cherchez a été déplacée ou n\'existe plus. Choisissez une rubrique ci-dessous, ou posez directement votre question à notre assistant.</p>'
+        f'<div{R(.22,"actions")}>{btn("Retour à l\'accueil","/","dark")}{btn_contact("light","Poser une question")}</div></div>')
+nf_art=(f'<div{R(.12,"nf-art")} aria-hidden="true"><div class="nf-num">4<i>0</i>4</div>'
+        '<picture><source srcset="/assets/img/mascotte-cache.webp" type="image/webp"><img src="/assets/img/mascotte-cache.png" alt="" width="260" height="152"></picture></div>')
+nf_body=(nf_css+f'<section class="phero"><div class="phero-card">{nf_txt}{nf_art}</div></section>'
+  '<section class="sec"><div class="wrap">'
+  f'<div class="head"><span{R()}>{label("Pages utiles")}</span><h2{R(.08,"h2")}>Où voulez-vous<br><b>aller ?</b></h2></div>'
+  '<div class="nf-links">'+"".join(
+    f'<a{R(.05*i,"nf-link")} href="{u}"><span class="icon-chip">{ic(k)}</span><span><b>{t}</b><span class="s">{d}</span></span><span class="go">{ic("arrow")}</span></a>'
+    for i,(k,t,d,u) in enumerate(NF_LINKS))+'</div></div></section>')
+NOINDEX.add("404")
+nf=shell("404","Page introuvable | ARélec","Cette page n'existe pas ou a été déplacée. Retrouvez l'électricité, le chauffage et la plomberie d'ARélec à Plouzané.",nf_body,"","/")
+nf=re.sub(r'<link rel="canonical"[^>]*>|<meta property="og:url"[^>]*>',"",nf)  # pas d'URL canonique pour une erreur
+nf=_INTERNAL.sub(r'href="\1/', nf)
+(SITE/"404.html").write_text(nf)
+
 urls=[p[0] for p in pages if p[0] not in NOINDEX]
 TODAY=datetime.date.today().isoformat()
 def url_meta(u):
