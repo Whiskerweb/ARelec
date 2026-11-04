@@ -961,21 +961,22 @@ REVS=[("Redistribution des prises et des points lumineux dans le cadre du réage
 PLOUZANE_GEO = {"lat": 48.3781, "lon": -4.6228}  # centre de Plouzané
 SAME_AS = [
     "https://www.facebook.com/people/AR%C3%A9lec/100089481862657/",
-    "https://wa.me/33678020424",
 ]
+def _area(area):
+    # Une page locale vise sa commune ; ailleurs, toutes les communes desservies + le département
+    if area: return {"@type": "City", "name": area}
+    return [{"@type": "City", "name": l} for _, l in ALL_COMMUNES] + [{"@type": "AdministrativeArea", "name": "Finistère"}]
 OPENING_HOURS = [
     {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"18:00"},
 ]
 
 def _local_business(path, area, reviews=True):
     """Construit l'objet LocalBusiness (Electrician) enrichi pour le graphe."""
-    if area:
-        area_served = area
-    else:
-        area_served = ["Brest","Plouzané","Finistère"]
+    # Zone : la commune de la page locale, sinon toutes les communes desservies (validées par Arnaud)
+    area_served = _area(area)
     lb = {
         "@context": "https://schema.org",
-        "@type": "Electrician",
+        "@type": ["Electrician", "Plumber", "HVACBusiness"],
         "@id": f"{DOMAIN}/#business",
         "name": "ARélec",
         "alternateName": "SARL ARélec",
@@ -989,6 +990,7 @@ def _local_business(path, area, reviews=True):
         "email": "contact@entreprise-arelec.fr",
         "address": {
             "@type": "PostalAddress",
+            "streetAddress": "Rue du Cloître",
             "addressLocality": "Plouzané",
             "postalCode": "29280",
             "addressRegion": "Finistère",
@@ -1011,10 +1013,14 @@ def _local_business(path, area, reviews=True):
         "currenciesAccepted": "EUR",
         "founder": {"@type": "Person", "name": "Arnaud Roncey"},
         "foundingDate": "2010",
-        "vatID": "FR",
+        "vatID": "FR81790223036",
         "taxID": "790223036",
         "sameAs": SAME_AS,
-        "knowsAbout": ["Électricité", "Chauffage", "Plomberie", "Mise aux normes NF C 15-100", "Rénovation", "Dépannage"],
+        "knowsAbout": ["Électricité", "Chauffage", "Plomberie", "Mise aux normes NF C 15-100", "Rénovation", "Dépannage",
+                       "Pompe à chaleur", "Climatisation", "Plancher chauffant", "Borne de recharge pour véhicule électrique",
+                       "Salle de bain", "Recherche de fuite"],
+        "hasCredential": {"@type": "EducationalOccupationalCredential", "credentialCategory": "Qualification",
+                          "name": "IRVE (infrastructures de recharge pour véhicules électriques)"},
     }
     if reviews:
         lb["review"] = [
@@ -1047,14 +1053,15 @@ def _service_schema(name, description, service_type, area):
         "description": description,
         "serviceType": service_type,
         "provider": {"@id": f"{DOMAIN}/#business"},
-        "areaServed": area or ["Brest","Plouzané","Finistère"],
+        "areaServed": _area(area),
     }
 
 def _dump(obj):
     # ensure_ascii=False pour garder les accents lisibles dans le HTML
     return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
 
-def jsonld(path,h1_text,area,reviews=True,breadcrumb_name=None,faq=None,service=None):
+def jsonld(path,h1_text,area,reviews=True,breadcrumb_name=None,faq=None,service=None,parent=None):
+    path = path if path.endswith("/") else path + "/"  # URL canonique (barre oblique finale, comme le site)
     blocks = [_dump(_local_business(path, area, reviews))]
     # Breadcrumb
     if path=="/" or path=="":
@@ -1066,10 +1073,9 @@ def jsonld(path,h1_text,area,reviews=True,breadcrumb_name=None,faq=None,service=
         name = breadcrumb_name or h1_text.replace("<br>"," ").replace("<b>","").replace("</b>","").strip().rstrip(".")
         crumbs = {
             "@context": "https://schema.org", "@type": "BreadcrumbList",
-            "itemListElement": [
-                {"@type": "ListItem", "position": 1, "name": "Accueil", "item": f"{DOMAIN}/"},
-                {"@type": "ListItem", "position": 2, "name": name, "item": f"{DOMAIN}{path}"},
-            ],
+            "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Accueil", "item": f"{DOMAIN}/"}]
+                + ([{"@type": "ListItem", "position": 2, "name": parent[0], "item": f"{DOMAIN}{parent[1]}"}] if parent else [])
+                + [{"@type": "ListItem", "position": 3 if parent else 2, "name": name, "item": f"{DOMAIN}{path}"}],
         }
     blocks.append(_dump(crumbs))
     if service:
@@ -1109,7 +1115,9 @@ def shell(path,title,desc,body,jl,active):
             + f'<body>{nav(active)}{mobile_drawer()}{chat_widget()}<main id="main">{body}</main>{FOOTER}'
             + '<script src="/assets/js/site.js?v=2" defer></script></body></html>')
 
+_INTERNAL=re.compile(r'href="(/[a-z0-9-]+(?:/[a-z0-9-]+)*)(?=["#?])')
 def write(path,h):
+    h=_INTERNAL.sub(r'href="\1/', h)
     d=SITE/(path.strip("/")); d.mkdir(parents=True,exist_ok=True)
     (d/"index.html").write_text(h)
 
@@ -1208,7 +1216,9 @@ def gen_sub(slug,title,desc,active,crumb,eyebrow,h1,lead,hero_img,hero_float,sec
           +f'<section class="sec"><div class="wrap"><div class="feat-rows">{rows}</div></div></section>'
           +extra+(areas_block(metier,area_h2) if area_h2 else areas_block(metier))
           +(faq_section(faq) if faq else "")+cta_section(recap_h2))
-    pages.append((slug,title,desc,body,jsonld("/"+slug,h1,area,breadcrumb_name=breadcrumb_name,faq=faq,service=service),"/services"))
+    # Page locale : fil d'Ariane à 3 niveaux (Accueil › métier › commune), comme le fil visible
+    parent=({"/electricite":"Électricité","/chauffage":"Chauffage","/plomberie":"Plomberie"}.get(active), active+"/") if area and active in METIER_OF else None
+    pages.append((slug,title,desc,body,jsonld("/"+slug,h1,area,breadcrumb_name=breadcrumb_name,faq=faq,service=service,parent=parent),"/services"))
 
 CRUMB_M = '<a href="/">Accueil</a> › {label}'
 CRUMB_L = '<a href="/">Accueil</a> › <a href="/{metier_url}">{metier}</a> › {commune}'
@@ -1235,7 +1245,7 @@ gen_sub("electricite","Électricien à Brest & Plouzané | ARélec",
  "Un projet électrique ? Estimons-le ensemble.", None, breadcrumb_name="Électricité",
  faq=FAQ_ELEC, service=SERVICE_ELEC)
 
-gen_sub("chauffage","Chauffagiste à Brest | ARélec",
+gen_sub("chauffage","Chauffagiste à Brest : pompe à chaleur, radiateurs | ARélec",
  "Pompe à chaleur, climatisation, plancher chauffant, radiateurs et eau chaude dans le bassin brestois. Installation et remplacement, devis gratuit — ARélec.",
  "/chauffage", CRUMB_M.format(label="Chauffage"),
  "Chauffage &amp; thermique", "Une maison <b>bien chauffée,</b> sans gaspiller.",
@@ -1256,7 +1266,7 @@ gen_sub("chauffage","Chauffagiste à Brest | ARélec",
  "Un remplacement, une pompe à chaleur, une question ?", None, breadcrumb_name="Chauffage",
  faq=FAQ_CHAUF, service=SERVICE_CHAUF)
 
-gen_sub("plomberie","Plombier à Brest | ARélec",
+gen_sub("plomberie","Plombier à Brest : salle de bain, recherche de fuite | ARélec",
  "Salle de bain, sanitaires, recherche de fuite et réseau d'eau dans le bassin brestois. Rénovation soignée, devis gratuit — ARélec.",
  "/plomberie", CRUMB_M.format(label="Plomberie"),
  "Plomberie", "Sanitaire et réseau d'eau, <b>propre et durable.</b>",
@@ -1399,7 +1409,7 @@ gen_local("chauffagiste-brest","Chauffagiste à Brest (29) | ARélec",
  "Un chauffage à installer ou à remplacer ?")
 
 gen_local("chauffagiste-plouzane","Chauffagiste à Plouzané (29) | ARélec",
- "Chauffagiste à Plouzané : ARélec installe et remplace votre chauffage (pompe à chaleur, radiateurs, plancher chauffant). Basé sur la commune depuis 2010. Devis gratuit.",
+ "Chauffagiste à Plouzané : ARélec installe pompe à chaleur, radiateurs et plancher chauffant. Basé sur la commune depuis 2010. Devis gratuit.",
  "Chauffage","chauffage","Plouzané","Plouzané",
  "Votre <b>chauffagiste à Plouzané.</b>",
  "Basés à Plouzané, on installe et on remplace votre chauffage : pompe à chaleur, radiateurs, plancher chauffant.",
@@ -1668,7 +1678,7 @@ avis_body=(phero(CRUMB_M.format(label="Avis clients"),"Avis clients",
  +rating_section().replace(btn("Lire les avis","/avis","light","arrow"),btn_contact("dark"))
  +testimonials_section()+cta_section())
 pages.append(("avis","Avis clients | ARélec — Brest & Plouzané",
-  "Ce que nos clients disent d'ARélec : qualité, propreté, réactivité et bons conseils. Avis vérifiés Google.",
+  f"Avis clients d'ARélec, électricien, chauffagiste et plombier à Plouzané : {RATING}/5 sur {RATING_COUNT} avis Google. Qualité, propreté, réactivité.",
   avis_body, jsonld("/avis","Avis clients",None,breadcrumb_name="Avis clients"), "/"))
 
 # ---------- pages légales ----------
@@ -1676,13 +1686,13 @@ def legal(slug,title,desc,h1,inner,breadcrumb_name):
     body=(phero(CRUMB_M.format(label=breadcrumb_name),breadcrumb_name,h1,"Informations légales du site entreprise-arelec.fr.",actions="")
           +f'<section class="sec"><div class="wrap"><div class="prose">{inner}</div></div></section>')
     pages.append((slug,title,desc,body,jsonld("/"+slug,breadcrumb_name,None,reviews=False,breadcrumb_name=breadcrumb_name),"/"))
-legal("mentions-legales","Mentions légales | ARélec","Mentions légales du site ARélec (SARL ARélec, Plouzané).",
+legal("mentions-legales","Mentions légales | ARélec, électricien à Plouzané","Mentions légales du site entreprise-arelec.fr : SARL ARélec, SIREN 790 223 036, siège à Plouzané (29280), hébergement Vercel.",
   "Mentions<br><b>légales.</b>",
   f"<h2>Éditeur</h2><p>SARL ARélec au capital de 2 000 € — SIREN 790 223 036 — TVA intracommunautaire FR81790223036.<br>Siège : {ADDRESS}.<br>Directeur de la publication : Arnaud Roncey.<br>"
   f"Contact : {EMAIL} · {PHONE_DISP}</p>"
   "<h2>Hébergement</h2><p>Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, États-Unis.</p>",
   "Mentions légales")
-legal("politique-confidentialite","Politique de confidentialité | ARélec","Politique de confidentialité et gestion des données du site ARélec.",
+legal("politique-confidentialite","Politique de confidentialité | ARélec","Politique de confidentialité d'ARélec : données du formulaire de contact et de l'assistant du site, usage, conservation et vos droits.",
   "Confidentialité.",
   "<h2>Formulaire de contact</h2><p>Les données envoyées via le formulaire de contact (sur la page Contact ou dans l'assistant) sont transmises par email à ARélec par un service d'envoi, et servent uniquement à répondre à votre demande.</p>"
   "<h2>Assistant du site</h2><p>Les messages écrits à l'assistant du site sont transmis à un service d'IA (via OpenRouter) uniquement pour générer la réponse ; le site ne les enregistre pas. Si vous poursuivez sur WhatsApp, la conversation est traitée par ARélec et son agent WhatsApp pour préparer votre demande.</p>"
@@ -1703,49 +1713,54 @@ def url_meta(u):
     if u in ("realisations","entreprise","avis"): return ("0.7","monthly")
     if u in ("mentions-legales","politique-confidentialite"): return ("0.2","yearly")
     return ("0.6","monthly")  # pages locales [métier]-[commune]
-sm='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+# lastmod réel : empreinte du contenu de chaque page (titre, description, <main>) gardée dans seo-lastmod.json ;
+# la date ne change que si ce contenu change (une date qui bouge à chaque build finit ignorée par Google).
+import hashlib
+LASTMOD_F=ROOT/"seo-lastmod.json"
+try: LASTMOD=json.loads(LASTMOD_F.read_text())
+except Exception: LASTMOD={}
+_NOIMG=("logo","mascotte","favicon","apple-touch","partenaires/")
+def _page_seo(u):
+    h=(SITE/u/"index.html").read_text() if u else (SITE/"index.html").read_text()
+    main=h[h.find("<main"):h.find("</main>")]
+    key=re.search(r"<title>.*?</title>",h).group(0)+(re.search(r'<meta name="description"[^>]*>',h) or re.search("","")).group(0)+main
+    imgs=[]
+    for src,alt in re.findall(r'<img[^>]*?src="(/assets/img/[^"]+)"[^>]*?alt="([^"]*)"',main):
+        if not any(x in src for x in _NOIMG) and src not in [i[0] for i in imgs]: imgs.append((src,alt))
+    return hashlib.sha1(key.encode()).hexdigest()[:16], imgs
+sm=('<?xml version="1.0" encoding="UTF-8"?>\n'
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n')
 for u in urls:
     loc=DOMAIN+("/" if u=="" else "/"+u+"/")
     pr,cf=url_meta(u)
-    sm+=f'  <url><loc>{loc}</loc><lastmod>{TODAY}</lastmod><changefreq>{cf}</changefreq><priority>{pr}</priority></url>\n'
+    hsh,imgs=_page_seo(u)
+    prev=LASTMOD.get(loc)
+    if not prev or prev["hash"]!=hsh: LASTMOD[loc]={"hash":hsh,"date":TODAY}
+    im="".join(f'<image:image><image:loc>{DOMAIN}{src}</image:loc></image:image>' for src,_ in imgs[:20])
+    sm+=f'  <url><loc>{loc}</loc><lastmod>{LASTMOD[loc]["date"]}</lastmod><changefreq>{cf}</changefreq><priority>{pr}</priority>{im}</url>\n'
 sm+='</urlset>\n'
+LASTMOD={k:v for k,v in LASTMOD.items() if k in {DOMAIN+("/" if u=="" else "/"+u+"/") for u in urls}}
+LASTMOD_F.write_text(json.dumps(LASTMOD,ensure_ascii=False,indent=1,sort_keys=True)+"\n")
 (SITE/"sitemap.xml").write_text(sm)
 
 # ---------- robots.txt avec directives IA explicites ----------
-ROBOTS = f"""# robots.txt — ARélec (entreprise-arelec.fr)
+# Tous les robots : tout le site, sauf les fonctions serveur (/api/ : chat, formulaire, WhatsApp).
+# Les robots IA (recherche et citation) sont nommés explicitement pour lever toute ambiguïté.
+_AI_BOTS=["GPTBot","OAI-SearchBot","ChatGPT-User","ClaudeBot","Claude-SearchBot","Claude-User","anthropic-ai",
+          "PerplexityBot","Perplexity-User","Google-Extended","Applebot","Applebot-Extended","Bingbot",
+          "DuckAssistBot","MistralAI-User","meta-externalagent","Amazonbot","CCBot","cohere-ai"]
+ROBOTS = (f"""# robots.txt — ARélec, électricien, chauffagiste et plombier à Plouzané ({DOMAIN})
+# Résumé du site pour les IA : {DOMAIN}/llms.txt (version complète : {DOMAIN}/llms-full.txt)
+
 User-agent: *
 Allow: /
+Disallow: /api/
 
-# Crawlers IA — autorisés à indexer et citer le contenu
-User-agent: GPTBot
-Allow: /
+# Moteurs de recherche et assistants IA : autorisés à lire et citer le site
+""" + "".join(f"User-agent: {b}\n" for b in _AI_BOTS) + """Allow: /
+Disallow: /api/
 
-User-agent: ChatGPT-User
-Allow: /
-
-User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: anthropic-ai
-Allow: /
-
-User-agent: Google-Extended
-Allow: /
-
-User-agent: Applebot-Extended
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-Sitemap: {DOMAIN}/sitemap.xml
-"""
+""" + f"Sitemap: {DOMAIN}/sitemap.xml\n")
 (SITE/"robots.txt").write_text(ROBOTS)
 
 # ---------- llms.txt — résumé pour crawlers IA ----------

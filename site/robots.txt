@@ -1,33 +1,31 @@
-# robots.txt — ARélec (entreprise-arelec.fr)
+# robots.txt — ARélec, électricien, chauffagiste et plombier à Plouzané (https://www.entreprise-arelec.fr)
+# Résumé du site pour les IA : https://www.entreprise-arelec.fr/llms.txt (version complète : https://www.entreprise-arelec.fr/llms-full.txt)
+
 User-agent: *
 Allow: /
+Disallow: /api/
 
-# Crawlers IA — autorisés à indexer et citer le contenu
+# Moteurs de recherche et assistants IA : autorisés à lire et citer le site
 User-agent: GPTBot
-Allow: /
-
-User-agent: ChatGPT-User
-Allow: /
-
 User-agent: OAI-SearchBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
+User-agent: ChatGPT-User
 User-agent: ClaudeBot
-Allow: /
-
+User-agent: Claude-SearchBot
+User-agent: Claude-User
 User-agent: anthropic-ai
-Allow: /
-
+User-agent: PerplexityBot
+User-agent: Perplexity-User
 User-agent: Google-Extended
-Allow: /
-
+User-agent: Applebot
 User-agent: Applebot-Extended
-Allow: /
-
 User-agent: Bingbot
+User-agent: DuckAssistBot
+User-agent: MistralAI-User
+User-agent: meta-externalagent
+User-agent: Amazonbot
+User-agent: CCBot
+User-agent: cohere-ai
 Allow: /
+Disallow: /api/
 
 Sitemap: https://www.entreprise-arelec.fr/sitemap.xml
