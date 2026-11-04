@@ -33,7 +33,7 @@
     const data = Object.fromEntries(new FormData(f));
     data.page = location.pathname;
     try {
-      const r = await fetch("/api/contact", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      const r = await fetch("/api/contact/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
       const out = await r.json().catch(() => ({}));
       if (r.ok) {
         f.classList.add("sent");

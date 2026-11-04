@@ -171,7 +171,7 @@
       if (!f.tel.value.trim() && !f.email.value.trim()) { err.textContent = ERR.joignable; f.tel.focus(); return; }
       btn.disabled = true; btn.textContent = "Envoi…";
       try {
-        const r = await fetch("/api/contact", {
+        const r = await fetch("/api/contact/", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ nom: f.nom.value, tel: f.tel.value, email: f.email.value, message: f.message.value, site: f.site.value, source: "chat", page: location.pathname })
         });
@@ -236,7 +236,7 @@
     col.appendChild(typing); scroll();
     let raw = "", b = null, data = null;
     try {
-      const r = await fetch("/api/chat", {
+      const r = await fetch("/api/chat/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: st.msgs.slice(-16).map(m => ({ role: m.role, content: m.content })) })
