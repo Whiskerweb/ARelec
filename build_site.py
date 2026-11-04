@@ -411,6 +411,15 @@ a.area-chip:hover{background:var(--ink);color:#fff}
 .cform input:focus,.cform textarea:focus,.cform select:focus{outline:none;border-color:var(--lime)}
 .cform .btn{align-self:flex-start;margin-top:6px}
 .cform-foot{font-size:12px;color:rgba(255,255,255,.5)}
+.cform label small{color:rgba(255,255,255,.45);font-size:12px}
+.hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+.cform-status{margin:0;padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.5;color:#fff;background:rgba(255,92,92,.16);border:1px solid rgba(255,92,92,.4)}
+.cform-status[hidden]{display:none}
+.cform-status a{color:var(--lime)}
+.cform-done{padding:28px;border-radius:18px;background:rgba(227,255,74,.1);border:1px solid rgba(227,255,74,.35)}
+.cform-done b{display:block;font-size:22px;font-weight:500;color:var(--lime);margin-bottom:8px}
+.cform-done p{margin:0;color:rgba(255,255,255,.75);line-height:1.55}
+#cform{scroll-margin-top:110px}
 /* --- galerie --- */
 .gallery{columns:3;column-gap:16px}
 .gcard{position:relative;break-inside:avoid;margin:0 0 16px;border-radius:20px;overflow:hidden}
@@ -465,6 +474,22 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
 .chat-send .ic{width:18px;height:18px}
 .chat-note{margin:0;padding:0 14px 10px;font-size:11px;color:var(--muted);text-align:center}
 .chat-note a{color:inherit}
+.chat-links{align-self:flex-start;display:flex;flex-wrap:wrap;gap:6px;max-width:92%;margin-top:-4px}
+.chat-link{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 14px;border-radius:100px;font-size:13.5px;text-decoration:none;color:var(--ink);background:#fff;border:1px solid var(--line)}
+.chat-link:hover{background:var(--lime);border-color:var(--lime)}
+.chat-link .ic{width:14px;height:14px}
+.chat-alt{align-self:center;padding:6px 10px;min-height:40px;font:inherit;font-size:13px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;background:none;border:0;cursor:pointer}
+.chat-alt:hover{color:var(--ink)}
+.chat-cf{align-self:stretch;display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:var(--mist)}
+.chat-cf>b{font-size:14.5px;font-weight:500}
+.chat-cf>small{font-size:12px;color:var(--muted);margin-top:-4px}
+.chat-cf input,.chat-cf textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:12px;color:var(--ink);background:#fff;border:1px solid var(--line)}
+.chat-cf textarea{resize:vertical;min-height:72px}
+.chat-cf input:focus,.chat-cf textarea:focus{outline:none;border-color:var(--ink)}
+.chat-cf .err{margin:0;font-size:12.5px;color:#c0362c}
+.chat-cf .err:empty{display:none}
+.chat-cf button{min-height:44px;border-radius:100px;font:inherit;font-size:14.5px;font-weight:500;cursor:pointer;color:var(--ink);background:var(--lime);border:0}
+.chat-cf button:disabled{opacity:.6;cursor:default}
 /* --- responsive --- */
 @media (max-width:1100px){
   .svc-grid,.cards-3,.testi-grid,.posts{grid-template-columns:repeat(2,1fr)}
@@ -954,7 +979,7 @@ def chat_widget():
             f'<button class="chat-send" type="submit" aria-label="Envoyer">{SVG_SEND}</button></form>'
             '<p class="chat-note">Assistant automatique · <a href="/politique-confidentialite">confidentialité</a></p></section>'
             f'<template id="chat-wa-ic">{SVG_WA}</template>'
-            '<script src="/assets/js/chat.js?v=1" defer></script>')
+            '<script src="/assets/js/chat.js?v=2" defer></script>')
 
 # ---------- avis Google réels ----------
 REVS=[("Redistribution des prises et des points lumineux dans le cadre du réagencement de notre rez-de-chaussée (maison années 30). Intervention de très bonne qualité, chantier propre et rapide. Je recommande ARÉLEC.","Philippe C.","Rénovation électrique"),
@@ -1599,26 +1624,29 @@ pages.append(("blog","Blog — conseils électricité, chauffage, plomberie | AR
 # ---------- /contact ----------
 contact_body=(phero(CRUMB_M.format(label="Contact"),"Contact",
   "Dites-nous ce dont vous avez besoin.<br><b>On s'occupe de la suite.</b>",
-  "Le plus rapide : notre assistant, WhatsApp ou un coup de fil. Réponse sous 24 à 48 h, devis gratuit sur place.",actions="")
+  "Notre assistant, WhatsApp, un coup de fil ou le formulaire ci-dessous si vous n'avez pas WhatsApp. Réponse sous 24 à 48 h, devis gratuit sur place.",actions="")
  +('<section class="sec"><div class="wrap"><div class="contact-grid">'
    f'<div{R(0,"panel mist")}><span class="mono">Parler à l\'équipe</span>'
    f'<button class="method ai" type="button" data-chat><span class="icon-chip">{ic("chat")}</span><div><b>Assistant du site</b><span>Réponse immédiate, puis relais WhatsApp</span></div><span class="go">{ic("arrow")}</span></button>'
    f'<a class="method wa" href="https://wa.me/{WHATSAPP_INT}" target="_blank" rel="noopener"><span class="icon-chip">{SVG_WA}</span><div><b>WhatsApp</b><span>{PHONE_MOBILE_DISP}</span></div><span class="go">{ic("arrow")}</span></a>'
    f'<a class="method" href="tel:{PHONE_TEL}"><span class="icon-chip">{ic("bolt")}</span><div><b>Téléphone</b><span>{PHONE_DISP} · mobile {PHONE_MOBILE_DISP}</span></div><span class="go">{ic("arrow")}</span></a>'
+   f'<a class="method" href="#cform"><span class="icon-chip">{ic("doc")}</span><div><b>Formulaire de contact</b><span>Pas de WhatsApp ? Laissez-nous un message</span></div><span class="go">{ic("arrow")}</span></a>'
    f'<a class="method" href="mailto:{EMAIL}"><span class="icon-chip">{SVG_MAIL}</span><div><b>Email</b><span>{EMAIL}</span></div><span class="go">{ic("arrow")}</span></a>'
    f'<div class="method" style="cursor:default"><span class="icon-chip">{ic("clock")}</span><div><b>Horaires</b><span>Lun–Ven · 8h–18h · {ADDRESS}</span></div></div>'
    '</div>'
    f'<div{R(.08,"panel ink dk")}><span class="mono" style="color:rgba(255,255,255,.55)">Demander une intervention</span>'
    '<h2 class="h2" style="font-size:32px">Laissez-nous un message.</h2>'
-   '<form class="cform" id="cform">'
-   '<div class="row"><label>Nom <input name="nom" type="text" required autocomplete="name"></label>'
-   '<label>Téléphone <input name="tel" type="tel" autocomplete="tel"></label></div>'
-   '<div class="row"><label>Email <input name="email" type="email" required autocomplete="email"></label>'
-   '<label>Commune <input name="commune" type="text" autocomplete="address-level2"></label></div>'
+   f'<form class="cform" id="cform" data-mail="{EMAIL}" data-phone="{PHONE_DISP}">'
+   '<div class="row"><label>Nom <input name="nom" type="text" required maxlength="80" autocomplete="name"></label>'
+   '<label>Téléphone <input name="tel" type="tel" maxlength="30" autocomplete="tel"></label></div>'
+   '<div class="row"><label><span>Email <small>(ou téléphone, au choix)</small></span><input name="email" type="email" maxlength="120" autocomplete="email"></label>'
+   '<label>Commune <input name="commune" type="text" maxlength="80" autocomplete="address-level2"></label></div>'
    '<label>Type de travaux <select name="metier"><option>Électricité</option><option>Chauffage</option><option>Plomberie</option><option>Plusieurs / je ne sais pas</option></select></label>'
-   '<label>Votre projet <textarea name="message" rows="5" required placeholder="Ce qu\'il faut faire, neuf ou rénovation, urgence, délais…"></textarea></label>'
+   '<label>Votre projet <textarea name="message" rows="5" required maxlength="2000" placeholder="Ce qu\'il faut faire, neuf ou rénovation, urgence, délais…"></textarea></label>'
+   '<label class="hp" aria-hidden="true">Ne pas remplir <input name="site" type="text" tabindex="-1" autocomplete="off"></label>'
+   '<p class="cform-status" role="alert" hidden></p>'
    f'<button type="submit" class="btn btn-lime"><span class="chip">{ic("arrow")}</span>Envoyer ma demande</button>'
-   '<p class="cform-foot">Vos informations servent uniquement à vous répondre.</p>'
+   '<p class="cform-foot">Vos informations servent uniquement à vous répondre (<a href="/politique-confidentialite" style="color:inherit">confidentialité</a>).</p>'
    '</form></div>'
    '</div></div></section>')
  +('<section class="sec" style="padding-top:0"><div class="wrap">'
@@ -1629,12 +1657,13 @@ contact_body=(phero(CRUMB_M.format(label="Contact"),"Contact",
                                        ("On vous recontacte","Sous 24 à 48 h, par téléphone ou WhatsApp, pour préciser le besoin."),
                                        ("On cale la visite","Visite gratuite sur place, puis devis détaillé et sans engagement.")]))
    + '</div></div></section>')
- +faq_section([("Sous combien de temps répondez-vous ?","Sous 24 à 48 h en général. L'assistant du site, lui, répond tout de suite et transmet votre demande sur WhatsApp."),
+ +faq_section([("Sous combien de temps répondez-vous ?","Sous 24 à 48 h en général. L'assistant du site, lui, répond tout de suite et transmet votre demande sur WhatsApp ou par le formulaire."),
+               ("Je n'ai pas WhatsApp, comment faire ?","Remplissez le formulaire de cette page, ou passez par l'assistant : il vous propose aussi un formulaire. Un téléphone ou un email suffit pour qu'on vous rappelle."),
                ("Faut-il savoir quel métier choisir ?","Non. Décrivez simplement la situation : on fait l'électricité, le chauffage et la plomberie, on saura vous orienter."),
                FAQ_HOME[3], FAQ_HOME[1]], h2="Avant de nous écrire"))
 pages.append(("contact","Contact & devis gratuit | ARélec — Plouzané (29)",
   "Contactez ARélec : assistant en ligne, WhatsApp 06 78 02 04 24, téléphone 02 98 40 20 43 ou contact@entreprise-arelec.fr. Devis gratuit dans tout le bassin brestois.",
-  contact_body+'<script>document.getElementById("cform")?.addEventListener("submit",function(e){e.preventDefault();const f=e.target;const body=`Nom: ${f.nom.value}\\nTéléphone: ${f.tel.value}\\nEmail: ${f.email.value}\\nCommune: ${f.commune.value}\\nTravaux: ${f.metier.value}\\n\\nMessage:\\n${f.message.value}`;window.location.href=`mailto:'+EMAIL+'?subject=${encodeURIComponent("Demande ARélec — "+f.nom.value)}&body=${encodeURIComponent(body)}`;});</script>',
+  contact_body+'<script src="/assets/js/contact.js?v=1" defer></script>',
   jsonld("/contact","Contact",None,breadcrumb_name="Contact"), "/contact"))
 
 # ---------- /realisations ----------
@@ -1688,7 +1717,7 @@ legal("mentions-legales","Mentions légales | ARélec","Mentions légales du sit
   "Mentions légales")
 legal("politique-confidentialite","Politique de confidentialité | ARélec","Politique de confidentialité et gestion des données du site ARélec.",
   "Confidentialité.",
-  "<h2>Formulaire de contact</h2><p>Les données envoyées via le formulaire de contact servent uniquement à répondre à votre demande.</p>"
+  "<h2>Formulaire de contact</h2><p>Les données envoyées via le formulaire de contact (sur la page Contact ou dans l'assistant) sont transmises par email à ARélec par un service d'envoi, et servent uniquement à répondre à votre demande.</p>"
   "<h2>Assistant du site</h2><p>Les messages écrits à l'assistant du site sont transmis à un service d'IA (via OpenRouter) uniquement pour générer la réponse ; le site ne les enregistre pas. Si vous poursuivez sur WhatsApp, la conversation est traitée par ARélec et son agent WhatsApp pour préparer votre demande.</p>"
   f"<h2>Vos droits</h2><p>Pour toute question ou demande de suppression : {EMAIL}. {tbd('Durées de conservation et détails RGPD à compléter avec Arnaud')}</p>",
   "Confidentialité")
@@ -1810,7 +1839,7 @@ Rayon d'intervention typique : environ 50 km autour de Plouzané, dans le Finist
 
 ## Comment travailler avec ARélec
 
-1. **Premier échange** : assistant du site, puis WhatsApp (06 78 02 04 24), ou téléphone
+1. **Premier échange** : assistant du site, puis WhatsApp (06 78 02 04 24), formulaire de contact du site (pour ceux qui n'ont pas WhatsApp) ou téléphone
 2. **Visite sur place gratuite** pour établir le vrai devis
 3. **Devis détaillé**, écrit, sans engagement
 4. **Réalisation du chantier** par la même équipe, de la dépose à la mise en route
@@ -1991,6 +2020,12 @@ Dernière mise à jour : {TODAY}
 # Contexte de l'assistant (/api/chat) = la documentation complète du site
 (API/"_context.js").write_text("// Généré par build_site.py — ne pas éditer.\nmodule.exports = { CONTEXT: " + json.dumps(LLMS_FULL, ensure_ascii=False) + " };\n")
 (JS_DIR/"chat.js").write_text((ROOT/"chat.js").read_text())
+(JS_DIR/"contact.js").write_text((ROOT/"contact.js").read_text())
+# Pages que l'assistant peut proposer (boutons de navigation dans le chat)
+PAGE_LIST=[{"url":"/"+(slug+"/" if slug else ""),"title":re.split(r" \| | — ",t)[0] if slug else "Accueil"}
+           for slug,t,d,body,jl,active in pages if slug not in NOINDEX and not slug.startswith("blog/")
+           and slug not in ("mentions-legales","politique-confidentialite")]
+(API/"_pages.js").write_text("// Généré par build_site.py — ne pas éditer.\nmodule.exports = { PAGES: " + json.dumps(PAGE_LIST, ensure_ascii=False) + " };\n")
 
 print("Pages :", len(pages))
 for slug,*_ in pages: print("  /"+(slug or "(accueil)"))

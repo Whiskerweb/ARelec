@@ -365,6 +365,15 @@ a.area-chip:hover{background:var(--ink);color:#fff}
 .cform input:focus,.cform textarea:focus,.cform select:focus{outline:none;border-color:var(--lime)}
 .cform .btn{align-self:flex-start;margin-top:6px}
 .cform-foot{font-size:12px;color:rgba(255,255,255,.5)}
+.cform label small{color:rgba(255,255,255,.45);font-size:12px}
+.hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+.cform-status{margin:0;padding:12px 14px;border-radius:14px;font-size:14px;line-height:1.5;color:#fff;background:rgba(255,92,92,.16);border:1px solid rgba(255,92,92,.4)}
+.cform-status[hidden]{display:none}
+.cform-status a{color:var(--lime)}
+.cform-done{padding:28px;border-radius:18px;background:rgba(227,255,74,.1);border:1px solid rgba(227,255,74,.35)}
+.cform-done b{display:block;font-size:22px;font-weight:500;color:var(--lime);margin-bottom:8px}
+.cform-done p{margin:0;color:rgba(255,255,255,.75);line-height:1.55}
+#cform{scroll-margin-top:110px}
 /* --- galerie --- */
 .gallery{columns:3;column-gap:16px}
 .gcard{position:relative;break-inside:avoid;margin:0 0 16px;border-radius:20px;overflow:hidden}
@@ -419,6 +428,22 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
 .chat-send .ic{width:18px;height:18px}
 .chat-note{margin:0;padding:0 14px 10px;font-size:11px;color:var(--muted);text-align:center}
 .chat-note a{color:inherit}
+.chat-links{align-self:flex-start;display:flex;flex-wrap:wrap;gap:6px;max-width:92%;margin-top:-4px}
+.chat-link{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 14px;border-radius:100px;font-size:13.5px;text-decoration:none;color:var(--ink);background:#fff;border:1px solid var(--line)}
+.chat-link:hover{background:var(--lime);border-color:var(--lime)}
+.chat-link .ic{width:14px;height:14px}
+.chat-alt{align-self:center;padding:6px 10px;min-height:40px;font:inherit;font-size:13px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;background:none;border:0;cursor:pointer}
+.chat-alt:hover{color:var(--ink)}
+.chat-cf{align-self:stretch;display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:var(--mist)}
+.chat-cf>b{font-size:14.5px;font-weight:500}
+.chat-cf>small{font-size:12px;color:var(--muted);margin-top:-4px}
+.chat-cf input,.chat-cf textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:12px;color:var(--ink);background:#fff;border:1px solid var(--line)}
+.chat-cf textarea{resize:vertical;min-height:72px}
+.chat-cf input:focus,.chat-cf textarea:focus{outline:none;border-color:var(--ink)}
+.chat-cf .err{margin:0;font-size:12.5px;color:#c0362c}
+.chat-cf .err:empty{display:none}
+.chat-cf button{min-height:44px;border-radius:100px;font:inherit;font-size:14.5px;font-weight:500;cursor:pointer;color:var(--ink);background:var(--lime);border:0}
+.chat-cf button:disabled{opacity:.6;cursor:default}
 /* --- responsive --- */
 @media (max-width:1100px){
   .svc-grid,.cards-3,.testi-grid,.posts{grid-template-columns:repeat(2,1fr)}
