@@ -919,10 +919,7 @@ def chat_widget():
         ("alert","Une panne","Dépannage, urgence","J'ai une panne, vous pouvez intervenir ?")))
     acts=(f'<a class="chat-act" href="tel:{PHONE_TEL}">{SVG_PHONE}Appeler</a>'
           f'<a class="chat-act wa" href="https://wa.me/{WHATSAPP_INT}" target="_blank" rel="noopener">{SVG_WA}WhatsApp</a>'
-          f'<button class="chat-act" type="button" data-cf>{ic("doc")}Être rappelé</button>'
-          f'<a class="chat-act" href="/services/" data-nav>{ic("tool")}Nos services</a>'
-          f'<a class="chat-act" href="/realisations/" data-nav>{ic("eye")}Réalisations</a>'
-          f'<a class="chat-act" href="/avis/" data-nav>{ic("star")}Avis clients</a>')
+          f'<button class="chat-act" type="button" data-cf>{ic("doc")}Formulaire</button>')
     # Lanceur : la mascotte s'agrippe au bas de l'écran (cachée en descendant, accoudée en remontant)
     return ('<div class="cb" data-state="off">'
             '<div class="cb-tease" hidden role="status"><button class="cb-tease-x" type="button" aria-label="Masquer le message">×</button>'
@@ -949,7 +946,7 @@ def chat_widget():
             f'<template id="chat-ic-vol">{ic("vol")}</template>'
             f'<template id="chat-ic-go">{ic("right")}</template>'
             f'<template id="chat-ic-down">{ic("down")}</template>'
-            '<script src="/assets/js/chat.js?v=6" defer></script>')
+            '<script src="/assets/js/chat.js?v=7" defer></script>')
 
 # ---------- avis Google réels ----------
 REVS=[("Redistribution des prises et des points lumineux dans le cadre du réagencement de notre rez-de-chaussée (maison années 30). Intervention de très bonne qualité, chantier propre et rapide. Je recommande ARÉLEC.","Philippe C.","Rénovation électrique"),
@@ -1103,7 +1100,7 @@ def head_common(path,title,desc,jl,noindex=False):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
             f'<title>{t_esc}</title><meta name="description" content="{d_esc}">{robots}'
             f'<link rel="canonical" href="{canon}">{og}{icons}{jl}{fonts}'
-            '<link rel="stylesheet" href="/assets/css/styles.css?v=55"><link rel="stylesheet" href="/assets/css/chat.css?v=2">'
+            '<link rel="stylesheet" href="/assets/css/styles.css?v=55"><link rel="stylesheet" href="/assets/css/chat.css?v=3">'
             '<script>document.documentElement.classList.add("js")</script></head>')
 
 NOINDEX = {"blog"}  # pages encore en maquette (contenu à rédiger)
@@ -1633,7 +1630,7 @@ contact_body=(phero(CRUMB_M.format(label="Contact"),"Contact",
                FAQ_HOME[3], FAQ_HOME[1]], h2="Avant de nous écrire"))
 pages.append(("contact","Contact & devis gratuit | ARélec — Plouzané (29)",
   "Contactez ARélec : assistant en ligne, WhatsApp 06 78 02 04 24, téléphone 02 98 40 20 43 ou contact@entreprise-arelec.fr. Devis gratuit dans tout le bassin brestois.",
-  contact_body+'<script src="/assets/js/contact.js?v=3" defer></script>',
+  contact_body+'<script src="/assets/js/contact.js?v=4" defer></script>',
   jsonld("/contact","Contact",None,breadcrumb_name="Contact"), "/contact"))
 
 # ---------- /realisations ----------
@@ -2006,6 +2003,40 @@ PAGE_LIST=[{"url":"/"+(slug+"/" if slug else ""),"title":re.split(r" \| | — ",
            for slug,t,d,body,jl,active in pages if slug not in NOINDEX and not slug.startswith("blog/")
            and slug not in ("mentions-legales","politique-confidentialite")]
 (API/"_pages.js").write_text("// Généré par build_site.py — ne pas éditer.\nmodule.exports = { PAGES: " + json.dumps(PAGE_LIST, ensure_ascii=False) + " };\n")
+# Extraits sourçables pour l'assistant : paragraphes, puces et réponses de FAQ des pages principales.
+# L'assistant cite un extrait (S1, S2…) ; le lien « Source » ramène à cet endroit précis de la page (#cite=…).
+from html.parser import HTMLParser
+class _Txt(HTMLParser):
+    BLOCK={"p","li","h3","summary"}
+    def __init__(s): super().__init__(); s.out=[]; s.stack=[]; s.inmain=False; s.skip=0
+    def handle_starttag(s,t,a):
+        a=dict(a); c=a.get("class") or ""
+        if t=="main": s.inmain=True
+        if not s.inmain: return
+        if t in ("script","style","template","form","button","nav") or "faq-intro" in c or "crumb" in c: s.skip+=1; s.stack.append((t,True)); return
+        blk=t in s.BLOCK or (t=="div" and "faq-a" in c)
+        s.stack.append((t,False)); 
+        if blk and not s.skip: s.out.append(["faq" if "faq-a" in c else t,""])
+    def handle_endtag(s,t):
+        if t=="main": s.inmain=False
+        while s.stack:
+            tt,sk=s.stack.pop()
+            if sk: s.skip-=1
+            if tt==t: break
+    def handle_data(s,d):
+        if s.inmain and not s.skip and s.out: s.out[-1][1]+=d
+SRC_PAGES=["","electricite","chauffage","plomberie","services","entreprise","contact","realisations"]
+SOURCES=[]; seen=set()
+for slug in SRC_PAGES:
+    title=next((x["title"] for x in PAGE_LIST if x["url"]==("/"+slug+"/" if slug else "/")),slug)
+    prs=_Txt(); prs.feed((SITE/slug/"index.html").read_text() if slug else (SITE/"index.html").read_text())
+    for kind,txt in prs.out:
+        t=" ".join(txt.replace("\xa0"," ").split())
+        if kind=="summary" or len(t)<45 or "*" in t or t in seen: continue
+        seen.add(t)
+        SOURCES.append({"id":f"S{len(SOURCES)+1}","url":"/"+(slug+"/" if slug else ""),"page":title,"text":t[:320]})
+(API/"_sources.js").write_text("// Généré par build_site.py — ne pas éditer.\nmodule.exports = { SOURCES: " + json.dumps(SOURCES, ensure_ascii=False) + " };\n")
+print("extraits sourçables :", len(SOURCES), sum(len(x["text"]) for x in SOURCES), "caractères")
 
 print("Pages :", len(pages))
 for slug,*_ in pages: print("  /"+(slug or "(accueil)"))

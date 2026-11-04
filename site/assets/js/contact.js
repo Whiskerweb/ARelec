@@ -5,6 +5,7 @@
   const f = document.getElementById("cform");
   if (!f) return;
   const btn = f.querySelector('button[type="submit"]'), status = f.querySelector(".cform-status");
+  const label = btn.lastChild, LABEL = label.textContent;
   const MAIL = f.dataset.mail, PHONE = f.dataset.phone;
   const ERR = {
     nom: "Indiquez votre nom.",
@@ -29,7 +30,7 @@
   // Sans Resend, le serveur valide puis c'est le navigateur qui transmet à FormSubmit (bloqué depuis un serveur)
   async function relay(out) {
     if (!out.relay) return;
-    const r = await fetch(out.relay.url, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(out.relay.body) });
+    const r = await fetch(out.relay.url, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(out.relay.body), signal: AbortSignal.timeout(12000) });
     const o = await r.json().catch(() => ({}));
     if (!r.ok || String(o.success) !== "true") throw new Error("relay");
   }
@@ -37,11 +38,11 @@
   f.addEventListener("submit", async e => {
     e.preventDefault();
     if (!f.tel.value.trim() && !f.email.value.trim()) { say(ERR.joignable); f.tel.focus(); return; }
-    btn.disabled = true; say("");
+    btn.disabled = true; say(""); label.textContent = "Envoi en cours…";
     const data = Object.fromEntries(new FormData(f));
     data.page = location.pathname;
     try {
-      const r = await fetch("/api/contact/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      const r = await fetch("/api/contact/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data), signal: AbortSignal.timeout(12000) });
       const out = await r.json().catch(() => ({}));
       if (r.ok) {
         await relay(out);
@@ -50,11 +51,11 @@
         try { sessionStorage.removeItem("arelec-chat-v1"); } catch (e) {}
         return;
       }
-      if (ERR[out.error]) { say(ERR[out.error]); btn.disabled = false; return; }
+      if (ERR[out.error]) { say(ERR[out.error]); btn.disabled = false; label.textContent = LABEL; return; }
       throw new Error(out.error || r.status);
     } catch (err) {
       say(`L'envoi n'a pas fonctionné. Écrivez-nous à <a href="mailto:${MAIL}">${MAIL}</a> ou appelez le <a href="tel:${PHONE.replace(/\s/g, "")}">${PHONE}</a>.`);
-      btn.disabled = false;
+      btn.disabled = false; label.textContent = LABEL;
     }
   });
 })();

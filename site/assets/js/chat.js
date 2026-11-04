@@ -102,8 +102,23 @@
     const b = el("div", "chat-msg");
     if (role === "user") b.textContent = text; else b.innerHTML = md(text);
     col.appendChild(b);
-    if (role !== "user" && !opts.noVoice) { const s = sayBtn(text); if (s) col.appendChild(s); }
+    if (role !== "user" && !opts.noVoice) {
+      // Sous la réponse : « Écouter » et, si l'assistant cite le site, un petit lien « Source » vers l'endroit exact
+      const meta = el("div", "chat-meta");
+      const s = sayBtn(text); if (s) meta.appendChild(s);
+      if (opts.source) meta.appendChild(sourceLink(opts.source));
+      if (meta.children.length) col.appendChild(meta);
+    }
     return { col, b };
+  }
+  function sourceLink(src) {
+    const a = el("a", "chat-src", "Source : " + esc(src.page));
+    a.href = src.url + "#cite=" + encodeURIComponent(src.quote);
+    a.addEventListener("click", e => {
+      close(); // le panneau se replie pour laisser voir le passage (la conversation est gardée)
+      if (src.url === location.pathname) { e.preventDefault(); cite(src.quote); }
+    });
+    return a;
   }
   function links(items) {
     const keep = (items || []).filter(p => p.url !== location.pathname);
@@ -149,7 +164,7 @@
   // Sans Resend, le serveur valide puis c'est le navigateur qui transmet à FormSubmit (bloqué depuis un serveur)
   async function relay(out) {
     if (!out.relay) return;
-    const r = await fetch(out.relay.url, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(out.relay.body) });
+    const r = await fetch(out.relay.url, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(out.relay.body), signal: AbortSignal.timeout(12000) });
     const o = await r.json().catch(() => ({}));
     if (!r.ok || String(o.success) !== "true") throw new Error("relay");
   }
@@ -189,7 +204,7 @@
       btn.disabled = true; btn.textContent = "Envoi…";
       try {
         const r = await fetch("/api/contact/", {
-          method: "POST", headers: { "Content-Type": "application/json" },
+          method: "POST", headers: { "Content-Type": "application/json" }, signal: AbortSignal.timeout(12000),
           body: JSON.stringify({ nom: f.nom.value, tel: f.tel.value, email: f.email.value, message: f.message.value, site: f.site.value, source: "chat", page: location.pathname })
         });
         const out = await r.json().catch(() => ({}));
@@ -210,7 +225,7 @@
   function render() {
     list.innerHTML = ""; lastRole = null;
     hello();
-    st.msgs.forEach(m => { bubble(m.role, m.content); if (m.role === "assistant") links(m.links); });
+    st.msgs.forEach(m => { bubble(m.role, m.content, { source: m.source }); if (m.role === "assistant") links(m.links); });
     handoff();
     scroll();
   }
@@ -291,11 +306,12 @@
       const reply = tidy((data.reply || "").trim()) || FALLBACK;
       const m = { role: "assistant", content: reply };
       if (Array.isArray(data.links) && data.links.length) m.links = data.links;
+      if (data.source?.url) m.source = data.source;
       st.msgs.push(m);
       if (data.handoff) { st.summary = data.handoff; st.sent = false; }
       if (data.mode === "form") st.mode = "form";
       col.parentNode.remove(); lastRole = "user";
-      bubble("assistant", reply); links(m.links);
+      bubble("assistant", reply, { source: m.source }); links(m.links);
     } catch (e) {
       // Sans réponse : WhatsApp avec la demande telle quelle, et le formulaire pour ceux qui n'ont pas WhatsApp
       if (!st.summary) st.summary = "Ma demande : " + st.msgs.filter(m => m.role === "user").map(m => m.content).join(" ").slice(0, 400);
@@ -377,6 +393,29 @@
   window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
   setTimeout(() => setState(window.scrollY > 120 ? "peek" : "up"), 1200);
   tease.addEventListener("click", e => { if (e.target.closest(".cb-tease-x")) { e.stopPropagation(); hideTease(true); return; } open(); });
+
+  // ---------- « Source » : ramène au passage cité (#cite=…), l'ouvre s'il est dans une FAQ et le surligne ----------
+  const norm = s => s.replace(/\s+/g, " ").trim().toLowerCase();
+  function cite(quote) {
+    const q = norm(quote), main = document.querySelector("main") || document.body;
+    const hit = [...main.querySelectorAll("p,li,h3,.faq-a")].filter(n => norm(n.textContent).includes(q))
+      .sort((a, b) => a.textContent.length - b.textContent.length)[0];
+    if (!hit) return;
+    const det = hit.closest("details"); if (det) det.open = true;
+    hit.classList.remove("cite-hl"); void hit.offsetWidth; hit.classList.add("cite-hl");
+    hit.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Filet de sécurité : si le défilement doux n'a pas eu lieu, on saute directement au passage
+    setTimeout(() => { const r = hit.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) hit.scrollIntoView({ block: "center" }); }, 1000);
+    setTimeout(() => hit.classList.remove("cite-hl"), 4200);
+  }
+  function citeFromHash() {
+    if (!location.hash.startsWith("#cite=")) return;
+    const q = decodeURIComponent(location.hash.slice(6));
+    history.replaceState(null, "", location.pathname + location.search);
+    setTimeout(() => cite(q), 350);
+  }
+  window.addEventListener("hashchange", citeFromHash);
+  citeFromHash();
 
   // ---------- événements ----------
   mascot.addEventListener("click", open);
