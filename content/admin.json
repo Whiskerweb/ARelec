@@ -1,8 +1,6 @@
 {
  "version": 1,
  "media": [],
- "images": {
-  "/|hero.jpg#0": "site:cablage.jpg"
- },
+ "images": {},
  "texts": {}
 }
