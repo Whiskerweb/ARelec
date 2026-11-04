@@ -12,7 +12,7 @@
     joignable: "Laissez un téléphone ou un email pour qu'on puisse vous répondre.",
     email: "L'adresse email ne semble pas valide.",
     tel: "Le numéro de téléphone ne semble pas complet.",
-    message: "Décrivez votre projet en quelques mots.",
+    message: "Décrivez votre demande en quelques mots.",
     rate: "Trop d'envois d'affilée. Réessayez dans quelques minutes."
   };
 

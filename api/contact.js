@@ -98,7 +98,7 @@ function asHtml(d, subject) {
   <h1 style="margin:0 0 6px;font:500 26px/1.2 ${FONT};color:${C.ink};letter-spacing:-.02em">${escH(d.nom)}</h1>
   <p style="margin:0 0 22px;font:14px/1.5 ${FONT};color:${C.muted}">Demande reçue via ${escH(d.source.toLowerCase())}${d.commune ? " · " + escH(d.commune) : ""}</p>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.cream};border-radius:16px">${rows}</table>
-  <p style="margin:24px 0 8px;font:600 12px/1 ${FONT};color:${C.muted};letter-spacing:.06em">SON PROJET</p>
+  <p style="margin:24px 0 8px;font:600 12px/1 ${FONT};color:${C.muted};letter-spacing:.06em">SA DEMANDE</p>
   <div style="padding:16px 18px;border-left:3px solid ${C.lime};background:${C.cream};border-radius:0 12px 12px 0;font:15px/1.6 ${FONT};color:${C.ink};white-space:pre-wrap">${escH(d.message)}</div>
   <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0 14px"><tr>${btns}</tr></table>
 </td></tr>

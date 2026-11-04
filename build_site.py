@@ -946,7 +946,7 @@ def chat_widget():
             f'<template id="chat-ic-vol">{ic("vol")}</template>'
             f'<template id="chat-ic-go">{ic("right")}</template>'
             f'<template id="chat-ic-down">{ic("down")}</template>'
-            '<script src="/assets/js/chat.js?v=7" defer></script>')
+            '<script src="/assets/js/chat.js?v=8" defer></script>')
 
 # ---------- avis Google réels ----------
 REVS=[("Redistribution des prises et des points lumineux dans le cadre du réagencement de notre rez-de-chaussée (maison années 30). Intervention de très bonne qualité, chantier propre et rapide. Je recommande ARÉLEC.","Philippe C.","Rénovation électrique"),
@@ -1619,7 +1619,7 @@ contact_body=(phero(CRUMB_M.format(label="Contact"),"Contact",
    '<div class="row"><label><span>Email <small>(ou téléphone, au choix)</small></span><input name="email" type="email" maxlength="120" autocomplete="email"></label>'
    '<label>Commune <input name="commune" type="text" maxlength="80" autocomplete="address-level2"></label></div>'
    '<label>Type de travaux <select name="metier"><option>Électricité</option><option>Chauffage</option><option>Plomberie</option><option>Plusieurs / je ne sais pas</option></select></label>'
-   '<label>Votre projet <textarea name="message" rows="5" required maxlength="2000" placeholder="Ce qu\'il faut faire, neuf ou rénovation, urgence, délais…"></textarea></label>'
+   '<label>Votre demande <textarea name="message" rows="5" required maxlength="2000" placeholder="Ce qu\'il faut faire, neuf ou rénovation, urgence, délais…"></textarea></label>'
    '<label class="hp" aria-hidden="true">Ne pas remplir <input name="site" type="text" tabindex="-1" autocomplete="off"></label>'
    '<p class="cform-status" role="alert" hidden></p>'
    f'<button type="submit" class="btn btn-lime"><span class="chip">{ic("arrow")}</span>Envoyer ma demande</button>'
@@ -1640,7 +1640,7 @@ contact_body=(phero(CRUMB_M.format(label="Contact"),"Contact",
                FAQ_HOME[3], FAQ_HOME[1]], h2="Avant de nous écrire"))
 pages.append(("contact","Contact & devis gratuit | ARélec — Plouzané (29)",
   "Contactez ARélec : assistant en ligne, WhatsApp 06 78 02 04 24, téléphone 02 98 40 20 43 ou contact@entreprise-arelec.fr. Devis gratuit dans tout le bassin brestois.",
-  contact_body+'<script src="/assets/js/contact.js?v=4" defer></script>',
+  contact_body+'<script src="/assets/js/contact.js?v=5" defer></script>',
   jsonld("/contact","Contact",None,breadcrumb_name="Contact"), "/contact"))
 
 # ---------- /realisations ----------

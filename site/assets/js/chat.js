@@ -17,7 +17,7 @@
   const SENT = "C'est envoyé. Arnaud a votre demande et vous recontacte **sous 24 à 48 h**.";
   const ERR = {
     nom: "Indiquez votre nom.", joignable: "Laissez un téléphone ou un email.", email: "L'email ne semble pas valide.",
-    tel: "Le numéro ne semble pas complet.", message: "Décrivez votre projet en quelques mots.", rate: "Trop d'envois, réessayez dans quelques minutes."
+    tel: "Le numéro ne semble pas complet.", message: "Décrivez votre demande en quelques mots.", rate: "Trop d'envois, réessayez dans quelques minutes."
   };
   const mobile = () => window.matchMedia("(max-width: 760px)").matches;
 
@@ -180,7 +180,7 @@
       '<input name="nom" autocomplete="name" maxlength="80" placeholder="Votre nom" aria-label="Votre nom">' +
       '<div class="two"><input name="tel" type="tel" autocomplete="tel" maxlength="30" placeholder="Téléphone" aria-label="Téléphone">' +
       '<input name="email" type="email" autocomplete="email" maxlength="120" placeholder="Email" aria-label="Email"></div>' +
-      '<textarea name="message" maxlength="2000" rows="3" placeholder="Votre projet" aria-label="Votre projet"></textarea>' +
+      '<textarea name="message" maxlength="2000" rows="3" placeholder="Votre demande" aria-label="Votre demande"></textarea>' +
       '<input class="hp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">' +
       '<p class="err" role="alert"></p><button type="submit" class="go">Envoyer ma demande</button>');
     f.noValidate = true;
