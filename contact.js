@@ -26,6 +26,14 @@
     status.innerHTML = text;
   }
 
+  // Sans Resend, le serveur valide puis c'est le navigateur qui transmet à FormSubmit (bloqué depuis un serveur)
+  async function relay(out) {
+    if (!out.relay) return;
+    const r = await fetch(out.relay.url, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(out.relay.body) });
+    const o = await r.json().catch(() => ({}));
+    if (!r.ok || String(o.success) !== "true") throw new Error("relay");
+  }
+
   f.addEventListener("submit", async e => {
     e.preventDefault();
     if (!f.tel.value.trim() && !f.email.value.trim()) { say(ERR.joignable); f.tel.focus(); return; }
@@ -36,6 +44,7 @@
       const r = await fetch("/api/contact/", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
       const out = await r.json().catch(() => ({}));
       if (r.ok) {
+        await relay(out);
         f.classList.add("sent");
         f.innerHTML = '<div class="cform-done"><b>Merci, c\'est envoyé.</b><p>On revient vers vous sous 24 à 48 h pour préciser le besoin et caler la visite gratuite.</p></div>';
         try { sessionStorage.removeItem("arelec-chat-v1"); } catch (e) {}

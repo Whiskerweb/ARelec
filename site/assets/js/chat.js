@@ -146,6 +146,13 @@
     c?.scrollIntoView({ block: "nearest", behavior: "smooth" });
     c?.querySelector("input")?.focus({ preventScroll: true });
   }
+  // Sans Resend, le serveur valide puis c'est le navigateur qui transmet à FormSubmit (bloqué depuis un serveur)
+  async function relay(out) {
+    if (!out.relay) return;
+    const r = await fetch(out.relay.url, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(out.relay.body) });
+    const o = await r.json().catch(() => ({}));
+    if (!r.ok || String(o.success) !== "true") throw new Error("relay");
+  }
   function contactForm() {
     const wrap = el("div", "chat-cf" + (st.cf ? " open" : "") + (st.mode === "form" ? " hl" : ""));
     const head = el("button", "chat-cf-head",
@@ -187,6 +194,7 @@
         });
         const out = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(out.error || r.status);
+        await relay(out);
         st.sent = true; st.cf = false; st.draft = {};
         st.msgs.push({ role: "assistant", content: SENT });
         save(); handoff(); bubble("assistant", SENT); scroll();

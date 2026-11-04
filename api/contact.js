@@ -2,6 +2,8 @@
 // La demande part par email à ARélec :
 //   - via Resend si RESEND_API_KEY est défini (CONTACT_FROM = expéditeur sur un domaine vérifié chez Resend) ;
 //   - sinon via FormSubmit (aucune clé : la toute première demande envoie un email d'activation à CONTACT_TO, à confirmer une fois).
+//     FormSubmit est derrière Cloudflare, qui bloque les appels venant d'un serveur : la fonction valide la demande
+//     et renvoie au navigateur de quoi l'envoyer lui-même (champ « relay »).
 // CONTACT_TO (facultatif) : destinataire, contact@entreprise-arelec.fr par défaut.
 // Si Upstash est branché (voir _store.js), une copie de chaque demande est gardée 90 jours.
 const crypto = require("node:crypto");
@@ -69,23 +71,17 @@ async function viaResend(d, subject) {
   if (!r.ok) throw new Error("Resend " + r.status);
 }
 
-async function viaFormSubmit(d, subject) {
-  const r = await fetch(`https://formsubmit.co/ajax/${encodeURIComponent(TO)}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json", Origin: SITE, Referer: SITE + "/contact/" },
-    body: JSON.stringify({
+// Demande prête à être envoyée à FormSubmit par le navigateur du visiteur
+function formSubmitRelay(d, subject) {
+  return {
+    url: `https://formsubmit.co/ajax/${encodeURIComponent(TO)}`,
+    body: {
       _subject: subject, _template: "table", _captcha: "false",
       Nom: d.nom, "Téléphone": d.tel || "—", Commune: d.commune || "—", Travaux: d.metier || "—",
       Message: d.message, Source: d.source + (d.page ? " (" + d.page + ")" : ""),
       ...(d.email ? { email: d.email, _replyto: d.email } : {})
-    }),
-    signal: AbortSignal.timeout(10000)
-  });
-  const raw = await r.text();
-  let out = {};
-  try { out = JSON.parse(raw); } catch (e) {}
-  // Tant que le lien d'activation reçu par email n'a pas été cliqué, FormSubmit refuse l'envoi (message « needs Activation »)
-  if (!r.ok || String(out.success) !== "true") throw new Error("FormSubmit " + r.status + " " + (out.message || raw.slice(0, 200)));
+    }
+  };
 }
 
 module.exports = async (req, res) => {
@@ -115,8 +111,9 @@ module.exports = async (req, res) => {
     const id = new Date().toISOString().slice(0, 19) + "-" + crypto.randomBytes(3).toString("hex");
     await store.set("contact:" + id, { ...data, at: Date.now() }, 90 * 24 * 3600).catch(() => {});
   }
+  if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, relay: formSubmitRelay(data, subject) });
   try {
-    await (process.env.RESEND_API_KEY ? viaResend : viaFormSubmit)(data, subject);
+    await viaResend(data, subject);
     return res.status(200).json({ ok: true });
   } catch (e) {
     console.error("contact:", e.message);
