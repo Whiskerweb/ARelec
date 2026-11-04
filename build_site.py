@@ -22,6 +22,11 @@ SVG_FB='<svg class="ic" viewBox="0 0 24 24" fill="currentColor" aria-hidden="tru
 JS_DIR = SITE/"assets/js"; API = ROOT/"api"
 for p in (IMG,CSS,JS_DIR,API): p.mkdir(parents=True, exist_ok=True)
 
+# Modifications faites depuis l'espace admin (content/admin.json) : photos, emplacements, textes
+import admin_content as AC
+ADMIN = AC.load(ROOT)
+AC.build_media(ROOT, IMG, ADMIN)
+
 # ---------- images mutualisees ----------
 def save(srcname, dst, w):
     im = ImageOps.exif_transpose(Image.open(ROOT/"assets/realisations"/srcname)).convert("RGB")
@@ -428,6 +433,11 @@ a.area-chip:hover{background:var(--ink);color:#fff}
 .gcard figcaption{position:absolute;left:10px;right:10px;bottom:10px;padding:12px 14px;border-radius:14px;color:#fff;background:rgba(18,18,17,.4);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 .gcard figcaption .mono{color:var(--lime);font-size:11px}
 .gcard figcaption span{display:block;font-size:14px;margin-top:3px}
+.gcard[hidden]{display:none}
+.gfilters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.gfilters button{min-height:40px;padding:8px 16px;border-radius:100px;font:inherit;font-size:14px;color:var(--ink);background:var(--mist);border:1px solid transparent;cursor:pointer;transition:background .2s,border-color .2s}
+.gfilters button:hover{border-color:var(--ink)}
+.gfilters button.on{color:#fff;background:var(--ink)}
 /* --- texte long --- */
 .prose{max-width:760px;font-size:16px;line-height:1.75;color:var(--muted)}
 .prose h2{font-size:24px;font-weight:400;letter-spacing:-.02em;color:var(--ink);margin:40px 0 12px}
@@ -1117,6 +1127,7 @@ def shell(path,title,desc,body,jl,active):
 
 _INTERNAL=re.compile(r'href="(/[a-z0-9-]+(?:/[a-z0-9-]+)*)(?=["#?])')
 def write(path,h):
+    h=AC.apply("/"+(path.strip("/")+"/" if path.strip("/") else ""), h, ADMIN)
     h=_INTERNAL.sub(r'href="\1/', h)
     d=SITE/(path.strip("/")); d.mkdir(parents=True,exist_ok=True)
     (d/"index.html").write_text(h)
@@ -1660,12 +1671,21 @@ GALLERY=[
  ("reno-cablage.jpg","Électricité","Câblage & isolation phonique"),
  ("chantier-toiture.jpg","Rénovation","Chantier en bord de mer"),
 ]
-gallery_items="".join(f'<figure{R(.05*(i%3),"gcard")}><img src="/assets/img/{img}" alt="{html.escape(cap)}" loading="lazy">'
-                      f'<figcaption><div class="mono">{kind}</div><span>{cap}</span></figcaption></figure>' for i,(img,kind,cap) in enumerate(GALLERY))
+# Catégorie de filtre de chaque photo d'origine ; les photos ajoutées dans l'admin passent en premier
+_GCAT={"Rénovation complète":"Rénovation"}
+_GALL=[(src,kind,cap,alt) for src,kind,cap,alt in AC.gallery_items(ADMIN)]+[("/assets/img/"+img,kind,cap,cap) for img,kind,cap in GALLERY]
+gallery_items="".join(f'<figure{R(.05*(i%3),"gcard")} data-cat="{html.escape(_GCAT.get(kind,kind))}"><img src="{src}" alt="{html.escape(alt)}" loading="lazy">'
+                      f'<figcaption><div class="mono">{html.escape(kind)}</div><span>{html.escape(cap)}</span></figcaption></figure>' for i,(src,kind,cap,alt) in enumerate(_GALL))
+_cats=[c for c in AC.CATEGORIES if any(_GCAT.get(k,k)==c for _,k,_,_ in _GALL)]
+gallery_filters=('<div class="gfilters" role="group" aria-label="Filtrer les réalisations">'
+  '<button type="button" class="on" data-f="">Tout</button>'+"".join(f'<button type="button" data-f="{html.escape(c)}">{c}</button>' for c in _cats)+'</div>'
+  '<script>document.querySelector(".gfilters").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;'
+  'this.querySelectorAll("button").forEach(function(x){x.classList.toggle("on",x===b)});'
+  'document.querySelectorAll(".gallery .gcard").forEach(function(g){g.hidden=!!b.dataset.f&&g.dataset.cat!==b.dataset.f})});</script>')
 real_body=(phero(CRUMB_M.format(label="Réalisations"),"Réalisations",
   "Le travail bien fait,<br><b>en vrai.</b>",
   "Quelques chantiers récents dans le bassin brestois : rénovations complètes, salles de bain, tableaux électriques, éclairage soigné.",actions="")
- +f'<section class="sec"><div class="wrap"><div class="gallery">{gallery_items}</div></div></section>'
+ +f'<section class="sec"><div class="wrap">{gallery_filters}<div class="gallery">{gallery_items}</div></div></section>'
  +cta_section('Un projet similaire ?<br><b>On en parle.</b>',img="sdb-baignoire.jpg"))
 pages.append(("realisations","Nos réalisations | ARélec — Brest & Finistère",
   "Galerie de nos chantiers à Brest, Plouzané et alentour : salles de bain, rénovations complètes, éclairage et installations électriques.",
@@ -1744,6 +1764,7 @@ nf=re.sub(r'<link rel="canonical"[^>]*>|<meta property="og:url"[^>]*>',"",nf)  #
 nf=_INTERNAL.sub(r'href="\1/', nf)
 (SITE/"404.html").write_text(nf)
 
+
 urls=[p[0] for p in pages if p[0] not in NOINDEX]
 TODAY=datetime.date.today().isoformat()
 def url_meta(u):
@@ -1795,10 +1816,12 @@ ROBOTS = (f"""# robots.txt — ARélec, électricien, chauffagiste et plombier �
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 
 # Moteurs de recherche et assistants IA : autorisés à lire et citer le site
 """ + "".join(f"User-agent: {b}\n" for b in _AI_BOTS) + """Allow: /
 Disallow: /api/
+Disallow: /admin/
 
 """ + f"Sitemap: {DOMAIN}/sitemap.xml\n")
 (SITE/"robots.txt").write_text(ROBOTS)
@@ -2095,3 +2118,12 @@ print("extraits sourçables :", len(SOURCES), sum(len(x["text"]) for x in SOURCE
 
 print("Pages :", len(pages))
 for slug,*_ in pages: print("  /"+(slug or "(accueil)"))
+
+# ---------- espace admin (/admin) + empreinte du build (suivi de mise en ligne depuis l'admin) ----------
+_site_imgs=sorted(f.name for f in IMG.glob("*.jpg") if not any(x in f.name for x in ("logo","mascotte","favicon","apple-touch","og")))
+(SITE/"admin").mkdir(exist_ok=True)
+(SITE/"admin"/"index.html").write_text((ROOT/"admin.html").read_text()
+    .replace("__PAGES__", json.dumps(PAGE_LIST, ensure_ascii=False))
+    .replace("__SITE_IMAGES__", json.dumps(_site_imgs))
+    .replace("__CATS__", json.dumps(AC.CATEGORIES, ensure_ascii=False)))
+(SITE/"build.json").write_text(json.dumps({"sha": os.environ.get("VERCEL_GIT_COMMIT_SHA", "local"), "at": datetime.datetime.utcnow().isoformat(timespec="seconds")+"Z"}))

@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Espace admin | ARélec</title>
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500&display=swap">
+<style>
+/* Espace admin ARélec — couleurs du site (encre, crème, jaune-vert) */
+:root{--ink:#121211;--ink2:#1d1d1b;--mist:#F3F2EE;--line:#E4E2DC;--muted:#6F6D66;--lime:#E3FF4A;--red:#c0362c;--font:'Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'Geist Mono',ui-monospace,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font:15px/1.5 var(--font);color:var(--ink);background:var(--mist);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+.ic{width:18px;height:18px;flex:none}
+.mono{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:8px 16px;border-radius:100px;border:1px solid var(--line);background:#fff;font-size:14px;font-weight:500;text-decoration:none;white-space:nowrap;transition:background .2s,border-color .2s,opacity .2s}
+.btn:hover{border-color:var(--ink)}
+.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.lime{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.btn.ghost{background:transparent;border-color:transparent;color:inherit}
+.btn.ghost:hover{background:rgba(127,127,127,.12)}
+.btn.danger{color:var(--red)}
+.btn:disabled{opacity:.45;cursor:default}
+input[type=text],input[type=password],select,textarea{width:100%;min-height:42px;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:14.5px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* Connexion */
+.login{min-height:100%;display:grid;place-items:center;padding:24px}
+.login form{width:min(380px,100%);display:flex;flex-direction:column;gap:14px;padding:32px;border-radius:28px;background:#fff;box-shadow:0 30px 60px rgba(18,18,17,.08)}
+.login img{width:110px;margin-bottom:6px}
+.login h1{margin:0;font-size:24px;font-weight:500;letter-spacing:-.02em}
+.login p{margin:0;color:var(--muted);font-size:14px}
+.login .err{color:var(--red);font-size:13.5px;min-height:1em}
+
+/* Barre du haut */
+.app{height:100%;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--ink);color:#fff;flex-wrap:wrap}
+.top img{height:30px;margin-right:6px}
+.tabs{display:flex;gap:4px;padding:4px;border-radius:100px;background:rgba(255,255,255,.08)}
+.tabs button{min-height:34px;padding:6px 14px;border:0;border-radius:100px;background:none;color:rgba(255,255,255,.75);font-size:14px}
+.tabs button.on{background:#fff;color:var(--ink)}
+.top .sp{flex:1}
+.pub{display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,.75)}
+.pub .dot{width:8px;height:8px;border-radius:50%;background:#8a887f}
+.pub.pending .dot{background:#f5a623}.pub.live .dot{background:var(--lime)}.pub.busy .dot{background:#f5a623;animation:blink 1s infinite}.pub.error .dot{background:#ff6b5e}
+@keyframes blink{50%{opacity:.3}}
+.top .btn.ghost{color:#fff}
+
+.view{flex:1;min-height:0;display:flex}
+
+/* Modifier le site */
+.side{width:250px;flex:none;display:flex;flex-direction:column;border-right:1px solid var(--line);background:#fff}
+.side .search{padding:12px}
+.pages{flex:1;overflow:auto;padding:0 8px 12px}
+.pages h4{margin:12px 8px 4px;font:500 11.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pages button{display:block;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:10px;background:none;font-size:14px}
+.pages button:hover{background:var(--mist)}
+.pages button.on{background:var(--ink);color:#fff}
+.stage{flex:1;min-width:0;display:flex;flex-direction:column}
+.stagebar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.stagebar .url{font:13px var(--mono);color:var(--muted);flex:1;min-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.switch{display:inline-flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;user-select:none}
+.switch input{appearance:none;width:38px;height:22px;border-radius:100px;background:var(--line);position:relative;cursor:pointer;transition:background .2s}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.switch input:checked{background:var(--ink)}
+.switch input:checked::after{transform:translateX(16px);background:var(--lime)}
+.frame{flex:1;position:relative;background:var(--mist)}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);padding:8px 14px;border-radius:100px;background:var(--ink);color:#fff;font-size:13px;box-shadow:0 10px 24px rgba(18,18,17,.25);pointer-events:none}
+
+/* Panneau image */
+.drawer{position:fixed;top:0;right:0;bottom:0;z-index:20;width:min(460px,100vw);display:flex;flex-direction:column;background:#fff;box-shadow:-20px 0 50px rgba(18,18,17,.18);animation:slide .25s ease}
+@keyframes slide{from{transform:translateX(30px);opacity:0}}
+.drawer header{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.drawer header b{flex:1;font-weight:500;font-size:16px}
+.drawer .body{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:16px}
+.drawer footer{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line)}
+.cur{display:flex;gap:12px;align-items:center;padding:10px;border-radius:14px;background:var(--mist)}
+.cur img{width:96px;height:72px;object-fit:cover;border-radius:10px}
+.cur small{display:block;color:var(--muted);font-size:12.5px}
+.scope{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.scope label{display:flex;gap:8px;align-items:flex-start;cursor:pointer}
+.scope small{color:var(--muted);font-size:12.5px}
+.pick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pick button{position:relative;padding:0;border:2px solid transparent;border-radius:12px;overflow:hidden;background:var(--mist);aspect-ratio:4/3}
+.pick button img{width:100%;height:100%;object-fit:cover;display:block}
+.pick button span{position:absolute;left:4px;right:4px;bottom:4px;padding:2px 6px;border-radius:6px;background:rgba(18,18,17,.6);color:#fff;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.pick button.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--lime) inset}
+
+/* Médiathèque */
+.lib{flex:1;overflow:auto;padding:20px}
+.lib-in{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.lib h2{margin:0;font-size:26px;font-weight:500;letter-spacing:-.02em}
+.lib .lead{margin:4px 0 0;color:var(--muted)}
+.drop{display:flex;flex-direction:column;align-items:center;gap:6px;padding:28px;border:2px dashed #cfccc3;border-radius:22px;background:#fff;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+.drop:hover,.drop.over{border-color:var(--ink);background:#fbfbf8}
+.drop b{font-size:16px;font-weight:500}
+.drop small{color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{min-height:34px;padding:5px 12px;border-radius:100px;border:1px solid var(--line);background:#fff;font-size:13.5px}
+.chips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.card{display:flex;flex-direction:column;border-radius:18px;background:#fff;overflow:hidden;border:1px solid var(--line)}
+.card .ph{position:relative;aspect-ratio:4/3;background:var(--mist)}
+.card .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.badge{position:absolute;top:8px;left:8px;padding:4px 9px;border-radius:100px;font-size:11.5px;font-weight:500;background:var(--lime);color:var(--ink)}
+.badge.new{left:auto;right:8px;background:var(--ink);color:#fff}
+.card .f{display:flex;flex-direction:column;gap:8px;padding:12px}
+.card .f label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.card .f .row{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.card.site .f{gap:2px}
+
+/* Barre de publication */
+.bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border-top:1px solid var(--line)}
+.bar .msg{flex:1;font-size:14px}
+.toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);z-index:30;padding:10px 16px;border-radius:12px;background:var(--ink);color:#fff;font-size:14px;box-shadow:0 12px 30px rgba(18,18,17,.3)}
+.toast.err{background:var(--red)}
+
+@media (max-width:820px){
+  .side{display:none}
+  .top img{display:none}
+  .pick{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- Connexion -->
+<section class="login" id="login" hidden>
+  <form id="loginForm">
+    <img src="/assets/img/logo-dark.png" alt="ARélec">
+    <h1>Espace admin</h1>
+    <p>Photos, réalisations et textes du site.</p>
+    <input type="password" name="password" placeholder="Mot de passe" autocomplete="current-password" required aria-label="Mot de passe">
+    <button class="btn dark" type="submit">Se connecter</button>
+    <div class="err" id="loginErr" role="alert"></div>
+  </form>
+</section>
+
+<!-- Application -->
+<section class="app" id="app" hidden>
+  <div class="top">
+    <img src="/assets/img/logo.png" alt="ARélec">
+    <div class="tabs" role="tablist">
+      <button class="on" data-tab="edit" role="tab">Modifier le site</button>
+      <button data-tab="lib" role="tab">Médiathèque</button>
+    </div>
+    <span class="sp"></span>
+    <span class="pub" id="pub"><span class="dot"></span><span id="pubTxt">À jour</span></span>
+    <a class="btn ghost" href="/" target="_blank" rel="noopener">Voir le site</a>
+    <button class="btn ghost" id="logout">Déconnexion</button>
+  </div>
+
+  <!-- Modifier le site -->
+  <div class="view" id="v-edit">
+    <aside class="side">
+      <div class="search"><input type="text" id="pageSearch" placeholder="Chercher une page…" aria-label="Chercher une page"></div>
+      <nav class="pages" id="pages"></nav>
+    </aside>
+    <div class="stage">
+      <div class="stagebar">
+        <select id="pageSelect" aria-label="Page" style="max-width:220px"></select>
+        <span class="url" id="frameUrl">/</span>
+        <label class="switch"><input type="checkbox" id="editMode" checked> Mode modification</label>
+      </div>
+      <div class="frame">
+        <iframe id="frame" title="Aperçu du site"></iframe>
+        <div class="hint" id="hint">Cliquez sur une image ou un texte pour le modifier</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Médiathèque -->
+  <div class="view" id="v-lib" hidden>
+    <div class="lib"><div class="lib-in">
+      <div>
+        <h2>Médiathèque</h2>
+        <p class="lead">Ajoutez vos photos de chantier. Choisissez une catégorie pour qu'une photo apparaisse dans <b>Réalisations</b>. Elles sont redimensionnées automatiquement.</p>
+      </div>
+      <label class="drop" id="drop">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        <b>Glissez vos photos ici, ou cliquez pour les choisir</b>
+        <small>JPEG, PNG ou photos de téléphone : elles sont mises au bon format automatiquement</small>
+        <input type="file" id="files" accept="image/*" multiple hidden>
+      </label>
+      <div class="chips" id="libChips"></div>
+      <div class="grid" id="libGrid"></div>
+      <div>
+        <h2 style="font-size:20px;margin-top:10px">Photos d'origine du site</h2>
+        <p class="lead">Elles restent disponibles pour être replacées ailleurs.</p>
+      </div>
+      <div class="grid" id="siteGrid"></div>
+    </div></div>
+  </div>
+
+  <div class="bar">
+    <span class="msg" id="barMsg">Aucune modification en attente.</span>
+    <button class="btn" id="discard" disabled>Annuler les modifications</button>
+    <button class="btn lime" id="publish" disabled>Publier sur le site</button>
+  </div>
+</section>
+
+<!-- Panneau « changer l'image » -->
+<aside class="drawer" id="drawer" hidden aria-label="Changer l'image">
+  <header><b>Changer l'image</b><button class="btn ghost" id="dClose" aria-label="Fermer">✕</button></header>
+  <div class="body">
+    <div class="cur"><img id="dCur" alt=""><div><b id="dCurName">Image actuelle</b><small id="dCurWhere"></small></div></div>
+    <div class="scope">
+      <span class="mono">Où appliquer le changement</span>
+      <label><input type="radio" name="scope" value="here" checked><span>Seulement à cet endroit<br><small>Cette image, sur cette page</small></span></label>
+      <label><input type="radio" name="scope" value="all"><span>Partout sur le site<br><small id="dAllInfo">Toutes les pages qui utilisent cette photo</small></span></label>
+    </div>
+    <label class="btn" style="align-self:flex-start">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+      Envoyer une nouvelle photo<input type="file" id="dFile" accept="image/*" hidden>
+    </label>
+    <span class="mono">Ou choisir dans la médiathèque</span>
+    <div class="pick" id="dPick"></div>
+  </div>
+  <footer><button class="btn" id="dReset">Remettre l'image d'origine</button><span style="flex:1"></span><button class="btn dark" id="dOk">Valider</button></footer>
+</aside>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// Données du site injectées au build : pages, photos d'origine, catégories
+const PAGES = [{"url": "/", "title": "Accueil"}, {"url": "/electricite/", "title": "Électricien à Brest & Plouzané"}, {"url": "/chauffage/", "title": "Chauffagiste à Brest : pompe à chaleur, radiateurs"}, {"url": "/plomberie/", "title": "Plombier à Brest : salle de bain, recherche de fuite"}, {"url": "/electricien-brest/", "title": "Électricien à Brest (29)"}, {"url": "/electricien-plouzane/", "title": "Électricien à Plouzané (29)"}, {"url": "/electricien-plouider/", "title": "Électricien à Plouider (29)"}, {"url": "/plombier-brest/", "title": "Plombier à Brest (29)"}, {"url": "/plombier-plouzane/", "title": "Plombier à Plouzané (29)"}, {"url": "/plombier-plouider/", "title": "Plombier à Plouider (29)"}, {"url": "/chauffagiste-brest/", "title": "Chauffagiste à Brest (29)"}, {"url": "/chauffagiste-plouzane/", "title": "Chauffagiste à Plouzané (29)"}, {"url": "/chauffagiste-plouider/", "title": "Chauffagiste à Plouider (29)"}, {"url": "/electricien-le-conquet/", "title": "Électricien à Le Conquet (29)"}, {"url": "/electricien-saint-renan/", "title": "Électricien à Saint-Renan (29)"}, {"url": "/electricien-guipavas/", "title": "Électricien à Guipavas (29)"}, {"url": "/electricien-le-relecq-kerhuon/", "title": "Électricien à Le Relecq-Kerhuon (29)"}, {"url": "/electricien-guilers/", "title": "Électricien à Guilers (29)"}, {"url": "/electricien-plougonvelin/", "title": "Électricien à Plougonvelin (29)"}, {"url": "/electricien-locmaria-plouzane/", "title": "Électricien à Locmaria-Plouzané (29)"}, {"url": "/electricien-lannilis/", "title": "Électricien à Lannilis (29)"}, {"url": "/electricien-plabennec/", "title": "Électricien à Plabennec (29)"}, {"url": "/electricien-landerneau/", "title": "Électricien à Landerneau (29)"}, {"url": "/electricien-bohars/", "title": "Électricien à Bohars (29)"}, {"url": "/electricien-gouesnou/", "title": "Électricien à Gouesnou (29)"}, {"url": "/electricien-plougastel-daoulas/", "title": "Électricien à Plougastel-Daoulas (29)"}, {"url": "/electricien-milizac-guipronvel/", "title": "Électricien à Milizac-Guipronvel (29)"}, {"url": "/electricien-plouarzel/", "title": "Électricien à Plouarzel (29)"}, {"url": "/electricien-ploudalmezeau/", "title": "Électricien à Ploudalmézeau (29)"}, {"url": "/electricien-lanildut/", "title": "Électricien à Lanildut (29)"}, {"url": "/electricien-porspoder/", "title": "Électricien à Porspoder (29)"}, {"url": "/electricien-lesneven/", "title": "Électricien à Lesneven (29)"}, {"url": "/electricien-le-folgoet/", "title": "Électricien à Le Folgoët (29)"}, {"url": "/plombier-le-conquet/", "title": "Plombier à Le Conquet (29)"}, {"url": "/plombier-saint-renan/", "title": "Plombier à Saint-Renan (29)"}, {"url": "/plombier-guipavas/", "title": "Plombier à Guipavas (29)"}, {"url": "/plombier-le-relecq-kerhuon/", "title": "Plombier à Le Relecq-Kerhuon (29)"}, {"url": "/plombier-guilers/", "title": "Plombier à Guilers (29)"}, {"url": "/plombier-plougonvelin/", "title": "Plombier à Plougonvelin (29)"}, {"url": "/plombier-locmaria-plouzane/", "title": "Plombier à Locmaria-Plouzané (29)"}, {"url": "/plombier-lannilis/", "title": "Plombier à Lannilis (29)"}, {"url": "/plombier-plabennec/", "title": "Plombier à Plabennec (29)"}, {"url": "/plombier-landerneau/", "title": "Plombier à Landerneau (29)"}, {"url": "/plombier-bohars/", "title": "Plombier à Bohars (29)"}, {"url": "/plombier-gouesnou/", "title": "Plombier à Gouesnou (29)"}, {"url": "/plombier-plougastel-daoulas/", "title": "Plombier à Plougastel-Daoulas (29)"}, {"url": "/plombier-milizac-guipronvel/", "title": "Plombier à Milizac-Guipronvel (29)"}, {"url": "/plombier-plouarzel/", "title": "Plombier à Plouarzel (29)"}, {"url": "/plombier-ploudalmezeau/", "title": "Plombier à Ploudalmézeau (29)"}, {"url": "/plombier-lanildut/", "title": "Plombier à Lanildut (29)"}, {"url": "/plombier-porspoder/", "title": "Plombier à Porspoder (29)"}, {"url": "/plombier-lesneven/", "title": "Plombier à Lesneven (29)"}, {"url": "/plombier-le-folgoet/", "title": "Plombier à Le Folgoët (29)"}, {"url": "/chauffagiste-le-conquet/", "title": "Chauffagiste à Le Conquet (29)"}, {"url": "/chauffagiste-saint-renan/", "title": "Chauffagiste à Saint-Renan (29)"}, {"url": "/chauffagiste-guipavas/", "title": "Chauffagiste à Guipavas (29)"}, {"url": "/chauffagiste-le-relecq-kerhuon/", "title": "Chauffagiste à Le Relecq-Kerhuon (29)"}, {"url": "/chauffagiste-guilers/", "title": "Chauffagiste à Guilers (29)"}, {"url": "/chauffagiste-plougonvelin/", "title": "Chauffagiste à Plougonvelin (29)"}, {"url": "/chauffagiste-locmaria-plouzane/", "title": "Chauffagiste à Locmaria-Plouzané (29)"}, {"url": "/chauffagiste-lannilis/", "title": "Chauffagiste à Lannilis (29)"}, {"url": "/chauffagiste-plabennec/", "title": "Chauffagiste à Plabennec (29)"}, {"url": "/chauffagiste-landerneau/", "title": "Chauffagiste à Landerneau (29)"}, {"url": "/chauffagiste-bohars/", "title": "Chauffagiste à Bohars (29)"}, {"url": "/chauffagiste-gouesnou/", "title": "Chauffagiste à Gouesnou (29)"}, {"url": "/chauffagiste-plougastel-daoulas/", "title": "Chauffagiste à Plougastel-Daoulas (29)"}, {"url": "/chauffagiste-milizac-guipronvel/", "title": "Chauffagiste à Milizac-Guipronvel (29)"}, {"url": "/chauffagiste-plouarzel/", "title": "Chauffagiste à Plouarzel (29)"}, {"url": "/chauffagiste-ploudalmezeau/", "title": "Chauffagiste à Ploudalmézeau (29)"}, {"url": "/chauffagiste-lanildut/", "title": "Chauffagiste à Lanildut (29)"}, {"url": "/chauffagiste-porspoder/", "title": "Chauffagiste à Porspoder (29)"}, {"url": "/chauffagiste-lesneven/", "title": "Chauffagiste à Lesneven (29)"}, {"url": "/chauffagiste-le-folgoet/", "title": "Chauffagiste à Le Folgoët (29)"}, {"url": "/services/", "title": "Nos services : électricité, chauffage, plomberie"}, {"url": "/entreprise/", "title": "L'entreprise"}, {"url": "/contact/", "title": "Contact & devis gratuit"}, {"url": "/realisations/", "title": "Nos réalisations"}, {"url": "/avis/", "title": "Avis clients"}];
+const SITE_IMAGES = ["cablage.jpg", "chantier-plouider.jpg", "chantier-toiture.jpg", "confort.jpg", "douche-marbre.jpg", "eclairage.jpg", "escalier-led.jpg", "hero.jpg", "maison-bleue.jpg", "plomb.jpg", "reno-cablage.jpg", "sdb-baignoire.jpg", "sdb-bleue.jpg", "sdb-bois.jpg", "sdb-marbre.jpg"];
+const CATEGORIES = ["Rénovation", "Salle de bain", "Électricité", "Éclairage", "Chauffage", "Plomberie", "Extérieur"];
+</script>
+<script>
+(function () {
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const API = a => "/api/admin/?a=" + a;
+  const DRAFT_KEY = "arelec-admin-draft";
+  const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  // published : contenu en ligne (content/admin.json) ; draft : copie modifiée ; pending : photos envoyées non publiées
+  let published = null, baseSha = null, draft = null, pending = {}, deployWatch = null;
+
+  function toast(t, err) {
+    const el = $("#toast"); el.textContent = t; el.className = "toast" + (err ? " err" : ""); el.hidden = false;
+    clearTimeout(toast.t); toast.t = setTimeout(() => (el.hidden = true), err ? 6000 : 3000);
+  }
+  async function call(a, body) {
+    const r = await fetch(API(a), body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+    const out = await r.json().catch(() => ({}));
+    if (r.status === 401 && a !== "login") { showLogin(); throw new Error("auth"); }
+    if (!r.ok) { const e = new Error(out.error || r.status); e.status = r.status; throw e; }
+    return out;
+  }
+
+  // ---------- connexion ----------
+  function showLogin() { $("#app").hidden = true; $("#login").hidden = false; $("#loginForm input").focus(); }
+  $("#loginForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const err = $("#loginErr"); err.textContent = "";
+    try { await call("login", { password: e.target.password.value }); e.target.reset(); start(); }
+    catch (x) { err.textContent = x.message === "rate" ? "Trop d'essais, réessayez dans 15 minutes." : x.message === "unconfigured" ? "L'espace admin n'est pas encore configuré (variables Vercel)." : "Mot de passe incorrect."; }
+  });
+  $("#logout").addEventListener("click", async () => { await call("logout", {}).catch(() => {}); showLogin(); });
+
+  async function start() {
+    try { await call("me"); } catch (e) { if (e.message === "unconfigured") { $("#loginErr").textContent = "L'espace admin n'est pas encore configuré (variables Vercel)."; } showLogin(); return; }
+    $("#login").hidden = true; $("#app").hidden = false;
+    await loadData();
+    buildPages();
+    openPage(sessionStorage.getItem("arelec-admin-page") || "/");
+    renderLib();
+  }
+
+  async function loadData() {
+    const out = await call("data");
+    published = out.data; baseSha = out.sha;
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch (e) {}
+    if (saved && saved.base === baseSha) { draft = saved.draft; pending = saved.pending || {}; }
+    else { draft = JSON.parse(JSON.stringify(published)); pending = {}; }
+    for (const k of ["media", "images", "texts"]) draft[k] = draft[k] || (k === "media" ? [] : {});
+    refreshBar();
+  }
+  function saveDraft() {
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ base: baseSha, draft, pending })); } catch (e) {}
+    refreshBar();
+  }
+  function changes() {
+    const a = JSON.stringify({ m: draft.media, i: draft.images, t: draft.texts });
+    const b = JSON.stringify({ m: published.media, i: published.images, t: published.texts });
+    if (a === b) return 0;
+    let n = Object.keys(pending).length;
+    for (const k of new Set([...Object.keys(draft.images), ...Object.keys(published.images)])) if (draft.images[k] !== published.images[k]) n++;
+    for (const k of new Set([...Object.keys(draft.texts), ...Object.keys(published.texts)])) if (draft.texts[k] !== published.texts[k]) n++;
+    const pm = Object.fromEntries(published.media.map(m => [m.id, JSON.stringify(m)]));
+    for (const m of draft.media) if (pm[m.id] && pm[m.id] !== JSON.stringify(m)) n++;
+    n += published.media.filter(m => !draft.media.some(d => d.id === m.id)).length;
+    return Math.max(n, 1);
+  }
+  function refreshBar() {
+    const n = changes();
+    $("#barMsg").textContent = n ? `${n} modification${n > 1 ? "s" : ""} en attente : cliquez sur « Publier » pour les mettre en ligne.` : "Aucune modification en attente.";
+    $("#publish").disabled = !n || !!deployWatch;
+    $("#discard").disabled = !n || !!deployWatch;
+    if (!deployWatch) setPub(n ? "pending" : "live", n ? "Non publié" : "À jour");
+  }
+  function setPub(cls, txt) { $("#pub").className = "pub " + cls; $("#pubTxt").textContent = txt; }
+
+  // ---------- médias ----------
+  const mediaUrl = id => {
+    if (!id) return null;
+    if (id.startsWith("site:")) return "/assets/img/" + id.slice(5);
+    if (pending[id]) return pending[id].thumb;
+    return "/assets/img/u/" + id + ".jpg";
+  };
+  const thumbUrl = id => (id.startsWith("site:") || pending[id]) ? mediaUrl(id) : "/assets/img/u/" + id + "-t.jpg";
+  const mediaName = id => id.startsWith("site:") ? id.slice(5) : (draft.media.find(m => m.id === id)?.name || "Photo");
+
+  // Redimensionne dans le navigateur (orientation corrigée, 2000 px max) puis envoie la photo à GitHub
+  async function addFile(file) {
+    if (!file.type.startsWith("image/")) return null;
+    let bmp;
+    try { bmp = await createImageBitmap(file, { imageOrientation: "from-image" }); }
+    catch (e) { toast(`« ${file.name} » : format non lu par ce navigateur (essayez en JPEG).`, true); return null; }
+    const scale = Math.min(1, 2000 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    const data = c.toDataURL("image/jpeg", 0.85);
+    const t = document.createElement("canvas"), ts = Math.min(1, 480 / c.width);
+    t.width = Math.round(c.width * ts); t.height = Math.round(c.height * ts);
+    t.getContext("2d").drawImage(c, 0, 0, t.width, t.height);
+    const thumb = t.toDataURL("image/jpeg", 0.8);
+    const { sha } = await call("blob", { data });
+    const d = new Date(), id = d.toISOString().slice(0, 10) + "-" + Math.random().toString(36).slice(2, 8);
+    const name = file.name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").slice(0, 80);
+    pending[id] = { sha, thumb };
+    draft.media.push({ id, name, alt: "", category: "", added: d.toISOString().slice(0, 10) });
+    saveDraft();
+    return id;
+  }
+  async function addFiles(list) {
+    const files = [...list].filter(f => f.type.startsWith("image/"));
+    if (!files.length) return [];
+    const ids = [];
+    for (let i = 0; i < files.length; i++) {
+      toast(`Préparation de la photo ${i + 1} sur ${files.length}…`);
+      try { const id = await addFile(files[i]); if (id) ids.push(id); }
+      catch (e) { if (e.message !== "auth") toast("L'envoi d'une photo a échoué. Réessayez.", true); }
+    }
+    if (ids.length) toast(`${ids.length} photo${ids.length > 1 ? "s ajoutées" : " ajoutée"} à la médiathèque.`);
+    renderLib();
+    return ids;
+  }
+
+  // ---------- médiathèque ----------
+  let libFilter = "";
+  function usage(id) { return Object.values(draft.images).filter(v => v === id).length; }
+  function renderLib() {
+    const cats = ["", "none", ...CATEGORIES];
+    $("#libChips").innerHTML = cats.map(c => `<button type="button" data-c="${esc(c)}" class="${c === libFilter ? "on" : ""}">${c === "" ? "Toutes" : c === "none" ? "Non classées" : esc(c)}</button>`).join("");
+    const list = [...draft.media].reverse().filter(m => !libFilter || (libFilter === "none" ? !m.category : m.category === libFilter));
+    $("#libGrid").innerHTML = list.length ? list.map(m => `
+      <div class="card" data-id="${m.id}">
+        <div class="ph"><img src="${esc(thumbUrl(m.id))}" alt="" loading="lazy">${m.category ? `<span class="badge">Dans Réalisations</span>` : ""}${pending[m.id] ? `<span class="badge new">Non publiée</span>` : ""}</div>
+        <div class="f">
+          <label>Nom (légende dans Réalisations)<input type="text" data-k="name" value="${esc(m.name)}" maxlength="80"></label>
+          <label>Catégorie<select data-k="category"><option value="">Non classée (pas dans Réalisations)</option>${CATEGORIES.map(c => `<option${c === m.category ? " selected" : ""}>${esc(c)}</option>`).join("")}</select></label>
+          <label>Description pour Google (facultatif)<input type="text" data-k="alt" value="${esc(m.alt)}" maxlength="160" placeholder="Ex. : salle de bain rénovée à Brest"></label>
+          <div class="row"><span>${usage(m.id) ? `Utilisée à ${usage(m.id)} endroit${usage(m.id) > 1 ? "s" : ""}` : "Pas encore placée sur le site"}</span><button class="btn ghost danger" data-del>Supprimer</button></div>
+        </div>
+      </div>`).join("") : `<p class="lead">Aucune photo ${libFilter ? "dans cette catégorie" : "pour l'instant"}.</p>`;
+    $("#siteGrid").innerHTML = SITE_IMAGES.map(f => `<div class="card site"><div class="ph"><img src="/assets/img/${esc(f)}" alt="" loading="lazy"></div><div class="f"><span class="mono">${esc(f)}</span></div></div>`).join("");
+  }
+  $("#libChips").addEventListener("click", e => { const b = e.target.closest("button"); if (b) { libFilter = b.dataset.c; renderLib(); } });
+  $("#libGrid").addEventListener("change", e => {
+    const card = e.target.closest(".card"), k = e.target.dataset.k;
+    const m = card && draft.media.find(x => x.id === card.dataset.id);
+    if (!m || !k) return;
+    m[k] = e.target.value.trim(); saveDraft();
+    if (k === "category") renderLib();
+  });
+  $("#libGrid").addEventListener("click", e => {
+    if (!e.target.closest("[data-del]")) return;
+    const id = e.target.closest(".card").dataset.id, n = usage(id);
+    if (!confirm(n ? `Cette photo est utilisée à ${n} endroit(s). Ces endroits reprendront leur image d'origine. Supprimer ?` : "Supprimer cette photo ?")) return;
+    draft.media = draft.media.filter(m => m.id !== id);
+    for (const [k, v] of Object.entries(draft.images)) if (v === id) delete draft.images[k];
+    delete pending[id];
+    saveDraft(); renderLib(); paintFrame();
+  });
+  const drop = $("#drop");
+  $("#files").addEventListener("change", e => { addFiles(e.target.files); e.target.value = ""; });
+  ["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", e => addFiles(e.dataTransfer.files));
+
+  // ---------- onglets ----------
+  $$(".tabs button").forEach(b => b.addEventListener("click", () => {
+    $$(".tabs button").forEach(x => x.classList.toggle("on", x === b));
+    $("#v-edit").hidden = b.dataset.tab !== "edit"; $("#v-lib").hidden = b.dataset.tab !== "lib";
+    if (b.dataset.tab === "lib") renderLib(); else paintFrame();
+  }));
+
+  // ---------- pages ----------
+  function group(u) {
+    if (/^\/electricien-/.test(u)) return "Électricien à…";
+    if (/^\/plombier-/.test(u)) return "Plombier à…";
+    if (/^\/chauffagiste-/.test(u)) return "Chauffagiste à…";
+    return "Pages principales";
+  }
+  function buildPages() {
+    const q = ($("#pageSearch").value || "").toLowerCase();
+    const groups = {};
+    PAGES.filter(p => !q || p.title.toLowerCase().includes(q) || p.url.includes(q)).forEach(p => (groups[group(p.url)] = groups[group(p.url)] || []).push(p));
+    $("#pages").innerHTML = Object.entries(groups).map(([g, ps]) => `<h4>${g}</h4>` + ps.map(p => `<button data-u="${p.url}">${esc(p.title)}</button>`).join("")).join("");
+    $("#pageSelect").innerHTML = PAGES.map(p => `<option value="${p.url}">${esc(p.title)}</option>`).join("");
+    markPage();
+  }
+  $("#pageSearch").addEventListener("input", buildPages);
+  $("#pages").addEventListener("click", e => { const b = e.target.closest("button"); if (b) openPage(b.dataset.u); });
+  $("#pageSelect").addEventListener("change", e => openPage(e.target.value));
+  let curPath = "/";
+  function openPage(u) { $("#frame").src = u; }
+  function markPage() {
+    $$("#pages button").forEach(b => b.classList.toggle("on", b.dataset.u === curPath));
+    $("#pageSelect").value = curPath; $("#frameUrl").textContent = curPath;
+  }
+
+  // ---------- mode modification dans l'aperçu ----------
+  const frame = $("#frame");
+  const fdoc = () => { try { return frame.contentDocument; } catch (e) { return null; } };
+  const editOn = () => $("#editMode").checked;
+  const CLEAN_OK = /^(b|strong|i|em|br|a)$/i;
+  function clean(html) {
+    // Garde seulement gras, italique, retours à la ligne et liens
+    const d = document.createElement("div"); d.innerHTML = html;
+    (function walk(n) {
+      [...n.childNodes].forEach(c => {
+        if (c.nodeType === 1) {
+          walk(c);
+          if (!CLEAN_OK.test(c.tagName)) { c.replaceWith(...c.childNodes); return; }
+          [...c.attributes].forEach(a => { if (!(c.tagName === "A" && a.name === "href")) c.removeAttribute(a.name); });
+        } else if (c.nodeType !== 3) c.remove();
+      });
+    })(d);
+    return d.innerHTML.replace(/&nbsp;/g, " ").trim();
+  }
+
+  frame.addEventListener("load", () => {
+    const d = fdoc();
+    if (!d) return;
+    curPath = d.location.pathname; sessionStorage.setItem("arelec-admin-page", curPath); markPage();
+    const st = d.createElement("style");
+    st.textContent = `.cb,#chat{display:none!important}
+      html.adm-edit [data-slot]{outline:3px dashed rgba(227,255,74,.95);outline-offset:-3px;cursor:pointer;filter:none!important}
+      html.adm-edit [data-slot]:hover,html.adm-edit .adm-hover{outline:4px solid #E3FF4A!important;outline-offset:-4px}
+      html.adm-edit.adm-over-img,html.adm-edit.adm-over-img *{cursor:pointer}
+      html.adm-edit [data-edit]{cursor:text;border-radius:6px;transition:box-shadow .15s}
+      html.adm-edit [data-edit]:hover{box-shadow:0 0 0 2px #E3FF4A,0 0 0 4px rgba(18,18,17,.6)}
+      .adm-editing{box-shadow:0 0 0 2px #121211,0 0 0 5px #E3FF4A!important;background:rgba(255,255,255,.85);color:#121211!important;outline:none}
+      .adm-tools{position:absolute;z-index:99999;display:flex;gap:6px;align-items:center;padding:6px;border-radius:12px;background:#121211;color:#fff;font:13px/1 -apple-system,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.3)}
+      .adm-tools button{min-height:30px;padding:0 10px;border:0;border-radius:8px;background:rgba(255,255,255,.12);color:#fff;font:inherit;cursor:pointer}
+      .adm-tools button.ok{background:#E3FF4A;color:#121211;font-weight:600}
+      .adm-tools label{display:flex;gap:5px;align-items:center;padding:0 6px;cursor:pointer}
+      .r{opacity:1!important;transform:none!important;filter:none!important}`;
+    d.head.appendChild(st);
+    d.documentElement.classList.toggle("adm-edit", editOn());
+    d.addEventListener("click", onFrameClick, true);
+    d.addEventListener("mousemove", onFrameMove, { passive: true });
+    paintFrame();
+  });
+  $("#editMode").addEventListener("change", () => {
+    const d = fdoc(); if (d) d.documentElement.classList.toggle("adm-edit", editOn());
+    $("#hint").hidden = !editOn();
+  });
+
+  const slotKey = (slot) => curPath + "|" + slot;
+  const slotFile = slot => slot.split("#")[0];
+  function effective(slot) { return draft.images[slotKey(slot)] || draft.images["*|" + slotFile(slot)] || null; }
+
+  // Applique le brouillon à l'aperçu (images et textes modifiés mais pas encore publiés)
+  function paintFrame() {
+    const d = fdoc(); if (!d || !draft) return;
+    d.querySelectorAll("img[data-slot]").forEach(img => {
+      const slot = img.dataset.slot, id = effective(slot);
+      const want = id ? mediaUrl(id) : "/assets/img/" + slotFile(slot);
+      if (want && img.getAttribute("src") !== want) { img.removeAttribute("srcset"); img.src = want; }
+    });
+    d.querySelectorAll("[data-edit]").forEach(el => {
+      if (el.classList.contains("adm-editing")) return;
+      const k = el.dataset.edit, v = draft.texts[curPath + "|" + k] ?? draft.texts["*|" + k];
+      if (el.dataset.admOrig == null) el.dataset.admOrig = el.innerHTML;
+      const want = v != null ? clean(v) : el.dataset.admOrig;
+      if (el.innerHTML !== want) el.innerHTML = want;
+    });
+  }
+
+  // Image sous le pointeur, même recouverte (fond d'en-tête sous un dégradé ou un texte)
+  const imgAt = (d, x, y) => d.elementsFromPoint(x, y).find(n => n.matches && n.matches("img[data-slot]"));
+  function onFrameMove(e) {
+    if (!editOn()) return;
+    const d = fdoc(); if (!d) return;
+    const over = e.target.closest && e.target.closest("[data-edit],.adm-tools");
+    const img = over ? null : imgAt(d, e.clientX, e.clientY);
+    d.querySelectorAll(".adm-hover").forEach(n => n !== img && n.classList.remove("adm-hover"));
+    if (img) img.classList.add("adm-hover");
+    d.documentElement.classList.toggle("adm-over-img", !!img);
+  }
+  function onFrameClick(e) {
+    if (!editOn()) return;
+    const txt = e.target.closest("[data-edit],.adm-editing,.adm-tools");
+    const img = e.target.closest("img[data-slot]") || (txt ? null : imgAt(fdoc(), e.clientX, e.clientY));
+    if (img) { e.preventDefault(); e.stopPropagation(); openDrawer(img); return; }
+    const t = e.target.closest("[data-edit]");
+    if (t && !t.classList.contains("adm-editing")) { e.preventDefault(); e.stopPropagation(); editText(t); return; }
+    if (e.target.closest(".adm-editing,.adm-tools")) return;
+    // Liens : on laisse naviguer dans l'aperçu (sauf liens externes et appels)
+    const a = e.target.closest("a[href]");
+    if (a && !/^\//.test(a.getAttribute("href"))) e.preventDefault();
+  }
+
+  // ---------- texte ----------
+  function editText(el) {
+    const d = fdoc(), k = el.dataset.edit, before = el.innerHTML;
+    d.querySelectorAll(".adm-tools").forEach(n => n.remove());
+    el.classList.add("adm-editing"); el.contentEditable = "true"; el.focus();
+    const all = draft.texts["*|" + k] != null;
+    const tools = d.createElement("div"); tools.className = "adm-tools";
+    tools.innerHTML = `<button data-b title="Gras"><b>G</b></button><label><input type="checkbox" ${all ? "checked" : ""}> Partout où ce texte apparaît</label><button data-x>Annuler</button><button class="ok" data-ok>Valider</button>`;
+    d.body.appendChild(tools);
+    const r = el.getBoundingClientRect(), w = d.defaultView;
+    tools.style.top = Math.max(4, r.top + w.scrollY - 46) + "px"; tools.style.left = Math.max(4, r.left + w.scrollX) + "px";
+    const finish = save => {
+      el.contentEditable = "false"; el.classList.remove("adm-editing"); tools.remove();
+      if (!save) { el.innerHTML = before; return; }
+      const html = clean(el.innerHTML), everywhere = tools.querySelector("input").checked;
+      if (html === clean(el.dataset.admOrig || before) && !draft.texts[curPath + "|" + k] && !draft.texts["*|" + k]) return;
+      delete draft.texts[curPath + "|" + k]; delete draft.texts["*|" + k];
+      if (html && html !== clean(el.dataset.admOrig || "")) draft.texts[(everywhere ? "*" : curPath) + "|" + k] = html;
+      el.innerHTML = html || el.dataset.admOrig;
+      saveDraft(); toast("Texte modifié. Publiez pour le mettre en ligne.");
+    };
+    tools.addEventListener("mousedown", e => { if (e.target.closest("button")) e.preventDefault(); });
+    tools.querySelector("[data-b]").addEventListener("click", () => d.execCommand("bold"));
+    tools.querySelector("[data-x]").addEventListener("click", () => finish(false));
+    tools.querySelector("[data-ok]").addEventListener("click", () => finish(true));
+    el.addEventListener("keydown", function onKey(ev) {
+      if (ev.key === "Escape") { finish(false); el.removeEventListener("keydown", onKey); }
+      // Entrée valide ; Maj + Entrée passe à la ligne
+      if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); finish(true); el.removeEventListener("keydown", onKey); }
+    });
+  }
+
+  // ---------- image ----------
+  let dImg = null, dChoice = undefined;
+  function openDrawer(img) {
+    dImg = img; dChoice = undefined;
+    const slot = img.dataset.slot, file = slotFile(slot), cur = effective(slot);
+    $("#dCur").src = img.currentSrc || img.src;
+    $("#dCurName").textContent = cur ? mediaName(cur) : "Image d'origine";
+    $("#dCurWhere").textContent = `Sur la page ${curPath === "/" ? "d'accueil" : curPath}`;
+    $("#dAllInfo").textContent = `Toutes les pages qui utilisent la photo « ${file} »`;
+    document.querySelector(`input[name=scope][value=${draft.images["*|" + file] && !draft.images[slotKey(slot)] ? "all" : "here"}]`).checked = true;
+    renderPick(cur);
+    $("#drawer").hidden = false;
+  }
+  function renderPick(sel) {
+    const items = [...[...draft.media].reverse().map(m => m.id), ...SITE_IMAGES.map(f => "site:" + f)];
+    $("#dPick").innerHTML = items.map(id => `<button type="button" data-id="${esc(id)}" class="${id === sel ? "on" : ""}"><img src="${esc(thumbUrl(id))}" alt="" loading="lazy"><span>${esc(mediaName(id))}</span></button>`).join("");
+  }
+  $("#dPick").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    dChoice = b.dataset.id;
+    $$("#dPick button").forEach(x => x.classList.toggle("on", x === b));
+    $("#dCur").src = thumbUrl(dChoice); $("#dCurName").textContent = mediaName(dChoice);
+  });
+  $("#dFile").addEventListener("change", async e => {
+    const ids = await addFiles(e.target.files); e.target.value = "";
+    if (ids[0]) { dChoice = ids[0]; renderPick(dChoice); $("#dCur").src = thumbUrl(dChoice); $("#dCurName").textContent = mediaName(dChoice); }
+  });
+  const closeDrawer = () => { $("#drawer").hidden = true; dImg = null; };
+  $("#dClose").addEventListener("click", closeDrawer);
+  $("#dReset").addEventListener("click", () => {
+    const slot = dImg.dataset.slot;
+    delete draft.images[slotKey(slot)];
+    if ($("input[name=scope]:checked").value === "all") delete draft.images["*|" + slotFile(slot)];
+    else if (draft.images["*|" + slotFile(slot)]) draft.images[slotKey(slot)] = "site:" + slotFile(slot);
+    saveDraft(); paintFrame(); closeDrawer(); toast("Image d'origine remise. Publiez pour la mettre en ligne.");
+  });
+  $("#dOk").addEventListener("click", () => {
+    if (dChoice === undefined) return closeDrawer();
+    const slot = dImg.dataset.slot, all = $("input[name=scope]:checked").value === "all";
+    if (all) { draft.images["*|" + slotFile(slot)] = dChoice; delete draft.images[slotKey(slot)]; }
+    else draft.images[slotKey(slot)] = dChoice;
+    saveDraft(); paintFrame(); closeDrawer(); renderLib(); toast("Image changée. Publiez pour la mettre en ligne.");
+  });
+
+  // ---------- publication ----------
+  $("#discard").addEventListener("click", () => {
+    if (!confirm("Annuler toutes les modifications non publiées ?")) return;
+    draft = JSON.parse(JSON.stringify(published)); pending = {};
+    localStorage.removeItem(DRAFT_KEY); refreshBar(); renderLib();
+    frame.contentWindow?.location.reload();
+  });
+  $("#publish").addEventListener("click", async () => {
+    const btn = $("#publish"); btn.disabled = true; $("#discard").disabled = true;
+    setPub("busy", "Envoi…");
+    const files = Object.entries(pending).filter(([id]) => draft.media.some(m => m.id === id)).map(([id, p]) => ({ id, sha: p.sha }));
+    try {
+      const n = changes();
+      const { commit } = await call("publish", { data: draft, base: baseSha, files, message: `${n} modification${n > 1 ? "s" : ""}` });
+      localStorage.removeItem(DRAFT_KEY);
+      watchDeploy(commit);
+    } catch (e) {
+      setPub("error", "Échec");
+      toast(e.message === "conflict" ? "Le site a été modifié entre-temps. Rechargez la page avant de publier." : "La publication a échoué. Réessayez dans un instant.", true);
+      refreshBar();
+    }
+  });
+  // Suit la mise en ligne : le build écrit /build.json avec le commit publié
+  function watchDeploy(commit) {
+    const t0 = Date.now();
+    setPub("busy", "Mise en ligne… (≈ 1 min)");
+    $("#barMsg").textContent = "Publication envoyée. Le site se met à jour, vous pouvez continuer à travailler.";
+    deployWatch = setInterval(async () => {
+      try {
+        const b = await (await fetch("/build.json?nc=" + Date.now(), { cache: "no-store" })).json();
+        if (b.sha === commit) {
+          clearInterval(deployWatch); deployWatch = null;
+          await loadData(); renderLib(); frame.contentWindow?.location.reload();
+          setPub("live", "En ligne"); toast("C'est en ligne !");
+          return;
+        }
+      } catch (e) {}
+      if (Date.now() - t0 > 6 * 60 * 1000) {
+        clearInterval(deployWatch); deployWatch = null;
+        setPub("error", "Lent…"); toast("La mise en ligne prend plus de temps que prévu. Vérifiez le site dans quelques minutes.", true);
+        await loadData().catch(() => {});
+      }
+    }, 6000);
+    refreshBar();
+  }
+
+  start();
+})();
+</script>
+</body>
+</html>

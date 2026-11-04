@@ -4,6 +4,7 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 
 # Moteurs de recherche et assistants IA : autorisés à lire et citer le site
 User-agent: GPTBot
@@ -27,5 +28,6 @@ User-agent: CCBot
 User-agent: cohere-ai
 Allow: /
 Disallow: /api/
+Disallow: /admin/
 
 Sitemap: https://www.entreprise-arelec.fr/sitemap.xml
