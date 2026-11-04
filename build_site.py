@@ -923,13 +923,15 @@ def chat_widget():
           f'<a class="chat-act" href="/services/" data-nav>{ic("tool")}Nos services</a>'
           f'<a class="chat-act" href="/realisations/" data-nav>{ic("eye")}Réalisations</a>'
           f'<a class="chat-act" href="/avis/" data-nav>{ic("star")}Avis clients</a>')
-    return ('<div class="cb">'
+    # Lanceur : la mascotte s'agrippe au bas de l'écran (cachée en descendant, accoudée en remontant)
+    return ('<div class="cb" data-state="off">'
             '<div class="cb-tease" hidden role="status"><button class="cb-tease-x" type="button" aria-label="Masquer le message">×</button>'
-            '<b>Je suis là</b> si vous avez une question !<small>Électricité, chauffage, plomberie</small></div>'
+            '<span class="cb-t cb-t-peek">Votre assistant est là</span>'
+            '<span class="cb-t cb-t-up"><b>La moindre question ?</b> Je suis là.</span></div>'
             '<button class="cb-mascot" type="button" aria-label="Poser une question à l\'assistant ARélec" aria-controls="chat" aria-expanded="false">'
-            '<picture class="cb-full"><source srcset="/assets/img/mascotte.webp" type="image/webp"><img src="/assets/img/mascotte.png" alt="" width="150" height="320"></picture>'
-            '<img class="cb-bust" src="/assets/img/mascotte-buste.png" alt="" width="168" height="192">'
-            '<span class="cb-dot" aria-hidden="true"></span></button></div>'
+            '<picture class="cb-peek"><source srcset="/assets/img/mascotte-cache.webp" type="image/webp"><img src="/assets/img/mascotte-cache.png" alt="" width="260" height="152"></picture>'
+            '<picture class="cb-up"><source srcset="/assets/img/mascotte-accoude.webp" type="image/webp"><img src="/assets/img/mascotte-accoude.png" alt="" width="236" height="214"></picture>'
+            '</button></div>'
             f'<section class="chat" id="chat" hidden role="dialog" aria-label="Assistant ARélec" data-wa="{WHATSAPP_INT}">'
             '<div class="chat-head"><span class="chat-av" aria-hidden="true"><img src="/assets/img/mascotte-buste.png" alt=""></span>'
             '<div class="chat-id"><b>L\'assistant ARélec</b><span>En ligne</span></div>'
@@ -946,7 +948,8 @@ def chat_widget():
             f'<template id="chat-sugg">{sugg}</template>'
             f'<template id="chat-ic-vol">{ic("vol")}</template>'
             f'<template id="chat-ic-go">{ic("right")}</template>'
-            '<script src="/assets/js/chat.js?v=4" defer></script>')
+            f'<template id="chat-ic-down">{ic("down")}</template>'
+            '<script src="/assets/js/chat.js?v=5" defer></script>')
 
 # ---------- avis Google réels ----------
 REVS=[("Redistribution des prises et des points lumineux dans le cadre du réagencement de notre rez-de-chaussée (maison années 30). Intervention de très bonne qualité, chantier propre et rapide. Je recommande ARÉLEC.","Philippe C.","Rénovation électrique"),
@@ -1100,7 +1103,7 @@ def head_common(path,title,desc,jl,noindex=False):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
             f'<title>{t_esc}</title><meta name="description" content="{d_esc}">{robots}'
             f'<link rel="canonical" href="{canon}">{og}{icons}{jl}{fonts}'
-            '<link rel="stylesheet" href="/assets/css/styles.css?v=55"><link rel="stylesheet" href="/assets/css/chat.css?v=1">'
+            '<link rel="stylesheet" href="/assets/css/styles.css?v=55"><link rel="stylesheet" href="/assets/css/chat.css?v=2">'
             '<script>document.documentElement.classList.add("js")</script></head>')
 
 NOINDEX = {"blog"}  # pages encore en maquette (contenu à rédiger)
@@ -1989,10 +1992,13 @@ Dernière mise à jour : {TODAY}
 (JS_DIR/"chat.js").write_text((ROOT/"chat.js").read_text())
 (CSS/"chat.css").write_text((ROOT/"chat.css").read_text())
 # Mascotte de l'assistant (générée avec Codex) : en pied pour le lanceur, buste pour l'avatar
-for src,name,hpx in (("electricien-pied.png","mascotte",320),("electricien-buste.png","mascotte-buste",192)):
+# et deux poses du lanceur : cachée (yeux + doigts agrippés) et accoudée (largeur fixe, bord bas = rebord de l'écran)
+for src,name,box in (("electricien-buste.png","mascotte-buste",(None,192)),
+                     ("electricien-cache.png","mascotte-cache",(260,None)),("electricien-accoude.png","mascotte-accoude",(236,None))):
     im=Image.open(ROOT/"assets/mascotte"/src).convert("RGBA")
     im=im.crop(im.split()[3].point(lambda v:255 if v>24 else 0).getbbox())
-    im=im.resize((round(im.width*hpx/im.height),hpx), Image.LANCZOS)
+    w,h=box
+    im=im.resize((w,round(im.height*w/im.width)) if w else (round(im.width*h/im.height),h), Image.LANCZOS)
     im.save(IMG/(name+".png"), optimize=True); im.save(IMG/(name+".webp"), quality=88, method=6)
 (JS_DIR/"contact.js").write_text((ROOT/"contact.js").read_text())
 # Pages que l'assistant peut proposer (boutons de navigation dans le chat)

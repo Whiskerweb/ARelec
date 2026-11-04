@@ -81,8 +81,11 @@ async function viaFormSubmit(d, subject) {
     }),
     signal: AbortSignal.timeout(10000)
   });
-  const out = await r.json().catch(() => ({}));
-  if (!r.ok || String(out.success) !== "true") throw new Error("FormSubmit " + r.status + " " + (out.message || ""));
+  const raw = await r.text();
+  let out = {};
+  try { out = JSON.parse(raw); } catch (e) {}
+  // Tant que le lien d'activation reçu par email n'a pas été cliqué, FormSubmit refuse l'envoi (message « needs Activation »)
+  if (!r.ok || String(out.success) !== "true") throw new Error("FormSubmit " + r.status + " " + (out.message || raw.slice(0, 200)));
 }
 
 module.exports = async (req, res) => {

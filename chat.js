@@ -128,44 +128,54 @@
   }
 
   // ---------- relais : WhatsApp ou formulaire ----------
+  // Relais : carte WhatsApp + carte « Être rappelé » repliée (préremplie, elle se déroule au clic)
   function handoff() {
-    list.querySelectorAll(".chat-wa,.chat-alt,.chat-cf").forEach(n => n.remove());
+    list.querySelectorAll(".chat-wa,.chat-cf").forEach(n => n.remove());
     if (st.sent) return;
-    if (st.summary && st.mode !== "form" && !st.cf) {
+    if (st.summary && st.mode !== "form") {
       const a = el("a", "chat-wa", tpl("chat-wa-ic") + "<span><b>Continuer sur WhatsApp</b><small>Votre demande est déjà résumée, Arnaud prend le relais.</small></span>");
       a.href = waLink(); a.target = "_blank"; a.rel = "noopener";
       list.appendChild(a);
     }
-    if (st.cf || st.mode === "form") list.appendChild(contactForm());
-    else if (st.summary) {
-      const b = el("button", "chat-alt", "Pas de WhatsApp ? Laisser mes coordonnées");
-      b.type = "button";
-      b.addEventListener("click", showForm);
-      list.appendChild(b);
-    }
+    if (st.summary || st.cf) list.appendChild(contactForm());
     lastRole = null;
   }
   function showForm() {
-    st.cf = true; st.sent = false; save(); handoff(); scroll();
-    list.querySelector(".chat-cf input")?.focus({ preventScroll: true });
+    st.cf = true; st.sent = false; save(); handoff();
+    const c = list.querySelector(".chat-cf");
+    c?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    c?.querySelector("input")?.focus({ preventScroll: true });
   }
   function contactForm() {
-    const f = el("form", "chat-cf",
-      "<b>On vous rappelle</b><small>Un téléphone ou un email suffit.</small>" +
+    const wrap = el("div", "chat-cf" + (st.cf ? " open" : "") + (st.mode === "form" ? " hl" : ""));
+    const head = el("button", "chat-cf-head",
+      `<span class="t"><b>${st.mode === "form" ? "Laisser mes coordonnées" : "Pas de WhatsApp ? Être rappelé"}</b><small></small></span>` + tpl("chat-ic-down"));
+    head.type = "button";
+    head.setAttribute("aria-expanded", st.cf ? "true" : "false");
+    wrap.appendChild(head);
+    const f = el("form", "chat-cf-body",
+      "<small>Déjà prérempli avec votre demande. Un téléphone ou un email suffit.</small>" +
       '<input name="nom" autocomplete="name" maxlength="80" placeholder="Votre nom" aria-label="Votre nom">' +
       '<div class="two"><input name="tel" type="tel" autocomplete="tel" maxlength="30" placeholder="Téléphone" aria-label="Téléphone">' +
       '<input name="email" type="email" autocomplete="email" maxlength="120" placeholder="Email" aria-label="Email"></div>' +
       '<textarea name="message" maxlength="2000" rows="3" placeholder="Votre projet" aria-label="Votre projet"></textarea>' +
       '<input class="hp" name="site" tabindex="-1" autocomplete="off" aria-hidden="true">' +
-      '<p class="err" role="alert"></p><button type="submit">Envoyer ma demande</button>');
+      '<p class="err" role="alert"></p><button type="submit" class="go">Envoyer ma demande</button>');
     f.noValidate = true;
     const d = st.draft || {};
     ["nom", "tel", "email"].forEach(k => { f[k].value = d[k] || ""; });
     f.message.value = d.message || (st.summary || st.msgs.filter(m => m.role === "user").map(m => m.content).join("\n")).replace(/^Mon projet\s*:\s*/i, "");
-    f.addEventListener("input", () => { st.draft = { nom: f.nom.value, tel: f.tel.value, email: f.email.value, message: f.message.value }; save(); });
+    const preview = () => { head.querySelector("small").textContent = f.message.value.trim().slice(0, 70) + (f.message.value.trim().length > 70 ? "…" : ""); };
+    preview();
+    head.addEventListener("click", () => {
+      st.cf = !wrap.classList.contains("open"); save();
+      wrap.classList.toggle("open", st.cf); head.setAttribute("aria-expanded", st.cf);
+      if (st.cf) { wrap.scrollIntoView({ block: "nearest", behavior: "smooth" }); f.nom.focus({ preventScroll: true }); }
+    });
+    f.addEventListener("input", () => { preview(); st.draft = { nom: f.nom.value, tel: f.tel.value, email: f.email.value, message: f.message.value }; save(); });
     f.addEventListener("submit", async e => {
       e.preventDefault();
-      const err = f.querySelector(".err"), btn = f.querySelector("button");
+      const err = f.querySelector(".err"), btn = f.querySelector('button[type="submit"]');
       err.textContent = "";
       if (!f.nom.value.trim()) { err.textContent = ERR.nom; f.nom.focus(); return; }
       if (!f.tel.value.trim() && !f.email.value.trim()) { err.textContent = ERR.joignable; f.tel.focus(); return; }
@@ -185,7 +195,8 @@
         btn.disabled = false; btn.textContent = "Envoyer ma demande";
       }
     });
-    return f;
+    wrap.appendChild(f);
+    return wrap;
   }
 
   function render() {
@@ -205,7 +216,7 @@
   }
   function open() {
     if (document.body.classList.contains("menu-open")) document.querySelector(".drawer-close")?.click();
-    hideTease(false);
+    clearTimeout(teaseTimer);
     box.hidden = false;
     document.body.classList.add("chat-open");
     mascot.setAttribute("aria-expanded", "true");
@@ -327,22 +338,36 @@
     });
   }
 
-  // ---------- bulle d'accroche de la mascotte ----------
-  let teaseTimer = null;
+  // ---------- mascotte : cachée en descendant, accoudée en remontant ----------
+  // off → (arrivée) up → défilement vers le bas : peek (yeux + doigts) → vers le haut : up. Changements espacés pour rester calme.
+  let state = "off", changedAt = 0, lastY = window.scrollY, ticking = false, teaseTimer = null;
+  let teaseOff = false;
+  try { teaseOff = !!sessionStorage.getItem("arelec-tease-off"); } catch (e) {}
+  function setState(s) {
+    if (s === state) return;
+    state = s; changedAt = Date.now();
+    launch.dataset.state = s;
+    if (teaseOff || s === "off") return;
+    tease.hidden = false;
+    clearTimeout(teaseTimer);
+    // Sur mobile, la bulle ne reste que quelques secondes à chaque changement
+    if (mobile()) teaseTimer = setTimeout(() => { tease.hidden = true; }, s === "up" ? 6000 : 3500);
+  }
   function hideTease(forever) {
     clearTimeout(teaseTimer);
     tease.hidden = true;
-    if (forever) { try { sessionStorage.setItem("arelec-tease-off", "1"); } catch (e) {} }
+    if (forever) { teaseOff = true; try { sessionStorage.setItem("arelec-tease-off", "1"); } catch (e) {} }
   }
-  let teaseOff = false;
-  try { teaseOff = !!sessionStorage.getItem("arelec-tease-off"); } catch (e) {}
-  if (!teaseOff && !st.seen) {
-    setTimeout(() => {
-      if (!box.hidden || document.body.classList.contains("menu-open")) return;
-      tease.hidden = false;
-      if (mobile()) teaseTimer = setTimeout(() => hideTease(false), 9000);
-    }, mobile() ? 4000 : 2500);
+  function onScroll() {
+    ticking = false;
+    const y = window.scrollY, dy = y - lastY;
+    if (Math.abs(dy) < 12) return;
+    lastY = y;
+    if (Date.now() - changedAt < 700) return;
+    setState(y < 120 || dy < 0 ? "up" : "peek");
   }
+  window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
+  setTimeout(() => setState(window.scrollY > 120 ? "peek" : "up"), 1200);
   tease.addEventListener("click", e => { if (e.target.closest(".cb-tease-x")) { e.stopPropagation(); hideTease(true); return; } open(); });
 
   // ---------- événements ----------
