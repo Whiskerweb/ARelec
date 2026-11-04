@@ -433,63 +433,6 @@ a.area-chip:hover{background:var(--ink);color:#fff}
 .prose h2{font-size:24px;font-weight:400;letter-spacing:-.02em;color:var(--ink);margin:40px 0 12px}
 .prose p{margin:0 0 14px}
 /* --- assistant : bulle discrète + panneau --- */
-.chat-fab{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:1200;width:58px;height:58px;padding:0;border-radius:999px;display:grid;place-items:center;cursor:pointer;color:var(--lime);font:inherit;background:var(--ink);border:0;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 14px 34px rgba(18,18,17,.35);transition:transform .3s var(--ease),opacity .2s}
-.chat-fab:hover{transform:translateY(-2px)}
-.chat-fab:focus-visible,.chat button:focus-visible,.chat a:focus-visible,.chat textarea:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
-.chat-fab .ic{width:24px;height:24px}
-.chat-fab .live{position:absolute;top:6px;right:7px;width:11px;height:11px;border-radius:50%;background:var(--lime);border:2px solid var(--ink)}
-body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;transform:scale(.8)}
-.chat{position:fixed;right:calc(18px + env(safe-area-inset-right));bottom:calc(18px + env(safe-area-inset-bottom));z-index:1201;width:min(390px,calc(100vw - 36px));height:min(600px,calc(100vh - 36px));height:min(600px,calc(100dvh - 36px));display:flex;flex-direction:column;border-radius:24px;overflow:hidden;color:var(--ink);background:#fff;box-shadow:0 0 0 1px rgba(18,18,17,.06),0 30px 70px rgba(18,18,17,.28);transform-origin:bottom right;animation:chatIn .25s var(--ease)}
-.chat[hidden]{display:none}
-@keyframes chatIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-.chat-head{display:flex;align-items:center;gap:10px;padding:14px 14px 14px 18px;color:#fff;background:var(--ink)}
-.chat-id{flex:1;min-width:0;line-height:1.25}
-.chat-id b{display:block;font-size:15px;font-weight:500}
-.chat-id span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.6)}
-.chat-id span::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--lime)}
-.chat-hbtn{width:44px;height:44px;flex:none;border-radius:100px;display:grid;place-items:center;color:#fff;text-decoration:none;cursor:pointer;padding:0;font:inherit;font-size:24px;line-height:1;background:rgba(255,255,255,.1);border:0}
-.chat-hbtn:hover{background:rgba(255,255,255,.18)}
-.chat-hbtn .ic{width:18px;height:18px}
-.chat-msgs{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:16px;display:flex;flex-direction:column;gap:10px}
-.chat-msg{max-width:86%;padding:10px 14px;border-radius:18px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
-.chat-msg.bot{align-self:flex-start;background:var(--mist);border-bottom-left-radius:6px}
-.chat-msg.me{align-self:flex-end;color:#fff;background:var(--ink);border-bottom-right-radius:6px}
-.chat-typing{align-self:flex-start;display:flex;gap:4px;padding:14px 16px;border-radius:18px;background:var(--mist)}
-.chat-typing i{width:7px;height:7px;border-radius:50%;background:#a5a29a;animation:chatDot 1s infinite ease-in-out}
-.chat-typing i:nth-child(2){animation-delay:.15s}.chat-typing i:nth-child(3){animation-delay:.3s}
-@keyframes chatDot{0%,80%,100%{opacity:.3;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
-.chat-wa{align-self:stretch;display:flex;align-items:center;gap:12px;padding:12px 14px;min-height:56px;border-radius:16px;text-decoration:none;color:#fff;background:#1fa952}
-.chat-wa .ic{width:24px;height:24px;flex:none}
-.chat-wa b{display:block;font-size:15px;font-weight:500}
-.chat-wa small{display:block;font-size:12px;opacity:.9;line-height:1.3}
-.chat-sugg{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 10px}
-.chat-sugg[hidden]{display:none}
-.chat-sugg button{min-height:44px;padding:8px 14px;border-radius:100px;cursor:pointer;font:inherit;font-size:13.5px;color:var(--ink);background:#fff;border:1px solid var(--line)}
-.chat-sugg button:hover{background:var(--mist)}
-.chat-form{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
-.chat-form textarea{flex:1;resize:none;min-height:44px;max-height:120px;padding:11px 14px;border-radius:16px;font:inherit;font-size:16px;line-height:1.35;color:var(--ink);background:var(--mist);border:1px solid transparent}
-.chat-form textarea:focus{outline:none;border-color:var(--ink)}
-.chat-send{width:44px;height:44px;flex:none;border-radius:100px;display:grid;place-items:center;cursor:pointer;padding:0;color:var(--lime);background:var(--ink);border:0}
-.chat-send:disabled{opacity:.5;cursor:default}
-.chat-send .ic{width:18px;height:18px}
-.chat-note{margin:0;padding:0 14px 10px;font-size:11px;color:var(--muted);text-align:center}
-.chat-note a{color:inherit}
-.chat-links{align-self:flex-start;display:flex;flex-wrap:wrap;gap:6px;max-width:92%;margin-top:-4px}
-.chat-link{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:8px 14px;border-radius:100px;font-size:13.5px;text-decoration:none;color:var(--ink);background:#fff;border:1px solid var(--line)}
-.chat-link:hover{background:var(--lime);border-color:var(--lime)}
-.chat-link .ic{width:14px;height:14px}
-.chat-alt{align-self:center;padding:6px 10px;min-height:40px;font:inherit;font-size:13px;color:var(--muted);text-decoration:underline;text-underline-offset:3px;background:none;border:0;cursor:pointer}
-.chat-alt:hover{color:var(--ink)}
-.chat-cf{align-self:stretch;display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:var(--mist)}
-.chat-cf>b{font-size:14.5px;font-weight:500}
-.chat-cf>small{font-size:12px;color:var(--muted);margin-top:-4px}
-.chat-cf input,.chat-cf textarea{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:12px;color:var(--ink);background:#fff;border:1px solid var(--line)}
-.chat-cf textarea{resize:vertical;min-height:72px}
-.chat-cf input:focus,.chat-cf textarea:focus{outline:none;border-color:var(--ink)}
-.chat-cf .err{margin:0;font-size:12.5px;color:#c0362c}
-.chat-cf .err:empty{display:none}
-.chat-cf button{min-height:44px;border-radius:100px;font:inherit;font-size:14.5px;font-weight:500;cursor:pointer;color:var(--ink);background:var(--lime);border:0}
-.chat-cf button:disabled{opacity:.6;cursor:default}
 /* --- responsive --- */
 @media (max-width:1100px){
   .svc-grid,.cards-3,.testi-grid,.posts{grid-template-columns:repeat(2,1fr)}
@@ -568,15 +511,12 @@ body.chat-open .chat-fab,body.menu-open .chat-fab{opacity:0;pointer-events:none;
   .f-social{justify-content:flex-start}
   .panel{padding:24px 18px}
   .gallery{columns:1}
-  .chat-fab{width:52px;height:52px;right:calc(14px + env(safe-area-inset-right));bottom:calc(14px + env(safe-area-inset-bottom))}
-  .chat-fab .ic{width:22px;height:22px}
-  .chat{left:8px;right:8px;width:auto;bottom:calc(8px + env(safe-area-inset-bottom));height:min(640px,calc(100vh - 70px));height:min(640px,calc(100dvh - 70px));border-radius:22px}
 }
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   .js .r{opacity:1;transform:none;filter:none;transition:none}
   .hero-bg{animation:none;transform:none}
-  .ticker-track,.pulse,.chat,.chat-typing i{animation:none}
+  .ticker-track,.pulse{animation:none}
   .c-track{scroll-behavior:auto}
   .step-line{transform:none;transition:none}
   .btn,.svc>img,.gcard img,.method{transition:none}
@@ -607,6 +547,11 @@ _IC = {
  "doc":'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
  "eye":'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
  "tool":'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L3 17.8V21h3.2l6.3-6.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
+ "mic":'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+ "grow":'<path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>',
+ "shrink":'<path d="M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7"/>',
+ "down":'<path d="m6 9 6 6 6-6"/>',
+ "vol":'<path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>',
  "logo":'<rect x="3" y="3" width="18" height="18" rx="5"/><path d="M8 15l4-8 4 8M9.5 12.5h5"/>',
 }
 def ic(name, extra=""):
@@ -965,21 +910,43 @@ addEventListener("keydown",function(e){if(e.key==="Escape"&&!dr.hidden)close()})
 SVG_CHAT='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>'
 SVG_SEND='<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
 def chat_widget():
-    # Bulle discrète en bas à droite + panneau de l'assistant (logique : /assets/js/chat.js, API : /api/chat)
-    sugg="".join(f'<button type="button">{t}</button>' for t in
-                 ("Rénover mon électricité","Changer mon chauffage","Une fuite, une panne","Vous venez chez moi ?"))
-    return (f'<button class="chat-fab" type="button" aria-label="Poser une question à ARélec" aria-controls="chat" aria-expanded="false"><span class="live" aria-hidden="true"></span>{SVG_CHAT}</button>'
+    # Mascotte qui saute en bas à droite + bulle d'accroche + panneau de l'assistant
+    # (logique : /assets/js/chat.js, styles : /assets/css/chat.css, API : /api/chat et /api/contact)
+    sugg="".join(f'<button type="button" data-ask="{q}">{ic(i)}<span>{t}<br><small>{s_}</small></span></button>' for i,t,s_,q in (
+        ("bolt","Électricité","Rénovation, tableau, normes","J'ai un projet en électricité"),
+        ("flame","Chauffage","PAC, radiateurs, eau chaude","J'ai un projet de chauffage"),
+        ("drop","Plomberie","Salle de bain, fuite","J'ai un projet en plomberie"),
+        ("alert","Une panne","Dépannage, urgence","J'ai une panne, vous pouvez intervenir ?")))
+    acts=(f'<a class="chat-act" href="tel:{PHONE_TEL}">{SVG_PHONE}Appeler</a>'
+          f'<a class="chat-act wa" href="https://wa.me/{WHATSAPP_INT}" target="_blank" rel="noopener">{SVG_WA}WhatsApp</a>'
+          f'<button class="chat-act" type="button" data-cf>{ic("doc")}Être rappelé</button>'
+          f'<a class="chat-act" href="/services/" data-nav>{ic("tool")}Nos services</a>'
+          f'<a class="chat-act" href="/realisations/" data-nav>{ic("eye")}Réalisations</a>'
+          f'<a class="chat-act" href="/avis/" data-nav>{ic("star")}Avis clients</a>')
+    return ('<div class="cb">'
+            '<div class="cb-tease" hidden role="status"><button class="cb-tease-x" type="button" aria-label="Masquer le message">×</button>'
+            '<b>Je suis là</b> si vous avez une question !<small>Électricité, chauffage, plomberie</small></div>'
+            '<button class="cb-mascot" type="button" aria-label="Poser une question à l\'assistant ARélec" aria-controls="chat" aria-expanded="false">'
+            '<picture class="cb-full"><source srcset="/assets/img/mascotte.webp" type="image/webp"><img src="/assets/img/mascotte.png" alt="" width="150" height="320"></picture>'
+            '<img class="cb-bust" src="/assets/img/mascotte-buste.png" alt="" width="168" height="192">'
+            '<span class="cb-dot" aria-hidden="true"></span></button></div>'
             f'<section class="chat" id="chat" hidden role="dialog" aria-label="Assistant ARélec" data-wa="{WHATSAPP_INT}">'
-            '<div class="chat-head"><div class="chat-id"><b>ARélec</b><span>On vous répond tout de suite</span></div>'
-            f'<a class="chat-hbtn" href="tel:{PHONE_TEL}" aria-label="Appeler le {PHONE_DISP}">{SVG_PHONE}</a>'
-            '<button class="chat-hbtn chat-close" type="button" aria-label="Fermer">×</button></div>'
+            '<div class="chat-head"><span class="chat-av" aria-hidden="true"><img src="/assets/img/mascotte-buste.png" alt=""></span>'
+            '<div class="chat-id"><b>L\'assistant ARélec</b><span>En ligne</span></div>'
+            f'<a class="chat-hbtn" href="tel:{PHONE_TEL}" aria-label="Appeler le {PHONE_DISP}" data-tip="Appeler">{SVG_PHONE}</a>'
+            f'<button class="chat-hbtn chat-expand" type="button" aria-label="Agrandir" data-tip="Agrandir">{ic("grow","ic-grow")}{ic("shrink","ic-shrink")}</button>'
+            f'<button class="chat-hbtn chat-close" type="button" aria-label="Réduire" data-tip="Réduire">{ic("down")}</button></div>'
             '<div class="chat-msgs" aria-live="polite"></div>'
-            f'<div class="chat-sugg">{sugg}</div>'
-            '<form class="chat-form"><textarea rows="1" maxlength="800" placeholder="Votre question, votre projet…" aria-label="Votre message"></textarea>'
-            f'<button class="chat-send" type="submit" aria-label="Envoyer">{SVG_SEND}</button></form>'
-            '<p class="chat-note">Assistant automatique · <a href="/politique-confidentialite">confidentialité</a></p></section>'
+            f'<div class="chat-bar" aria-label="Raccourcis">{acts}</div>'
+            '<form class="chat-form"><textarea rows="1" maxlength="800" placeholder="Écrivez ou dictez…" aria-label="Votre message"></textarea>'
+            f'<button class="chat-mic" type="button" aria-label="Dicter un message" hidden>{ic("mic")}</button>'
+            f'<button class="chat-send" type="submit" aria-label="Envoyer" disabled>{SVG_SEND}</button></form>'
+            '<p class="chat-note">Assistant automatique · <button type="button" class="chat-reset">Nouvelle conversation</button> · <a href="/politique-confidentialite">confidentialité</a></p></section>'
             f'<template id="chat-wa-ic">{SVG_WA}</template>'
-            '<script src="/assets/js/chat.js?v=2" defer></script>')
+            f'<template id="chat-sugg">{sugg}</template>'
+            f'<template id="chat-ic-vol">{ic("vol")}</template>'
+            f'<template id="chat-ic-go">{ic("right")}</template>'
+            '<script src="/assets/js/chat.js?v=3" defer></script>')
 
 # ---------- avis Google réels ----------
 REVS=[("Redistribution des prises et des points lumineux dans le cadre du réagencement de notre rez-de-chaussée (maison années 30). Intervention de très bonne qualité, chantier propre et rapide. Je recommande ARÉLEC.","Philippe C.","Rénovation électrique"),
@@ -1133,7 +1100,7 @@ def head_common(path,title,desc,jl,noindex=False):
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
             f'<title>{t_esc}</title><meta name="description" content="{d_esc}">{robots}'
             f'<link rel="canonical" href="{canon}">{og}{icons}{jl}{fonts}'
-            '<link rel="stylesheet" href="/assets/css/styles.css?v=54">'
+            '<link rel="stylesheet" href="/assets/css/styles.css?v=55"><link rel="stylesheet" href="/assets/css/chat.css?v=1">'
             '<script>document.documentElement.classList.add("js")</script></head>')
 
 NOINDEX = {"blog"}  # pages encore en maquette (contenu à rédiger)
@@ -2020,6 +1987,13 @@ Dernière mise à jour : {TODAY}
 # Contexte de l'assistant (/api/chat) = la documentation complète du site
 (API/"_context.js").write_text("// Généré par build_site.py — ne pas éditer.\nmodule.exports = { CONTEXT: " + json.dumps(LLMS_FULL, ensure_ascii=False) + " };\n")
 (JS_DIR/"chat.js").write_text((ROOT/"chat.js").read_text())
+(CSS/"chat.css").write_text((ROOT/"chat.css").read_text())
+# Mascotte de l'assistant (générée avec Codex) : en pied pour le lanceur, buste pour l'avatar
+for src,name,hpx in (("electricien-pied.png","mascotte",320),("electricien-buste.png","mascotte-buste",192)):
+    im=Image.open(ROOT/"assets/mascotte"/src).convert("RGBA")
+    im=im.crop(im.split()[3].point(lambda v:255 if v>24 else 0).getbbox())
+    im=im.resize((round(im.width*hpx/im.height),hpx), Image.LANCZOS)
+    im.save(IMG/(name+".png"), optimize=True); im.save(IMG/(name+".webp"), quality=88, method=6)
 (JS_DIR/"contact.js").write_text((ROOT/"contact.js").read_text())
 # Pages que l'assistant peut proposer (boutons de navigation dans le chat)
 PAGE_LIST=[{"url":"/"+(slug+"/" if slug else ""),"title":re.split(r" \| | — ",t)[0] if slug else "Accueil"}

@@ -1,7 +1,9 @@
 // Assistant du site ARélec — fonction Vercel (POST /api/chat).
 // Variables d'environnement (Vercel > Settings > Environment Variables) :
 //   OPENROUTER_API_KEY  (obligatoire)   OPENROUTER_MODEL  (facultatif)
-const { complete, takeTag } = require("./_openrouter.js");
+// Réponse en flux NDJSON : des lignes {"d":"<morceau de texte>"} pendant l'écriture,
+// puis une dernière ligne {"done":true, reply, links, handoff, mode}.
+const { stream, takeTag } = require("./_openrouter.js");
 const { PAGES } = require("./_pages.js");
 const KNOWN = new Map(PAGES.map(p => [p.url, p.title]));
 
@@ -9,22 +11,34 @@ const MAX_MSGS = 16, MAX_LEN = 800;
 const WINDOW_MS = 10 * 60 * 1000, MAX_HITS = 30;
 const hits = new Map(); // limite par IP, au mieux (mémoire de l'instance)
 
-const INSTRUCTIONS = `Tu es l'assistant du site d'ARélec, artisan électricien, chauffagiste et plombier à Plouzané (bassin brestois, Finistère) depuis 2010. Tu réponds aux visiteurs du site en français, au nom de l'entreprise (« on », « nous »).
+const INSTRUCTIONS = `Tu es l'assistant du site d'ARélec, artisan électricien, chauffagiste et plombier à Plouzané (bassin brestois, Finistère) depuis 2010. Tu réponds dans une petite fenêtre de chat, en français, au nom de l'équipe (« on », « nous »), en vouvoyant le visiteur.
 
-Ton objectif : répondre clairement aux questions, guider le visiteur vers les bonnes pages du site, comprendre son besoin, puis l'amener à transmettre sa demande : sur WhatsApp, où ARélec prend le relais pour préparer la visite et le devis gratuit, ou par le formulaire de contact s'il n'a pas WhatsApp.
+Ton objectif : répondre à la question, guider vers la bonne page du site, comprendre le besoin, puis faire transmettre la demande : sur WhatsApp, où Arnaud prend le relais pour la visite et le devis gratuit, ou par le formulaire de contact pour ceux qui n'ont pas WhatsApp.
 
-Consignes :
-- Réponses courtes : 2 à 4 phrases.
-- Si tu ne sais pas, propose WhatsApp ou le téléphone.
-- Pose une seule question à la fois pour comprendre le besoin : type de travaux, commune, urgence ou non, neuf ou rénovation.
-- Dès que tu connais le besoin et la commune, ou au plus tard à ta troisième réponse, ou dès que le visiteur parle de devis, prix, rendez-vous ou contact : invite-le à continuer sur WhatsApp (ou par le formulaire, juste en dessous, s'il n'a pas WhatsApp), puis termine ton message par une ligne exactement de cette forme :
+Comment tu écris (c'est le plus important) :
+- Très court. 1 ou 2 phrases, 35 mots maximum en tout. Une seule question à la fois, à la fin.
+- Tu parles comme un artisan au téléphone : simple, direct, chaleureux. Des mots de tous les jours. Tu peux commencer par « Oui », « Ah », « D'accord », « Bien sûr » ou entrer directement dans le sujet.
+- Mets en gras avec **deux astérisques** l'information clé de ta réponse (un mot ou trois, pas plus, et pas à chaque message). Jamais d'astérisque seul, jamais de titre.
+- Une liste à tirets seulement si le visiteur demande de comparer des options, 3 lignes maximum.
+- Interdit : « Parfait ! », « Excellente question », « Super ! », « N'hésitez pas », « Je comprends tout à fait », « Absolument », « En effet », « Il est important de noter », « Que ce soit… ou… », les tirets longs (—), les points d'exclamation en rafale, les émojis, les formules de fin du type « Je reste à votre disposition ». Pas de compliments sur la question. Ne répète pas ce que le visiteur vient de dire.
+- Varie tes tournures d'un message à l'autre. Pas de structure en trois éléments.
+
+Déroulé :
+- Pour comprendre le besoin : type de travaux, commune, urgence ou non, neuf ou rénovation. Une question par message, et jamais une question à laquelle il a déjà répondu.
+- Dès que tu connais le besoin et la commune, ou au plus tard à ta troisième réponse, ou dès qu'il parle de devis, prix, rendez-vous ou contact : propose-lui de continuer sur WhatsApp (ou le formulaire juste en dessous s'il n'a pas WhatsApp), puis termine par une ligne exactement de cette forme :
 <<WHATSAPP>>Mon projet : <résumé en une ou deux phrases à la première personne : type de travaux, commune, détails utiles><<END>>
-- Si le visiteur dit qu'il n'a pas WhatsApp, préfère l'email, le formulaire ou être rappelé : dis-lui que le formulaire s'affiche juste en dessous (nom, téléphone ou email), puis termine par la même ligne résumé mais avec <<FORMULAIRE>> à la place de <<WHATSAPP>>.
+- S'il dit qu'il n'a pas WhatsApp, préfère l'email, le formulaire ou être rappelé : dis-lui que le formulaire est juste en dessous (son nom, un téléphone ou un email suffit), puis termine par la même ligne avec <<FORMULAIRE>> à la place de <<WHATSAPP>>.
 Ces lignes servent à préremplir sa demande ; ne les mentionne jamais.
-- Navigation : quand une page du site répond à sa question (un métier, sa commune, les réalisations, les avis, l'entreprise, le contact), propose-la. Ajoute alors, sur la toute dernière ligne, au plus 2 adresses de la liste ci-dessous, exactement sous cette forme :
+- Navigation : quand une page du site répond à sa question (un métier, sa commune, les réalisations, les avis, l'entreprise, le contact), dis-le en quelques mots (« je vous mets la page juste en dessous ») et ajoute sur la toute dernière ligne au plus 2 adresses de la liste ci-dessous, exactement sous cette forme :
 <<PAGES>>/chauffage/ /chauffagiste-brest/<<END>>
-Le site les affiche en boutons cliquables ; n'écris jamais d'adresse dans ta phrase. Pour une commune, préfère la page « métier à commune » si elle existe.
+Le site les affiche en boutons ; n'écris jamais d'adresse dans ta phrase. Pour une commune, préfère la page « métier à commune » si elle existe.
 - Ne demande pas l'adresse exacte.
+
+Exemples du ton attendu :
+Visiteur : vous faites les pompes à chaleur ?
+Toi : Oui, on pose des **PAC air/eau et air/air** dans tout le bassin brestois. C'est pour remplacer un chauffage existant ou pour du neuf ?
+Visiteur : mon disjoncteur saute tout le temps
+Toi : Ça arrive souvent avec un appareil en défaut ou un circuit surchargé. Ça saute quand vous allumez quelque chose en particulier ?
 
 Pages du site (adresse · titre) :
 ${PAGES.map(p => p.url + " · " + p.title).join("\n")}`;
@@ -35,6 +49,23 @@ function limited(ip) {
   h.push(now);
   hits.set(ip, h);
   return h.length > MAX_HITS;
+}
+
+// Sépare la réponse visible des lignes techniques (<<PAGES>>, <<WHATSAPP>>, <<FORMULAIRE>>)
+function finish(raw) {
+  const pages = takeTag(raw, "PAGES");
+  const wa = takeTag(pages.text, "WHATSAPP");
+  const form = takeTag(wa.text, "FORMULAIRE");
+  const summary = form.value || wa.value;
+  // On ne garde que des pages qui existent vraiment sur le site
+  const links = [...new Set(String(pages.value || "").match(/\/[a-z0-9-]*\/?/g) || [])]
+    .map(u => (u.endsWith("/") ? u : u + "/")).filter(u => KNOWN.has(u)).slice(0, 2)
+    .map(u => ({ url: u, title: KNOWN.get(u) }));
+  return {
+    done: true, reply: form.text, links,
+    handoff: summary ? summary.slice(0, 500) : null,
+    mode: form.value ? "form" : summary ? "whatsapp" : null
+  };
 }
 
 module.exports = async (req, res) => {
@@ -60,22 +91,20 @@ module.exports = async (req, res) => {
     .map(m => ({ role: m.role, content: m.content.slice(0, MAX_LEN) }));
   if (!messages.length || messages[messages.length - 1].role !== "user") return res.status(400).json({ error: "messages" });
 
+  let started = false;
   try {
-    const raw = await complete(INSTRUCTIONS, messages);
-    const pages = takeTag(raw, "PAGES");
-    const wa = takeTag(pages.text, "WHATSAPP");
-    const form = takeTag(wa.text, "FORMULAIRE");
-    const summary = form.value || wa.value;
-    // On ne garde que des pages qui existent vraiment sur le site
-    const links = [...new Set(String(pages.value || "").match(/\/[a-z0-9-]*\/?/g) || [])]
-      .map(u => (u.endsWith("/") ? u : u + "/")).filter(u => KNOWN.has(u)).slice(0, 2)
-      .map(u => ({ url: u, title: KNOWN.get(u) }));
-    return res.status(200).json({
-      reply: form.text, links,
-      handoff: summary ? summary.slice(0, 500) : null,
-      mode: form.value ? "form" : summary ? "whatsapp" : null
-    });
+    const raw = await stream(INSTRUCTIONS, messages, d => {
+      if (!started) {
+        started = true;
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
+      }
+      res.write(JSON.stringify({ d }) + "\n");
+    }, 260);
+    if (!started) { res.statusCode = 200; res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8"); }
+    res.end(JSON.stringify(finish(raw)) + "\n");
   } catch (e) {
+    if (started) return res.end(JSON.stringify({ error: "upstream" }) + "\n");
     return res.status(502).json({ error: "upstream" });
   }
 };
