@@ -56,6 +56,13 @@
    "alt": "Solution Pac AIR/AIR",
    "category": "Chauffage",
    "added": "2026-11-05"
+  },
+  {
+   "id": "2026-11-05-x7ka81",
+   "name": "logo new med sqar",
+   "alt": "",
+   "category": "",
+   "added": "2026-11-05"
   }
  ],
  "images": {
@@ -66,10 +73,12 @@
   "/chauffage/|chantier-plouider.jpg#0": "2026-11-05-eme6z7",
   "/services/|reno-cablage.jpg#0": "2026-11-04-80sj88",
   "/services/|sdb-baignoire.jpg#0": "2026-11-04-9hgiie",
-  "/services/|douche-marbre.jpg#0": "2026-11-05-eme6z7"
+  "/services/|douche-marbre.jpg#0": "2026-11-05-eme6z7",
+  "/entreprise/|chantier-plouider.jpg#0": "2026-11-05-x7ka81"
  },
  "texts": {
   "/plomberie/|69a6587542": "Une fuite, c'est rarement où on croit. Notre rôle en tant que plombier est de détecter l'origine de la fuite, d'identifier la cause du problème et d'effectuer une réparation durable afin de rétablir une installation parfaitement étanche et sécurisée",
-  "/plomberie/|107007ef71": "On se reprend sur le réseau d'eau existant dans les rénovations, on met en œuvre les nouvelles évacuations et arrivées par rapport à l'implantation du projet. Dans la mesure du possible en intégration complète"
+  "/plomberie/|107007ef71": "On se reprend sur le réseau d'eau existant dans les rénovations, on met en œuvre les nouvelles évacuations et arrivées par rapport à l'implantation du projet. Dans la mesure du possible en intégration complète",
+  "/entreprise/|ec4214e4d4": "Le Personnel derrière<br><b>ARélec.</b>"
  }
 }
