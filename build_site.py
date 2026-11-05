@@ -377,12 +377,14 @@ a.area-chip:hover{background:var(--ink);color:#fff}
 .steps-v .step-n{flex:none}
 .steps-v b{display:block;font-size:17px;font-weight:400;margin-bottom:4px}
 .steps-v p{font-size:14px;color:var(--muted);line-height:1.55}
-.team-card{background:var(--mist);border-radius:24px;padding:12px 12px 24px;display:flex;flex-direction:column;gap:16px}
+.team-card{background:var(--mist);border-radius:24px;padding:24px;display:flex;align-items:center;gap:16px}
 .ph{aspect-ratio:4/4.4;border-radius:18px;background:repeating-linear-gradient(135deg,#e9e7e1 0 12px,#e4e2dc 12px 24px);display:grid;place-items:center;color:var(--muted);text-align:center;padding:16px}
-.team-card .who{padding:0 12px}
+.team-card .who{min-width:0}
 .team-card .who b{display:block;font-size:20px;font-weight:400;letter-spacing:-.015em}
 .team-card .who span{font-size:14px;color:var(--muted)}
 /* --- blog --- */
+.blog-empty{max-width:720px;margin:0 auto;padding:56px 32px;border-radius:32px;background:var(--mist);display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.blog-empty .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 .post-feat{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;background:var(--mist);border-radius:32px;padding:16px}
 .post-feat .img{position:relative;min-height:460px}
 .post-feat .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:24px}
@@ -1569,8 +1571,8 @@ about_body=(phero(CRUMB_M.format(label="L'entreprise"),"À propos d'ARélec",
    f'<div class="split-head"><div class="head"><span{R()}>{label("L\'équipe")}</span><h2{R(.08,"h2")}>Les gens derrière<br><b>ARélec.</b></h2></div>'
    f'<div class="side"><p{R(.12,"lead")}>Deux artisans qui font les trois métiers eux-mêmes.</p></div></div>'
    '<div class="cards-2">'
-   f'<div{R(0,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>Arnaud Roncey</b><span>Gérant · électricité, chauffage</span></div></div>'
-   f'<div{R(.08,"team-card")}><div class="ph mono">{tbd("Photo à ajouter")}</div><div class="who"><b>Damien D.</b><span>Plombier · plomberie, chauffage</span></div></div>'
+   f'<div{R(0,"team-card")}><span class="icon-chip">{ic("bolt")}</span><div class="who"><b>Arnaud Roncey</b><span>Gérant · électricité, chauffage</span></div></div>'
+   f'<div{R(.08,"team-card")}><span class="icon-chip">{ic("drop")}</span><div class="who"><b>Damien D.</b><span>Plombier · plomberie, chauffage</span></div></div>'
    '</div></div></section>')
  +('<section class="sec" style="padding-top:0"><div class="wrap">'
    f'<div class="head"><span{R()}>{label("Garanties")}</span><h2{R(.08,"h2")}>Des engagements<br><b>clairement expliqués.</b></h2></div>'
@@ -1597,13 +1599,14 @@ posts="".join(f'<article{R(.06*(i%3),"post")}><div class="img"><img src="/assets
 blog_body=(phero(CRUMB_M.format(label="Blog"),"Le journal ARélec",
   "Des conseils pratiques<br><b>pour une maison sûre et confortable.</b>",
   "Électricité, chauffage, plomberie : les bons réflexes et les questions qu'on nous pose le plus, expliqués simplement.",actions="")
+ # Aucun article publié pour l'instant : les articles prévus (POSTS) restent cachés jusqu'à leur rédaction
  +('<section class="sec"><div class="wrap">'
-   f'<article{R(0,"post-feat")}><div class="img"><img src="/assets/img/cablage.jpg" alt="" loading="lazy"><span class="tag mono">À la une</span></div>'
-   f'<div class="txt"><div class="meta mono"><span class="pill lime">À rédiger</span></div>'
-   '<h2 class="h2">Disjoncteur qui saute :<br><b>les bons réflexes.</b></h2>'
-   f'<p class="lead">{tbd("Introduction de l\'article à rédiger")}</p></div></article>'
-   f'<div class="head" style="margin-top:96px"><span{R()}>{label("Derniers articles")}</span></div>'
-   f'<div class="posts">{posts}</div></div></section>')
+   f'<div{R(0,"blog-empty")}><span class="icon-chip">{ic("doc")}</span>'
+   '<h2 class="h2">Aucun article<br><b>pour le moment.</b></h2>'
+   '<p class="lead">Nos premiers conseils d\'artisan arrivent bientôt : électricité, chauffage, plomberie. '
+   'En attendant, posez directement votre question, on vous répond.</p>'
+   f'<div class="actions">{btn_contact("dark","Poser une question")}{btn("Voir nos réalisations","/realisations","light")}</div></div>'
+   '</div></section>')
  +cta_section('Une question précise ?<br><b>Posez-la directement.</b>',"Notre assistant vous répond tout de suite, puis l'équipe prend le relais sur WhatsApp."))
 pages.append(("blog","Blog — conseils électricité, chauffage, plomberie | ARélec",
   "Conseils d'artisan sur l'électricité, le chauffage et la plomberie : bons réflexes, entretien et rénovation, par ARélec.",

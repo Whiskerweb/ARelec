@@ -326,12 +326,14 @@ a.area-chip:hover{background:var(--ink);color:#fff}
 .steps-v .step-n{flex:none}
 .steps-v b{display:block;font-size:17px;font-weight:400;margin-bottom:4px}
 .steps-v p{font-size:14px;color:var(--muted);line-height:1.55}
-.team-card{background:var(--mist);border-radius:24px;padding:12px 12px 24px;display:flex;flex-direction:column;gap:16px}
+.team-card{background:var(--mist);border-radius:24px;padding:24px;display:flex;align-items:center;gap:16px}
 .ph{aspect-ratio:4/4.4;border-radius:18px;background:repeating-linear-gradient(135deg,#e9e7e1 0 12px,#e4e2dc 12px 24px);display:grid;place-items:center;color:var(--muted);text-align:center;padding:16px}
-.team-card .who{padding:0 12px}
+.team-card .who{min-width:0}
 .team-card .who b{display:block;font-size:20px;font-weight:400;letter-spacing:-.015em}
 .team-card .who span{font-size:14px;color:var(--muted)}
 /* --- blog --- */
+.blog-empty{max-width:720px;margin:0 auto;padding:56px 32px;border-radius:32px;background:var(--mist);display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.blog-empty .actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
 .post-feat{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;background:var(--mist);border-radius:32px;padding:16px}
 .post-feat .img{position:relative;min-height:460px}
 .post-feat .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:24px}
