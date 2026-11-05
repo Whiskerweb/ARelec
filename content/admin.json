@@ -53,7 +53,10 @@
  ],
  "images": {
   "*|confort.jpg": "2026-11-04-ngygdi",
-  "/|reno-cablage.jpg#0": "2026-11-04-49ang8"
+  "/|reno-cablage.jpg#0": "2026-11-04-49ang8",
+  "/electricite/|reno-cablage.jpg#0": "2026-11-04-49ang8",
+  "/electricite/|eclairage.jpg#0": "site:escalier-led.jpg",
+  "/chauffage/|chantier-plouider.jpg#0": "2026-11-05-eme6z7"
  },
  "texts": {}
 }
