@@ -123,6 +123,71 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
 .toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%);z-index:30;padding:10px 16px;border-radius:12px;background:var(--ink);color:#fff;font-size:14px;box-shadow:0 12px 30px rgba(18,18,17,.3)}
 .toast.err{background:var(--red)}
 
+/* Blog : liste */
+.muted{color:var(--muted);font-size:13px}
+.bl-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.bl-rows{display:flex;flex-direction:column;gap:10px}
+.bl-row{display:flex;align-items:center;gap:14px;padding:10px;border-radius:18px;background:#fff;border:1px solid var(--line);cursor:pointer;transition:border-color .2s}
+.bl-row:hover{border-color:var(--ink)}
+.bl-row img,.bl-row .noimg{width:112px;height:76px;flex:none;border-radius:12px;object-fit:cover;background:var(--mist)}
+.bl-row .t{flex:1;min-width:0}
+.bl-row .t b{display:block;font-weight:500;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bl-row .t small{color:var(--muted);font-size:13px}
+.st{flex:none;padding:5px 10px;border-radius:100px;font-size:12px;font-weight:500;background:var(--mist)}
+.st.on{background:var(--lime)}.st.mod{background:#ffe2b8}
+.empty{padding:40px;border-radius:22px;background:#fff;text-align:center;color:var(--muted)}
+/* Blog : éditeur */
+.ed{flex:1;min-height:0;display:flex}
+.ed-main{flex:1;min-width:0;display:flex;flex-direction:column}
+.ed-top{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line)}
+.ed-info{flex:1;font-size:13px;color:var(--muted);text-align:right}
+.ed-scroll{flex:1;overflow:auto;padding:28px 20px 80px}
+.ed-paper{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.ed-cover{position:relative;display:grid;place-items:center;min-height:120px;border:2px dashed #cfccc3;border-radius:22px;color:var(--muted);cursor:pointer;overflow:hidden;background:#fff}
+.ed-cover img{display:block;width:100%;max-height:380px;object-fit:cover}
+.ed-cover.has{border:0;min-height:0}.ed-cover.has span{position:absolute;top:10px;right:10px;padding:6px 10px;border-radius:100px;background:rgba(18,18,17,.7);color:#fff;font-size:12.5px}
+.ed-title{width:100%;resize:none;overflow:hidden;border:0;background:none;padding:0;font:500 clamp(28px,4vw,42px)/1.15 var(--font);letter-spacing:-.025em;color:var(--ink)}
+.ed-title:focus{outline:none}
+.tb{position:sticky;top:-28px;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:4px;padding:6px;border-radius:14px;background:var(--ink);box-shadow:0 10px 24px rgba(18,18,17,.18)}
+.tb button{min-height:32px;padding:4px 10px;border:0;border-radius:9px;background:none;color:#fff;font-size:13.5px}
+.tb button:hover{background:rgba(255,255,255,.14)}
+.tb .sep{width:1px;height:20px;background:rgba(255,255,255,.2);margin:0 3px}
+.ed-body{min-height:360px;padding:6px 2px 40px;font-size:17px;line-height:1.75;color:#3d3c38;outline:none}
+.ed-body:empty::before{content:attr(data-ph);color:#a5a29a}
+.ed-body h2{font-size:26px;font-weight:500;letter-spacing:-.02em;color:var(--ink);margin:34px 0 10px;line-height:1.25}
+.ed-body h3{font-size:20px;font-weight:500;color:var(--ink);margin:26px 0 8px}
+.ed-body p{margin:0 0 14px}
+.ed-body ul,.ed-body ol{margin:0 0 16px;padding-left:24px}
+.ed-body blockquote{margin:22px 0;padding:14px 18px;border-left:3px solid var(--lime);background:#fff;border-radius:0 12px 12px 0;color:var(--ink)}
+.ed-body figure{margin:24px 0}
+.ed-body figure img{display:block;width:100%;border-radius:16px}
+.ed-body figcaption{margin-top:6px;font-size:14px;color:var(--muted);text-align:center;outline:none}
+.ed-body figcaption:empty::before{content:"Légende (facultatif)";color:#b3b0a7}
+.ed-body figure.sel img{box-shadow:0 0 0 3px var(--lime),0 0 0 5px var(--ink)}
+.ed-body hr{border:0;border-top:1px solid var(--line);margin:28px 0}
+.ed-body a{color:var(--ink);text-decoration:underline}
+.ed-side{width:320px;flex:none;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:#fff;border-left:1px solid var(--line)}
+.ed-box{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:16px;background:var(--mist)}
+.ed-box label{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--muted)}
+.ed-box em{font-style:normal;color:var(--muted);font-family:var(--font);text-transform:none;letter-spacing:0;float:right}
+.ed-box em.over{color:var(--red)}
+.seg{display:flex;padding:3px;border-radius:100px;background:#fff;border:1px solid var(--line)}
+.seg button{flex:1;min-height:34px;border:0;border-radius:100px;background:none;font-size:13.5px}
+.seg button.on{background:var(--ink);color:#fff}
+.seg button.on[data-v=published]{background:var(--lime);color:var(--ink);font-weight:600}
+.gprev{display:flex;flex-direction:column;gap:2px;padding:12px;border-radius:12px;background:#fff;font-family:Arial,sans-serif}
+.gprev small{color:#4d5156;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gprev b{color:#1a0dab;font-size:17px;font-weight:400;line-height:1.3}
+.gprev span{color:#4d5156;font-size:13px;line-height:1.45}
+/* Fenêtres */
+.modal{position:fixed;inset:0;z-index:40;display:grid;place-items:center;padding:20px;background:rgba(18,18,17,.55)}
+.modal-in{width:min(860px,100%);max-height:88vh;display:flex;flex-direction:column;border-radius:22px;background:#fff;overflow:hidden}
+.modal-in.wide{width:min(1180px,100%);height:88vh}
+.modal-in header{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.modal-in header b{font-weight:500;font-size:16px;flex:1}
+.pick.big{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));padding:14px;overflow:auto}
+.modal-in iframe{flex:1;border:0;width:100%}
+@media (max-width:1000px){.ed{flex-direction:column}.ed-side{width:auto;border-left:0;border-top:1px solid var(--line)}}
 @media (max-width:820px){
   .side{display:none}
   .top img{display:none}
@@ -151,6 +216,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
     <div class="tabs" role="tablist">
       <button class="on" data-tab="edit" role="tab">Modifier le site</button>
       <button data-tab="lib" role="tab">Médiathèque</button>
+      <button data-tab="blog" role="tab">Blog</button>
     </div>
     <span class="sp"></span>
     <span class="pub" id="pub"><span class="dot"></span><span id="pubTxt">À jour</span></span>
@@ -200,6 +266,73 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
     </div></div>
   </div>
 
+  <!-- Blog -->
+  <div class="view" id="v-blog" hidden>
+    <!-- Liste des articles -->
+    <div class="lib" id="blogList"><div class="lib-in">
+      <div class="bl-head">
+        <div><h2>Blog</h2><p class="lead">Écrivez vos articles : conseils, chantiers, actualités. Un article « En ligne » apparaît sur le site après « Publier ».</p></div>
+        <button class="btn dark" id="newPost">+ Nouvel article</button>
+      </div>
+      <div class="bl-rows" id="blogRows"></div>
+    </div></div>
+    <!-- Éditeur -->
+    <div class="ed" id="blogEdit" hidden>
+      <div class="ed-main">
+        <div class="ed-top">
+          <button class="btn ghost" id="edBack">← Tous les articles</button>
+          <span class="ed-info" id="edInfo"></span>
+          <button class="btn" id="edPreview">Aperçu</button>
+        </div>
+        <div class="ed-scroll">
+          <div class="ed-paper">
+            <label class="ed-cover" id="edCover" title="Changer l'image de couverture"><span>+ Image de couverture</span><img alt="" hidden></label>
+            <textarea id="edTitle" class="ed-title" rows="1" maxlength="140" placeholder="Titre de l'article"></textarea>
+            <div class="tb" id="edTools" role="toolbar" aria-label="Mise en forme">
+              <button data-cmd="h2" title="Titre de section">Titre</button>
+              <button data-cmd="h3" title="Sous-titre">Sous-titre</button>
+              <button data-cmd="p" title="Texte normal">Texte</button>
+              <span class="sep"></span>
+              <button data-cmd="bold" title="Gras (Cmd+B)"><b>G</b></button>
+              <button data-cmd="italic" title="Italique (Cmd+I)"><i>I</i></button>
+              <span class="sep"></span>
+              <button data-cmd="ul" title="Liste à puces">• Liste</button>
+              <button data-cmd="ol" title="Liste numérotée">1. Liste</button>
+              <button data-cmd="quote" title="Citation / encadré">“ Citation</button>
+              <span class="sep"></span>
+              <button data-cmd="link" title="Ajouter un lien">Lien</button>
+              <button data-cmd="image" title="Insérer une image">Image</button>
+              <button data-cmd="hr" title="Séparateur">—</button>
+              <span class="sep"></span>
+              <button data-cmd="undo" title="Annuler (Cmd+Z)">↶</button>
+              <button data-cmd="redo" title="Rétablir">↷</button>
+            </div>
+            <div class="ed-body prose-ed" id="edBody" contenteditable="true" data-ph="Commencez à écrire… Utilisez « Titre » pour découper l'article en parties : elles formeront le sommaire."></div>
+          </div>
+        </div>
+      </div>
+      <aside class="ed-side">
+        <div class="ed-box">
+          <span class="mono">Statut</span>
+          <div class="seg" id="edStatus"><button data-v="draft">Brouillon</button><button data-v="published">En ligne</button></div>
+          <small class="muted">« En ligne » : visible sur le site après « Publier ».</small>
+        </div>
+        <label class="ed-box"><span class="mono">Date de publication</span><input type="date" id="edDate"></label>
+        <label class="ed-box"><span class="mono">Catégorie</span><select id="edCat"></select></label>
+        <label class="ed-box"><span class="mono">Résumé <em id="edExcN"></em></span>
+          <textarea id="edExc" rows="3" maxlength="300" placeholder="2 ou 3 phrases qui donnent envie de lire (affiché dans la liste du blog)"></textarea></label>
+        <div class="ed-box">
+          <span class="mono">Référencement Google</span>
+          <div class="gprev"><small id="gpUrl"></small><b id="gpTitle"></b><span id="gpDesc"></span></div>
+          <label>Adresse de la page<input type="text" id="edSlug" maxlength="70" placeholder="adresse-de-l-article"></label>
+          <label>Titre Google <em id="edSeoTN"></em><input type="text" id="edSeoT" maxlength="70" placeholder="Par défaut : le titre de l'article"></label>
+          <label>Description Google <em id="edSeoDN"></em><textarea id="edSeoD" rows="3" maxlength="170" placeholder="Par défaut : le résumé"></textarea></label>
+        </div>
+        <button class="btn danger" id="edDelete">Supprimer l'article</button>
+      </aside>
+    </div>
+  </div>
+
   <div class="bar">
     <span class="msg" id="barMsg">Aucune modification en attente.</span>
     <button class="btn" id="discard" disabled>Annuler les modifications</button>
@@ -227,6 +360,21 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
   <footer><button class="btn" id="dReset">Remettre l'image d'origine</button><span style="flex:1"></span><button class="btn dark" id="dOk">Valider</button></footer>
 </aside>
 
+<!-- Choix d'une image (blog) -->
+<div class="modal" id="picker" hidden>
+  <div class="modal-in" role="dialog" aria-label="Choisir une image">
+    <header><b id="pkTitle">Choisir une image</b>
+      <label class="btn">Envoyer une photo<input type="file" id="pkFile" accept="image/*" hidden></label>
+      <button class="btn ghost" id="pkClose" aria-label="Fermer">✕</button></header>
+    <div class="pick big" id="pkGrid"></div>
+  </div>
+</div>
+<!-- Aperçu d'un article -->
+<div class="modal" id="preview" hidden>
+  <div class="modal-in wide"><header><b>Aperçu de l'article</b><span class="muted" style="flex:1">Rendu avec le style du site</span><button class="btn ghost" id="pvClose">✕</button></header>
+  <iframe id="pvFrame" title="Aperçu"></iframe></div>
+</div>
+
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -234,6 +382,7 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
 const PAGES = __PAGES__;
 const SITE_IMAGES = __SITE_IMAGES__;
 const CATEGORIES = __CATS__;
+const BLOG_CATEGORIES = __BLOG_CATS__;
 </script>
 <script>
 (function () {
@@ -283,7 +432,8 @@ const CATEGORIES = __CATS__;
     try { saved = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch (e) {}
     if (saved && saved.base === baseSha) { draft = saved.draft; pending = saved.pending || {}; }
     else { draft = JSON.parse(JSON.stringify(published)); pending = {}; }
-    for (const k of ["media", "images", "texts"]) draft[k] = draft[k] || (k === "media" ? [] : {});
+    for (const k of ["media", "images", "texts", "posts"]) draft[k] = draft[k] || (k === "media" || k === "posts" ? [] : {});
+    published.posts = published.posts || [];
     refreshBar();
   }
   function saveDraft() {
@@ -291,8 +441,8 @@ const CATEGORIES = __CATS__;
     refreshBar();
   }
   function changes() {
-    const a = JSON.stringify({ m: draft.media, i: draft.images, t: draft.texts });
-    const b = JSON.stringify({ m: published.media, i: published.images, t: published.texts });
+    const a = JSON.stringify({ m: draft.media, i: draft.images, t: draft.texts, p: draft.posts });
+    const b = JSON.stringify({ m: published.media, i: published.images, t: published.texts, p: published.posts || [] });
     if (a === b) return 0;
     let n = Object.keys(pending).length;
     for (const k of new Set([...Object.keys(draft.images), ...Object.keys(published.images)])) if (draft.images[k] !== published.images[k]) n++;
@@ -300,6 +450,9 @@ const CATEGORIES = __CATS__;
     const pm = Object.fromEntries(published.media.map(m => [m.id, JSON.stringify(m)]));
     for (const m of draft.media) if (pm[m.id] && pm[m.id] !== JSON.stringify(m)) n++;
     n += published.media.filter(m => !draft.media.some(d => d.id === m.id)).length;
+    const pp = Object.fromEntries((published.posts || []).map(x => [x.id, JSON.stringify(x)]));
+    for (const x of draft.posts) if (pp[x.id] !== JSON.stringify(x)) n++;
+    n += (published.posts || []).filter(x => !draft.posts.some(d => d.id === x.id)).length;
     return Math.max(n, 1);
   }
   function refreshBar() {
@@ -403,8 +556,9 @@ const CATEGORIES = __CATS__;
   // ---------- onglets ----------
   $$(".tabs button").forEach(b => b.addEventListener("click", () => {
     $$(".tabs button").forEach(x => x.classList.toggle("on", x === b));
-    $("#v-edit").hidden = b.dataset.tab !== "edit"; $("#v-lib").hidden = b.dataset.tab !== "lib";
-    if (b.dataset.tab === "lib") renderLib(); else paintFrame();
+    if (curPost && b.dataset.tab !== "blog") flushBody();
+    $("#v-edit").hidden = b.dataset.tab !== "edit"; $("#v-lib").hidden = b.dataset.tab !== "lib"; $("#v-blog").hidden = b.dataset.tab !== "blog";
+    if (b.dataset.tab === "lib") renderLib(); else if (b.dataset.tab === "blog") { if (!curPost) renderBlogList(); } else paintFrame();
   }));
 
   // ---------- pages ----------
@@ -601,14 +755,279 @@ const CATEGORIES = __CATS__;
     saveDraft(); paintFrame(); closeDrawer(); renderLib(); toast("Image changée. Publiez pour la mettre en ligne.");
   });
 
+  // ---------- blog ----------
+  // Les articles vivent dans draft.posts ; ils partent sur le site avec « Publier » comme le reste.
+  let curPost = null, saveTimer = null, savedRange = null;
+  const today = () => new Date().toISOString().slice(0, 10);
+  const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+  const dateFr = iso => { const [y, m, d] = (iso || "").split("-").map(Number); return y ? `${d} ${MOIS[m - 1]} ${y}` : ""; };
+  const slugify = s => (s || "").normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 70);
+  const postOf = id => draft.posts.find(p => p.id === id);
+  const pubOf = id => (published.posts || []).find(p => p.id === id);
+  const textOf = html => { const d = document.createElement("div"); d.innerHTML = html || ""; return d.textContent.replace(/\s+/g, " ").trim(); };
+  function postState(p) {
+    const q = pubOf(p.id);
+    if (q && JSON.stringify(q) === JSON.stringify(p)) return p.status === "published" ? ["on", "En ligne"] : ["", "Brouillon"];
+    if (!q && p.status !== "published") return ["", "Brouillon"];
+    return ["mod", p.status === "published" ? "À publier" : "Brouillon modifié"];
+  }
+
+  function renderBlogList() {
+    const posts = [...draft.posts].sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    $("#blogRows").innerHTML = posts.length ? posts.map(p => {
+      const [cls, lab] = postState(p);
+      return `<div class="bl-row" data-id="${p.id}">${p.cover ? `<img src="${esc(thumbUrl(p.cover))}" alt="">` : `<span class="noimg"></span>`}
+        <div class="t"><b>${esc(p.title || "Sans titre")}</b><small>${esc(p.category)} · ${dateFr(p.date)}${p.status === "published" ? "" : " · non visible sur le site"}</small></div>
+        <span class="st ${cls}">${lab}</span></div>`;
+    }).join("") : `<div class="empty">Aucun article pour l'instant. Cliquez sur « Nouvel article » pour écrire le premier.</div>`;
+  }
+  $("#blogRows").addEventListener("click", e => { const r = e.target.closest(".bl-row"); if (r) openPost(r.dataset.id); });
+  $("#newPost").addEventListener("click", () => {
+    const id = today() + "-" + Math.random().toString(36).slice(2, 8);
+    draft.posts.push({ id, slug: "", title: "", excerpt: "", category: "Conseils", cover: "", status: "draft", date: today(), updated: "", seoTitle: "", seoDesc: "", body: "" });
+    saveDraft(); openPost(id); $("#edTitle").focus();
+  });
+
+  // Corps de l'article : l'éditeur affiche les images ; l'enregistrement ne garde que leur identifiant
+  const OK_TAGS = /^(H2|H3|P|UL|OL|LI|B|STRONG|I|EM|A|BLOCKQUOTE|FIGURE|FIGCAPTION|IMG|BR|HR)$/;
+  function cleanBody(root, keepSrc) {
+    (function walk(n) {
+      [...n.childNodes].forEach(c => {
+        if (c.nodeType === 3) return;
+        if (c.nodeType !== 1) { c.remove(); return; }
+        walk(c);
+        let t = c.tagName;
+        if (t === "DIV") { const p = document.createElement("p"); p.append(...c.childNodes); c.replaceWith(p); c = p; t = "P"; }
+        if (t === "H1") { const h = document.createElement("h2"); h.append(...c.childNodes); c.replaceWith(h); c = h; t = "H2"; }
+        if (t === "H4" || t === "H5" || t === "H6") { const h = document.createElement("h3"); h.append(...c.childNodes); c.replaceWith(h); c = h; t = "H3"; }
+        if (!OK_TAGS.test(t)) { if (/^(SCRIPT|STYLE|IFRAME|OBJECT)$/.test(t)) c.remove(); else c.replaceWith(...c.childNodes); return; }
+        [...c.attributes].forEach(a => {
+          const keep = (t === "A" && a.name === "href") || (t === "IMG" && (a.name === "data-media" || a.name === "alt" || (keepSrc && a.name === "src")));
+          if (!keep) c.removeAttribute(a.name);
+        });
+        if (t === "IMG" && !c.getAttribute("data-media")) c.remove();
+      });
+    })(root);
+    return root;
+  }
+  function toEditor(html) {
+    const d = document.createElement("div"); d.innerHTML = html || "";
+    d.querySelectorAll("img[data-media]").forEach(img => { img.src = mediaUrl(img.dataset.media) || ""; });
+    return d.innerHTML;
+  }
+  function fromEditor() {
+    const d = document.createElement("div"); d.innerHTML = $("#edBody").innerHTML;
+    d.querySelectorAll(".sel").forEach(n => n.classList.remove("sel"));
+    // Texte ou mise en forme posés directement à la racine : rangés dans un paragraphe
+    let para = null;
+    [...d.childNodes].forEach(n => {
+      const inline = n.nodeType === 3 ? n.textContent.trim() !== "" : n.nodeType === 1 && /^(B|STRONG|I|EM|A|SPAN|BR)$/.test(n.tagName);
+      if (inline) { if (!para) { para = document.createElement("p"); n.before(para); } para.appendChild(n); }
+      else { para = null; if (n.nodeType === 3) n.remove(); }
+    });
+    return cleanBody(d, false).innerHTML.replace(/<p><br><\/p>$/, "").trim();
+  }
+
+  function openPost(id) {
+    const p = postOf(id); if (!p) return;
+    curPost = id;
+    $("#edTitle").value = p.title; growTitle();
+    $("#edBody").innerHTML = toEditor(p.body);
+    $("#edDate").value = p.date || today();
+    $("#edCat").innerHTML = BLOG_CATEGORIES.map(c => `<option${c === p.category ? " selected" : ""}>${esc(c)}</option>`).join("");
+    $("#edExc").value = p.excerpt || ""; $("#edSlug").value = p.slug || "";
+    $("#edSeoT").value = p.seoTitle || ""; $("#edSeoD").value = p.seoDesc || "";
+    paintCover(); paintStatus(); paintSeo(); paintInfo();
+    $("#blogList").hidden = true; $("#blogEdit").hidden = false;
+    document.execCommand("defaultParagraphSeparator", false, "p");
+  }
+  function closePost() { flushBody(); curPost = null; $("#blogEdit").hidden = true; $("#blogList").hidden = false; renderBlogList(); }
+  $("#edBack").addEventListener("click", closePost);
+
+  // Toute modification : date de mise à jour si l'article est déjà en ligne, puis brouillon enregistré
+  function touch(p) {
+    const q = pubOf(p.id);
+    if (q && q.status === "published") p.updated = today();
+    saveDraft(); paintSeo(); paintInfo();
+  }
+  function flushBody() {
+    clearTimeout(saveTimer);
+    const p = curPost && postOf(curPost); if (!p) return;
+    const b = fromEditor();
+    if (b !== p.body) { p.body = b; touch(p); }
+  }
+  $("#edBody").addEventListener("input", () => { clearTimeout(saveTimer); saveTimer = setTimeout(flushBody, 500); paintInfo(); });
+
+  function growTitle() { const t = $("#edTitle"); t.style.height = "auto"; t.style.height = t.scrollHeight + "px"; }
+  $("#edTitle").addEventListener("input", () => {
+    const p = postOf(curPost), old = p.title;
+    p.title = $("#edTitle").value.replace(/\n/g, " ");
+    // L'adresse suit le titre tant que l'article n'a jamais été mis en ligne et qu'elle n'a pas été changée à la main
+    const live = pubOf(p.id)?.status === "published";
+    if (!live && (!p.slug || p.slug === slugify(old))) { p.slug = slugify(p.title); $("#edSlug").value = p.slug; }
+    growTitle(); touch(p);
+  });
+  $("#edTitle").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); $("#edBody").focus(); } });
+  const bind = (sel, key, fn) => $(sel).addEventListener("input", e => { const p = postOf(curPost); p[key] = fn ? fn(e.target.value) : e.target.value; touch(p); });
+  bind("#edDate", "date"); bind("#edCat", "category"); bind("#edExc", "excerpt"); bind("#edSeoT", "seoTitle"); bind("#edSeoD", "seoDesc");
+  bind("#edSlug", "slug", v => slugify(v));
+  $("#edSlug").addEventListener("change", e => { e.target.value = postOf(curPost).slug; });
+  $("#edStatus").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const p = postOf(curPost);
+    if (b.dataset.v === "published" && !p.title.trim()) { toast("Donnez un titre à l'article avant de le mettre en ligne.", true); return; }
+    p.status = b.dataset.v; paintStatus(); touch(p);
+    if (p.status === "published") toast("L'article sera en ligne après « Publier sur le site ».");
+  });
+  $("#edDelete").addEventListener("click", () => {
+    const p = postOf(curPost);
+    if (!confirm(`Supprimer « ${p.title || "Sans titre"} » ?${pubOf(p.id) ? " Il disparaîtra du site après « Publier »." : ""}`)) return;
+    draft.posts = draft.posts.filter(x => x.id !== p.id); curPost = null; saveDraft();
+    $("#blogEdit").hidden = true; $("#blogList").hidden = false; renderBlogList();
+  });
+
+  function paintStatus() { const p = postOf(curPost); $$("#edStatus button").forEach(b => b.classList.toggle("on", b.dataset.v === p.status)); }
+  function paintCover() {
+    const p = postOf(curPost), img = $("#edCover img");
+    $("#edCover").classList.toggle("has", !!p.cover);
+    img.hidden = !p.cover; if (p.cover) img.src = mediaUrl(p.cover);
+    $("#edCover span").textContent = p.cover ? "Changer l'image" : "+ Image de couverture";
+  }
+  function counter(el, n, max) { el.textContent = `${n}/${max}`; el.classList.toggle("over", n > max); }
+  function paintSeo() {
+    const p = postOf(curPost); if (!p) return;
+    const title = (p.seoTitle || p.title || "Titre de l'article") + (p.seoTitle ? "" : " | ARélec");
+    const desc = p.seoDesc || p.excerpt || textOf(p.body).slice(0, 155);
+    $("#gpUrl").textContent = `entreprise-arelec.fr › blog › ${p.slug || "…"}`;
+    $("#gpTitle").textContent = title.length > 62 ? title.slice(0, 60) + "…" : title;
+    $("#gpDesc").textContent = desc.length > 160 ? desc.slice(0, 158) + "…" : (desc || "Ajoutez un résumé pour la description Google.");
+    counter($("#edExcN"), (p.excerpt || "").length, 300);
+    counter($("#edSeoTN"), title.length, 60);
+    counter($("#edSeoDN"), desc.length, 160);
+  }
+  function paintInfo() {
+    const words = textOf($("#edBody").innerHTML).split(" ").filter(Boolean).length;
+    const h2 = $("#edBody").querySelectorAll("h2").length;
+    $("#edInfo").textContent = `${words} mots · ${Math.max(1, Math.round(words / 200))} min de lecture · ${h2} partie${h2 > 1 ? "s" : ""} au sommaire · enregistré dans le brouillon`;
+  }
+
+  // ---------- barre d'outils ----------
+  const body = $("#edBody");
+  // Position du curseur suivie en continu ; restaurée seulement si elle a quitté l'éditeur (choix d'image, lien…)
+  function keepRange() { const s = getSelection(); if (s.rangeCount && body.contains(s.anchorNode)) savedRange = s.getRangeAt(0).cloneRange(); }
+  function restoreRange() {
+    const s = getSelection();
+    if (s.rangeCount && body.contains(s.anchorNode)) return;
+    body.focus();
+    if (savedRange && body.contains(savedRange.startContainer)) { s.removeAllRanges(); s.addRange(savedRange); }
+    else { const rg = document.createRange(); rg.selectNodeContents(body); rg.collapse(false); s.removeAllRanges(); s.addRange(rg); }
+  }
+  document.addEventListener("selectionchange", keepRange);
+  $("#edTools").addEventListener("mousedown", e => { if (e.target.closest("button")) e.preventDefault(); });
+  $("#edTools").addEventListener("click", e => {
+    const b = e.target.closest("button[data-cmd]"); if (!b) return;
+    const c = b.dataset.cmd;
+    restoreRange();
+    const ex = (k, v) => document.execCommand(k, false, v);
+    if (c === "h2" || c === "h3" || c === "p") ex("formatBlock", c);
+    else if (c === "quote") ex("formatBlock", "blockquote");
+    else if (c === "bold" || c === "italic" || c === "undo" || c === "redo") ex(c);
+    else if (c === "ul") ex("insertUnorderedList");
+    else if (c === "ol") ex("insertOrderedList");
+    else if (c === "hr") ex("insertHorizontalRule");
+    else if (c === "link") {
+      const url = prompt("Adresse du lien (une page du site comme /contact/, ou https://…). Laissez vide pour retirer le lien.", "/contact/");
+      if (url === null) return;
+      if (!url.trim()) ex("unlink");
+      else if (!/^(\/|https?:\/\/|tel:|mailto:)/.test(url.trim())) { toast("Le lien doit commencer par /, https://, tel: ou mailto:", true); return; }
+      else if (getSelection().isCollapsed) ex("insertHTML", `<a href="${esc(url.trim())}">${esc(url.trim())}</a>`);
+      else ex("createLink", url.trim());
+    } else if (c === "image") {
+      keepRange();
+      openPicker("Insérer une image dans l'article", id => {
+        restoreRange();
+        ex("insertHTML", `<figure><img data-media="${esc(id)}" src="${esc(mediaUrl(id))}" alt="${esc(mediaName(id))}"><figcaption></figcaption></figure><p><br></p>`);
+        flushBody();
+      });
+      return;
+    }
+    keepRange(); flushBody();
+  });
+  // Raccourcis + collage en texte simple (pas de styles copiés depuis Word ou un site)
+  body.addEventListener("keydown", e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $('#edTools [data-cmd="link"]').click(); }
+  });
+  body.addEventListener("paste", e => {
+    e.preventDefault();
+    const t = (e.clipboardData || window.clipboardData).getData("text/plain") || "";
+    const html = t.replace(/\r/g, "").split(/\n{2,}/).map(par => `<p>${esc(par).replace(/\n/g, "<br>")}</p>`).join("");
+    document.execCommand("insertHTML", false, html);
+  });
+  // Clic sur une image : sélection ; Suppr/Retour arrière la retire
+  body.addEventListener("click", e => {
+    body.querySelectorAll("figure.sel").forEach(f => f.classList.remove("sel"));
+    const f = e.target.closest("figure"); if (f && e.target.tagName === "IMG") f.classList.add("sel");
+  });
+  document.addEventListener("keydown", e => {
+    const f = body.querySelector("figure.sel");
+    if (f && (e.key === "Backspace" || e.key === "Delete") && !e.target.closest("figcaption")) { e.preventDefault(); f.remove(); flushBody(); }
+  });
+
+  $("#edCover").addEventListener("click", e => {
+    e.preventDefault();
+    openPicker("Image de couverture", id => { const p = postOf(curPost); p.cover = id; paintCover(); touch(p); renderBlogList(); });
+  });
+
+  // ---------- choix d'une image (médiathèque, photos du site ou nouvel envoi) ----------
+  let pickCb = null;
+  function openPicker(title, cb) {
+    pickCb = cb; $("#pkTitle").textContent = title;
+    const items = [...[...draft.media].reverse().map(m => m.id), ...SITE_IMAGES.map(f => "site:" + f)];
+    $("#pkGrid").innerHTML = items.map(id => `<button type="button" data-id="${esc(id)}"><img src="${esc(thumbUrl(id))}" alt="" loading="lazy"><span>${esc(mediaName(id))}</span></button>`).join("");
+    $("#picker").hidden = false;
+  }
+  const closePicker = () => { $("#picker").hidden = true; pickCb = null; };
+  $("#pkClose").addEventListener("click", closePicker);
+  $("#picker").addEventListener("click", e => { if (e.target.id === "picker") closePicker(); });
+  $("#pkGrid").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; const cb = pickCb; closePicker(); cb && cb(b.dataset.id); });
+  $("#pkFile").addEventListener("change", async e => {
+    const cb = pickCb, ids = await addFiles(e.target.files); e.target.value = "";
+    if (ids[0]) { closePicker(); cb && cb(ids[0]); }
+  });
+
+  // ---------- aperçu avec le style du site ----------
+  $("#edPreview").addEventListener("click", () => {
+    flushBody();
+    const p = postOf(curPost);
+    const d = document.createElement("div"); d.innerHTML = $("#edBody").innerHTML; cleanBody(d, true);
+    const toc = [...d.querySelectorAll("h2")].map((h, i) => { h.id = "s" + i; return `<li><a href="#s${i}">${esc(h.textContent)}</a></li>`; }).join("");
+    const words = textOf(d.innerHTML).split(" ").filter(Boolean).length;
+    $("#pvFrame").srcdoc = `<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Doto:wght@900&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@500&display=swap">
+      <link rel="stylesheet" href="/assets/css/styles.css"><style>.art-hero{padding-top:48px}</style></head><body><main>
+      <section class="art-hero"><div class="wrap"><div class="art-head">
+        <div class="crumb">Accueil › Blog › ${esc(p.title)}</div><span class="label on-mist">${esc(p.category)}</span>
+        <h1 class="h1 art-title">${esc(p.title || "Titre de l'article")}</h1>
+        <div class="art-meta mono">${dateFr(p.date)} · ${Math.max(1, Math.round(words / 200))} min de lecture · Par Arnaud Roncey</div>
+        ${p.excerpt ? `<p class="lead">${esc(p.excerpt)}</p>` : ""}</div>
+        <img class="art-cover" src="${esc(mediaUrl(p.cover) || "/assets/img/hero.jpg")}" alt=""></div></section>
+      <section class="sec"><div class="wrap art-grid"><aside class="art-side">${d.querySelectorAll("h2").length > 1 ? `<nav class="art-toc"><span class="mono">Sommaire</span><ol>${toc}</ol></nav>` : ""}</aside>
+      <article class="prose art-body">${d.innerHTML}</article></div></section></main></body></html>`;
+    $("#preview").hidden = false;
+  });
+  $("#pvClose").addEventListener("click", () => { $("#preview").hidden = true; });
+
   // ---------- publication ----------
   $("#discard").addEventListener("click", () => {
     if (!confirm("Annuler toutes les modifications non publiées ?")) return;
-    draft = JSON.parse(JSON.stringify(published)); pending = {};
+    draft = JSON.parse(JSON.stringify(published)); pending = {}; draft.posts = draft.posts || [];
     localStorage.removeItem(DRAFT_KEY); refreshBar(); renderLib();
+    if (curPost && !postOf(curPost)) { curPost = null; $("#blogEdit").hidden = true; $("#blogList").hidden = false; }
+    curPost ? openPost(curPost) : renderBlogList();
     frame.contentWindow?.location.reload();
   });
   $("#publish").addEventListener("click", async () => {
+    if (curPost) flushBody();
     const btn = $("#publish"); btn.disabled = true; $("#discard").disabled = true;
     setPub("busy", "Envoi…");
     const files = Object.entries(pending).filter(([id]) => draft.media.some(m => m.id === id)).map(([id, p]) => ({ id, sha: p.sha }));
@@ -634,6 +1053,7 @@ const CATEGORIES = __CATS__;
         if (b.sha === commit) {
           clearInterval(deployWatch); deployWatch = null;
           await loadData(); renderLib(); frame.contentWindow?.location.reload();
+          if (curPost && postOf(curPost)) openPost(curPost); else renderBlogList();
           setPub("live", "En ligne"); toast("C'est en ligne !");
           return;
         }

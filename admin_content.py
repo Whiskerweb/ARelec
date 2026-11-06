@@ -139,3 +139,114 @@ def gallery_items(data):
     """Photos classées par Arnaud, à ajouter en tête de la galerie Réalisations (les plus récentes d'abord)."""
     return [(f"/assets/img/u/{m['id']}.jpg", m["category"], m.get("name") or m["category"], m.get("alt") or m.get("name") or "")
             for m in reversed(data["media"]) if m.get("category") in CATEGORIES]
+
+
+# ---------- blog : articles écrits dans l'admin (data["posts"]) ----------
+BLOG_CATEGORIES = ["Électricité", "Chauffage", "Plomberie", "Rénovation", "Conseils", "Actualités"]
+MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"]
+
+
+def date_fr(iso):
+    try:
+        y, m, d = (int(x) for x in iso.split("-"))
+        return f"{d} {MOIS[m - 1]} {y}"
+    except Exception:
+        return iso
+
+
+def slugify(s):
+    import unicodedata
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")[:70] or "article"
+
+
+class _Post(HTMLParser):
+    """Corps d'article : garde la mise en forme prévue par l'éditeur, retire tout le reste."""
+    BLOCK = {"h2", "h3", "p", "ul", "ol", "li", "blockquote", "figure", "figcaption"}
+    INLINE = {"b", "strong", "i", "em", "a", "br", "hr"}
+
+    def __init__(self, data):
+        super().__init__(convert_charrefs=True)
+        self.data, self.out, self.toc, self.words, self.stack = data, [], [], 0, []
+        self.ids, self.skip = set(), 0
+
+    def handle_starttag(self, t, attrs):
+        a = dict(attrs)
+        if t in ("script", "style", "iframe", "object"):
+            self.skip += 1
+            return
+        if t == "img":
+            mid = a.get("data-media") or ""
+            src = media_src(self.data, mid) if mid else None
+            if src:
+                alt = a.get("alt") or media_alt(self.data, mid) or ""
+                self.out.append(f'<img src="{src}" alt="{_html.escape(alt)}" loading="lazy">')
+            return
+        if t not in self.BLOCK | self.INLINE:
+            return
+        if t == "a":
+            href = a.get("href") or ""
+            ok = re.match(r"^(/|tel:|mailto:|https?://)", href)
+            ext = href.startswith("http")
+            self.out.append(f'<a href="{_html.escape(href)}"{" target=\"_blank\" rel=\"noopener\"" if ext else ""}>' if ok else "<a>")
+        elif t in ("br", "hr"):
+            self.out.append(f"<{t}>")
+            return
+        elif t == "h2":
+            self.out.append("<h2 \0>")  # identifiant ajouté à la fermeture (sommaire)
+        else:
+            self.out.append(f"<{t}>")
+        self.stack.append(t)
+
+    def handle_endtag(self, t):
+        if t in ("script", "style", "iframe", "object"):
+            self.skip = max(0, self.skip - 1)
+            return
+        if t not in self.stack:
+            return
+        while self.stack:
+            x = self.stack.pop()
+            if x == "h2":
+                i = max(k for k, v in enumerate(self.out) if v == "<h2 \0>")
+                text = re.sub(r"<[^>]+>", "", "".join(self.out[i + 1:])).strip()
+                base = slugify(text)
+                hid, n = base, 2
+                while hid in self.ids:
+                    hid, n = f"{base}-{n}", n + 1
+                self.ids.add(hid)
+                self.out[i] = f'<h2 id="{hid}">'
+                if text:
+                    self.toc.append((hid, _html.unescape(text)))
+            self.out.append(f"</{x}>")
+            if x == t:
+                break
+
+    def handle_data(self, d):
+        if self.skip:
+            return
+        self.words += len(d.split())
+        self.out.append(_html.escape(d, quote=False))
+
+
+def render_post(body, data):
+    """Corps HTML propre + sommaire (h2) + temps de lecture (≈ 200 mots/min)."""
+    p = _Post(data)
+    p.feed(body or "")
+    p.close()
+    while p.stack:
+        p.handle_endtag(p.stack[-1])
+    html_out = re.sub(r"<(p|h2|h3|li|blockquote|figcaption)( id=\"[^\"]*\")?>\s*(<br>)?\s*</\1>", "", "".join(p.out))
+    return html_out, p.toc, max(1, round(p.words / 200))
+
+
+def published_posts(data):
+    """Articles publiés, du plus récent au plus ancien (avec un slug unique chacun)."""
+    seen, out = set(), []
+    posts = [x for x in data.get("posts", []) if x.get("status") == "published" and x.get("title")]
+    for x in sorted(posts, key=lambda x: (x.get("date") or "", x.get("updated") or ""), reverse=True):
+        s = x.get("slug") or slugify(x["title"])
+        while s in seen:
+            s += "-2"
+        seen.add(s)
+        out.append({**x, "slug": s})
+    return out

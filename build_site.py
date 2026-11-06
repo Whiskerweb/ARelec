@@ -444,6 +444,31 @@ a.area-chip:hover{background:var(--ink);color:#fff}
 .prose{max-width:760px;font-size:16px;line-height:1.75;color:var(--muted)}
 .prose h2{font-size:24px;font-weight:400;letter-spacing:-.02em;color:var(--ink);margin:40px 0 12px}
 .prose p{margin:0 0 14px}
+.prose h3{font-size:19px;font-weight:500;letter-spacing:-.01em;color:var(--ink);margin:28px 0 10px}
+.prose ul,.prose ol{margin:0 0 16px;padding-left:22px}.prose li{margin:5px 0}
+.prose blockquote{margin:24px 0;padding:16px 20px;border-left:3px solid var(--lime);background:var(--mist);border-radius:0 14px 14px 0;color:var(--ink)}
+.prose figure{margin:28px 0}.prose img{display:block;width:100%;height:auto;border-radius:18px}
+.prose figcaption{margin-top:8px;font-size:13.5px;color:var(--muted);text-align:center}
+.prose hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+.prose b,.prose strong{color:var(--ink);font-weight:500}
+.art-hero{padding:130px 0 0}
+.art-head{max-width:860px;display:flex;flex-direction:column;align-items:flex-start;gap:18px}
+.art-title{font-size:clamp(34px,5vw,58px)}
+.art-meta{color:var(--muted);line-height:1.6}
+.art-cover{display:block;width:100%;max-height:560px;object-fit:cover;border-radius:28px;margin-top:44px}
+.art-grid{display:grid;grid-template-columns:230px minmax(0,1fr);gap:64px;align-items:start}
+.art-side{position:sticky;top:110px;display:flex;flex-direction:column;gap:28px}
+.art-toc ol{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.4}
+.art-toc a{color:var(--muted);text-decoration:none}.art-toc a:hover{color:var(--ink)}
+.art-share div{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.art-share a,.art-share button{display:inline-flex;align-items:center;min-height:34px;padding:5px 12px;border-radius:100px;font:inherit;font-size:13px;color:var(--ink);text-decoration:none;background:var(--mist);border:1px solid transparent;cursor:pointer}
+.art-share a:hover,.art-share button:hover{border-color:var(--ink)}
+.art-body{max-width:720px;font-size:17px;color:#3d3c38}
+.art-body h2{scroll-margin-top:110px}
+a.post,a.post-feat{color:inherit;text-decoration:none}
+a.post:hover h3,a.post-feat:hover h2{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.post[hidden]{display:none}
+@media (max-width:900px){.art-grid{grid-template-columns:1fr;gap:32px}.art-side{position:static;order:2}.art-hero{padding-top:110px}}
 /* --- assistant : bulle discrète + panneau --- */
 /* --- responsive --- */
 @media (max-width:1100px){
@@ -1129,7 +1154,12 @@ def shell(path,title,desc,body,jl,active):
 
 _INTERNAL=re.compile(r'href="(/[a-z0-9-]+(?:/[a-z0-9-]+)*)(?=["#?])')
 def write(path,h):
-    h=AC.apply("/"+(path.strip("/")+"/" if path.strip("/") else ""), h, ADMIN)
+    if path.startswith("blog/"):
+        h=h.replace('<meta property="og:type" content="website">','<meta property="og:type" content="article">',1)
+    else:
+        h=AC.apply("/"+(path.strip("/")+"/" if path.strip("/") else ""), h, ADMIN)
+    if path.startswith("blog"):
+        h=h.replace("</head>",f'<link rel="alternate" type="application/rss+xml" title="Blog ARélec" href="{DOMAIN}/blog/feed.xml"></head>',1)
     h=_INTERNAL.sub(r'href="\1/', h)
     d=SITE/(path.strip("/")); d.mkdir(parents=True,exist_ok=True)
     (d/"index.html").write_text(h)
@@ -1586,31 +1616,89 @@ pages.append(("entreprise","L'entreprise | ARélec, artisan depuis 2010",
   "ARélec, artisan électricien-chauffagiste-plombier à Plouzané depuis 2010. Une équipe, un seul interlocuteur, un travail soigné dans tout le bassin brestois.",
   about_body, jsonld("/entreprise","L'entreprise",None,breadcrumb_name="L'entreprise"), "/entreprise"))
 
-# ---------- /blog (maquette : articles à rédiger, page en noindex) ----------
-POSTS=[("chauffage","confort.jpg","Chauffage : les réglages qui font baisser la facture"),
-       ("plomberie","sdb-bleue.jpg","Rénover sa salle de bain : par où commencer ?"),
-       ("électricité","reno-cablage.jpg","Mise aux normes NF C 15-100 : ce qu'il faut savoir"),
-       ("plomberie","douche-marbre.jpg","Une fuite invisible ? Les signes qui ne trompent pas"),
-       ("électricité","eclairage.jpg","Bien éclairer une pièce : nos conseils d'artisan"),
-       ("chauffage","maison-bleue.jpg","Pompe à chaleur : est-ce adapté à ma maison ?")]
-posts="".join(f'<article{R(.06*(i%3),"post")}><div class="img"><img src="/assets/img/{img}" alt="" loading="lazy"><span class="tag mono">{cat}</span></div>'
-              f'<div class="meta mono"><span class="pill lime">À rédiger</span>{tbd("date")}</div><h3 class="h3">{t}</h3>'
-              f'<p class="small">{tbd("Résumé de l\'article à rédiger")}</p></article>' for i,(cat,img,t) in enumerate(POSTS))
+# ---------- /blog : articles écrits depuis l'espace admin (onglet Blog, content/admin.json) ----------
+BLOG_POSTS=AC.published_posts(ADMIN)
+if BLOG_POSTS: NOINDEX.discard("blog")
+def _cover(p):
+    return (AC.media_src(ADMIN,p["cover"]) if p.get("cover") else None) or "/assets/img/hero.jpg"
+def _excerpt(p, n=155):
+    e=(p.get("excerpt") or "").strip() or " ".join(re.sub(r"<[^>]+>"," ",p.get("body") or "").split())
+    return e if len(e)<=n else e[:n].rsplit(" ",1)[0]+"…"
+def _post_card(p,i):
+    _,_,mins=AC.render_post(p.get("body",""),ADMIN)
+    return (f'<a{R(.06*(i%3),"post")} href="/blog/{p["slug"]}" data-cat="{html.escape(p.get("category") or "")}">'
+            f'<div class="img"><img src="{_cover(p)}" alt="" loading="lazy"><span class="tag mono">{html.escape(p.get("category") or "Conseils")}</span></div>'
+            f'<div class="meta mono">{AC.date_fr(p["date"])} · {mins} min</div><h3 class="h3">{html.escape(p["title"])}</h3>'
+            f'<p class="small">{html.escape(_excerpt(p,140))}</p></a>')
+if BLOG_POSTS:
+    feat=BLOG_POSTS[0]; _,_,fmins=AC.render_post(feat.get("body",""),ADMIN)
+    _bcats=[c for c in AC.BLOG_CATEGORIES if any(x.get("category")==c for x in BLOG_POSTS[1:])]
+    blog_list=('<section class="sec"><div class="wrap">'
+      f'<a{R(0,"post-feat")} href="/blog/{feat["slug"]}" data-cat="{html.escape(feat.get("category") or "")}"><div class="img"><img src="{_cover(feat)}" alt="" fetchpriority="high"><span class="tag mono">À la une</span></div>'
+      f'<div class="txt"><div class="meta mono"><span class="pill lime">{html.escape(feat.get("category") or "Conseils")}</span>{AC.date_fr(feat["date"])} · {fmins} min de lecture</div>'
+      f'<h2 class="h2">{html.escape(feat["title"])}</h2><p class="lead">{html.escape(_excerpt(feat,220))}</p>'
+      '<span class="btn btn-dark"><span class="chip">'+ic("arrow")+'</span>Lire l\'article</span></div></a>'
+      +((f'<div class="head" style="margin-top:96px"><span{R()}>{label("Tous les articles")}</span></div>'
+         +('<div class="gfilters bfilters" role="group" aria-label="Filtrer les articles"><button type="button" class="on" data-f="">Tout</button>'
+           +"".join(f'<button type="button" data-f="{html.escape(c)}">{c}</button>' for c in _bcats)+'</div>' if len(_bcats)>1 else "")
+         +'<div class="posts">'+"".join(_post_card(x,i) for i,x in enumerate(BLOG_POSTS[1:]))+'</div>') if len(BLOG_POSTS)>1 else "")
+      +'</div></section>'
+      '<script>(function(){var f=document.querySelector(".bfilters");if(!f)return;f.addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;'
+      'f.querySelectorAll("button").forEach(function(x){x.classList.toggle("on",x===b)});'
+      'document.querySelectorAll(".posts .post").forEach(function(g){g.hidden=!!b.dataset.f&&g.dataset.cat!==b.dataset.f})})})();</script>')
+else:
+    blog_list=('<section class="sec"><div class="wrap">'
+      f'<div{R(0,"blog-empty")}><span class="icon-chip">{ic("doc")}</span>'
+      '<h2 class="h2">Aucun article<br><b>pour le moment.</b></h2>'
+      '<p class="lead">Nos premiers conseils d\'artisan arrivent bientôt : électricité, chauffage, plomberie. '
+      'En attendant, posez directement votre question, on vous répond.</p>'
+      f'<div class="actions">{btn_contact("dark","Poser une question")}{btn("Voir nos réalisations","/realisations","light")}</div></div>'
+      '</div></section>')
 blog_body=(phero(CRUMB_M.format(label="Blog"),"Le journal ARélec",
   "Des conseils pratiques<br><b>pour une maison sûre et confortable.</b>",
   "Électricité, chauffage, plomberie : les bons réflexes et les questions qu'on nous pose le plus, expliqués simplement.",actions="")
- # Aucun article publié pour l'instant : les articles prévus (POSTS) restent cachés jusqu'à leur rédaction
- +('<section class="sec"><div class="wrap">'
-   f'<div{R(0,"blog-empty")}><span class="icon-chip">{ic("doc")}</span>'
-   '<h2 class="h2">Aucun article<br><b>pour le moment.</b></h2>'
-   '<p class="lead">Nos premiers conseils d\'artisan arrivent bientôt : électricité, chauffage, plomberie. '
-   'En attendant, posez directement votre question, on vous répond.</p>'
-   f'<div class="actions">{btn_contact("dark","Poser une question")}{btn("Voir nos réalisations","/realisations","light")}</div></div>'
-   '</div></section>')
+ +blog_list
  +cta_section('Une question précise ?<br><b>Posez-la directement.</b>',"Notre assistant vous répond tout de suite, puis l'équipe prend le relais sur WhatsApp."))
 pages.append(("blog","Blog — conseils électricité, chauffage, plomberie | ARélec",
   "Conseils d'artisan sur l'électricité, le chauffage et la plomberie : bons réflexes, entretien et rénovation, par ARélec.",
   blog_body, jsonld("/blog","Blog",None,reviews=False,breadcrumb_name="Blog"), "/blog"))
+
+# Une page par article : couverture, sommaire automatique, partage, articles liés, données structurées BlogPosting
+for p in BLOG_POSTS:
+    body_html,toc,mins=AC.render_post(p.get("body",""),ADMIN)
+    url=f"/blog/{p['slug']}/"; cover=_cover(p); title=p["title"]; cat=p.get("category") or "Conseils"
+    upd=p.get("updated") if p.get("updated") and p.get("updated")!=p.get("date") else None
+    share_u=html.escape(DOMAIN+url)
+    toc_html=(f'<nav class="art-toc" aria-label="Sommaire"><span class="mono">Sommaire</span><ol>'
+              +"".join(f'<li><a href="#{i}">{html.escape(t)}</a></li>' for i,t in toc)+'</ol></nav>') if len(toc)>1 else ""
+    share=('<div class="art-share"><span class="mono">Partager</span><div>'
+           f'<a href="https://www.facebook.com/sharer/sharer.php?u={share_u}" target="_blank" rel="noopener">Facebook</a>'
+           f'<a href="https://wa.me/?text={html.escape(title)}%20{share_u}" target="_blank" rel="noopener">WhatsApp</a>'
+           f'<a href="mailto:?subject={html.escape(title)}&amp;body={share_u}">Email</a>'
+           '<button type="button" data-copy>Copier le lien</button></div></div>')
+    related=sorted([q for q in BLOG_POSTS if q is not p], key=lambda q: q.get("category")!=p.get("category"))[:3]
+    art=('<section class="art-hero"><div class="wrap"><div class="art-head">'
+         f'<div class="crumb"><a href="/">Accueil</a> › <a href="/blog">Blog</a> › {html.escape(title)}</div>'
+         f'{label(html.escape(cat),"on-mist")}'
+         f'<h1 class="h1 art-title">{html.escape(title)}</h1>'
+         f'<div class="art-meta mono">{AC.date_fr(p["date"])}{" · mis à jour le "+AC.date_fr(upd) if upd else ""} · {mins} min de lecture · Par Arnaud Roncey</div>'
+         +(f'<p class="lead">{html.escape(p["excerpt"])}</p>' if p.get("excerpt") else "")+'</div>'
+         f'<img class="art-cover" src="{cover}" alt="{html.escape(title)}" fetchpriority="high"></div></section>'
+         '<section class="sec art-sec"><div class="wrap art-grid">'
+         f'<aside class="art-side">{toc_html}{share}</aside>'
+         f'<article class="prose art-body">{body_html}</article></div></section>'
+         +(('<section class="sec" style="padding-top:0"><div class="wrap">'
+            f'<div class="head"><span>{label("À lire aussi")}</span></div><div class="posts">'
+            +"".join(_post_card(q,i) for i,q in enumerate(related))+'</div></div></section>') if related else "")
+         +cta_section('Un projet en tête ?<br><b>Parlons-en.</b>',"Décrivez votre besoin à notre assistant : on vous répond et on prépare la visite gratuite.")
+         +'<script>document.querySelector("[data-copy]")?.addEventListener("click",function(){navigator.clipboard.writeText(location.href.split("#")[0]);this.textContent="Lien copié"});</script>')
+    bp={"@context":"https://schema.org","@type":"BlogPosting","headline":title[:110],"description":_excerpt(p),
+        "image":[DOMAIN+cover],"datePublished":p["date"],"dateModified":upd or p["date"],"inLanguage":"fr-FR",
+        "author":{"@type":"Person","name":"Arnaud Roncey","url":DOMAIN+"/entreprise/"},
+        "publisher":{"@id":f"{DOMAIN}/#business"},"mainEntityOfPage":DOMAIN+url,"articleSection":cat}
+    pages.append((f"blog/{p['slug']}", (p.get("seoTitle") or f"{title} | ARélec")[:70], (p.get("seoDesc") or _excerpt(p))[:170], art,
+                  jsonld(url,title,None,reviews=False,breadcrumb_name=title,parent=("Blog","/blog/"))
+                  +f'<script type="application/ld+json">{_dump(bp)}</script>', "/blog"))
 
 # ---------- /contact ----------
 contact_body=(phero(CRUMB_M.format(label="Contact"),"Contact",
@@ -2106,7 +2194,7 @@ class _Txt(HTMLParser):
             if tt==t: break
     def handle_data(s,d):
         if s.inmain and not s.skip and s.out: s.out[-1][1]+=d
-SRC_PAGES=["","electricite","chauffage","plomberie","services","entreprise","contact","realisations"]
+SRC_PAGES=["","electricite","chauffage","plomberie","services","entreprise","contact","realisations"]+[f"blog/{x['slug']}" for x in BLOG_POSTS]
 SOURCES=[]; seen=set()
 for slug in SRC_PAGES:
     title=next((x["title"] for x in PAGE_LIST if x["url"]==("/"+slug+"/" if slug else "/")),slug)
@@ -2128,5 +2216,21 @@ _site_imgs=sorted(f.name for f in IMG.glob("*.jpg") if not any(x in f.name for x
 (SITE/"admin"/"index.html").write_text((ROOT/"admin.html").read_text()
     .replace("__PAGES__", json.dumps(PAGE_LIST, ensure_ascii=False))
     .replace("__SITE_IMAGES__", json.dumps(_site_imgs))
-    .replace("__CATS__", json.dumps(AC.CATEGORIES, ensure_ascii=False)))
+    .replace("__CATS__", json.dumps(AC.CATEGORIES, ensure_ascii=False))
+    .replace("__BLOG_CATS__", json.dumps(AC.BLOG_CATEGORIES, ensure_ascii=False)))
 (SITE/"build.json").write_text(json.dumps({"sha": os.environ.get("VERCEL_GIT_COMMIT_SHA", "local"), "at": datetime.datetime.utcnow().isoformat(timespec="seconds")+"Z"}))
+
+# ---------- flux RSS du blog (/blog/feed.xml) ----------
+from email.utils import format_datetime
+def _rfc822(iso):
+    try: return format_datetime(datetime.datetime.fromisoformat(iso).replace(hour=8, tzinfo=datetime.timezone.utc))
+    except Exception: return ""
+_items="".join(
+    f"<item><title>{html.escape(x['title'])}</title><link>{DOMAIN}/blog/{x['slug']}/</link><guid>{DOMAIN}/blog/{x['slug']}/</guid>"
+    f"<pubDate>{_rfc822(x['date'])}</pubDate><category>{html.escape(x.get('category') or 'Conseils')}</category>"
+    f"<description>{html.escape(_excerpt(x,300))}</description></item>" for x in BLOG_POSTS[:30])
+(SITE/"blog").mkdir(exist_ok=True)
+(SITE/"blog"/"feed.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel>'
+    f"<title>Blog ARélec</title><link>{DOMAIN}/blog/</link><language>fr-FR</language>"
+    "<description>Conseils d'artisan sur l'électricité, le chauffage et la plomberie, par ARélec (Plouzané).</description>"
+    f"{_items}</channel></rss>\n")

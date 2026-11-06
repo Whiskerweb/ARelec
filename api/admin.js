@@ -12,6 +12,7 @@ const BRANCH = process.env.GITHUB_BRANCH || "main";
 const DATA_PATH = "content/admin.json";
 const COOKIE = "arelec_admin", SESSION_S = 7 * 24 * 3600;
 const CATEGORIES = ["Rénovation", "Salle de bain", "Électricité", "Éclairage", "Chauffage", "Plomberie", "Extérieur"];
+const BLOG_CATEGORIES = ["Électricité", "Chauffage", "Plomberie", "Rénovation", "Conseils", "Actualités"];
 const MAX_IMG = 4 * 1024 * 1024;
 const hits = new Map(); // tentatives de connexion par IP (mémoire de l'instance)
 
@@ -73,7 +74,24 @@ function validate(d) {
   for (const [k, v] of Object.entries(d.texts || {})) {
     if (/^(\*|\/[a-z0-9/-]*)\|[0-9a-f]{10}$/.test(k) && typeof v === "string" && v.trim()) texts[k] = v.slice(0, 3000);
   }
-  return { version: 1, media, images, texts };
+  // Articles du blog : le corps HTML est nettoyé au build (balises autorisées seulement)
+  const day = v => (/^\d{4}-\d{2}-\d{2}$/.test(v) ? v : "");
+  const slugs = new Set();
+  const posts = (Array.isArray(d.posts) ? d.posts : []).slice(0, 300).filter(x => x && ID.test(x.id)).map(x => {
+    let slug = str(x.slug, 70).toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-+|-+$/g, "");
+    while (slug && slugs.has(slug)) slug += "-2";
+    if (slug) slugs.add(slug);
+    const cover = typeof x.cover === "string" && (ids.has(x.cover) || /^site:[a-z0-9._-]+\.(jpe?g|png|webp)$/.test(x.cover)) ? x.cover : "";
+    return {
+      id: x.id, slug, title: str(x.title, 140), excerpt: str(x.excerpt, 300),
+      category: BLOG_CATEGORIES.includes(x.category) ? x.category : "Conseils", cover,
+      status: x.status === "published" ? "published" : "draft",
+      date: day(x.date) || new Date().toISOString().slice(0, 10), updated: day(x.updated),
+      seoTitle: str(x.seoTitle, 70), seoDesc: str(x.seoDesc, 170),
+      body: typeof x.body === "string" ? x.body.slice(0, 200000) : ""
+    };
+  });
+  return { version: 1, media, images, texts, posts };
 }
 
 // ---------- actions ----------
