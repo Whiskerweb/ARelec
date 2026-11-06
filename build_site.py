@@ -161,12 +161,13 @@ body.menu-open{overflow:hidden}
 .logos-intro{flex:none;width:250px;display:flex;flex-direction:column;gap:6px}
 .logos-intro .small{font-size:13px;line-height:1.5}
 .ticker{flex:1;min-width:0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.ticker-track{display:flex;gap:56px;width:max-content;animation:marquee 32s linear infinite}
-.ticker-item{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:500;letter-spacing:-.02em;color:#9a978e;white-space:nowrap}
+.ticker-track{display:flex;width:max-content;animation:marquee 45s linear infinite;will-change:transform}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.ticker-item{flex:none;display:flex;align-items:center;gap:10px;padding-right:56px;font-size:18px;font-weight:500;letter-spacing:-.02em;color:#9a978e;white-space:nowrap}
 .ticker-item .ic{width:22px;height:22px}
-.ticker-item img{height:40px;width:auto;mix-blend-mode:multiply;filter:grayscale(1);opacity:.65;transition:filter .3s,opacity .3s}
+.ticker-item img{display:block;height:40px;width:auto;max-width:none;mix-blend-mode:multiply;filter:grayscale(1);opacity:.65;transition:filter .3s,opacity .3s}
 .ticker-item img:hover{filter:none;opacity:1}
-@keyframes marquee{to{transform:translateX(-50%)}}
+@keyframes marquee{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
 /* --- chiffres --- */
 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:64px}
 .stat{border-top:1px solid var(--line);padding-top:22px}
@@ -655,13 +656,18 @@ def hero_home():
 PARTNERS=[("schneider-electric","Schneider Electric"),("atlantic","Atlantic"),("thermor","Thermor"),("legrand","Legrand"),
           ("sonepar","Sonepar"),("aubade","Espace Aubade"),("cedeo","Cedeo"),("la-maison-des-travaux","La Maison des Travaux"),
           (None,"Point A"),("maisons-georges-menez","Les Maisons Georges Ménez"),("georges-menez-evolution","Georges Ménez Évolution")]
+def _logo_w(f):
+    # Largeur d'affichage (40 px de haut) : déclarée pour que la bande ne bouge pas pendant le chargement
+    with Image.open(IMG/"partenaires"/f"{f}.png") as im: return round(im.width*40/im.height)
 def logos_band():
-    items="".join(f'<span class="ticker-item"><img src="/assets/img/partenaires/{f}.png" alt="{n}" loading="lazy"></span>' if f
-                  else f'<span class="ticker-item">{n}</span>' for f,n in PARTNERS)
+    # Deux copies identiques de la liste ; la bande glisse d'une copie exacte (-50 %) puis recommence, sans saut
+    one="".join(f'<span class="ticker-item"><img src="/assets/img/partenaires/{f}.png" alt="{n}" width="{_logo_w(f)}" height="40" decoding="async"></span>' if f
+                else f'<span class="ticker-item">{n}</span>' for f,n in PARTNERS)
+    items=one+one.replace('alt="','aria-hidden="true" alt="').replace('<span class="ticker-item">Point','<span class="ticker-item" aria-hidden="true">Point')
     return ('<section class="logos"><div class="wrap">'
             f'<div{R(0,"logos-intro")}><span class="mono">Ils nous font confiance</span>'
             '<span class="small">Fournisseurs, partenaires et clients pros du bassin brestois.</span></div>'
-            f'<div class="ticker" aria-label="Logos partenaires"><div class="ticker-track">{items}{items}</div></div>'
+            f'<div class="ticker" aria-label="Logos partenaires"><div class="ticker-track">{items}</div></div>'
             '</div></section>')
 
 def stats_section(title='Un savoir-faire qui se voit.<br><b>Un travail qui dure.</b>',
