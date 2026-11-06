@@ -89,5 +89,21 @@
   "*|4793e5f788": "De la prise qui brule à la salle de bain complète : on s'occupe de toute la maison, en neuf comme en rénovation. Un seul devis, un seul interlocuteur, du début à la fin.",
   "/|123c9bbb47": "Réalisation",
   "/entreprise/|94dee4ae69": "Installés à Plouzané, on s'occupe de l'électricité, du chauffage et de la plomberie dans le bassin brestois. En neuf, en rénovation, en dépannage. Un seul interlocuteur de bout en bout"
- }
+ },
+ "posts": [
+  {
+   "id": "2026-11-06-w31hd4",
+   "slug": "hey",
+   "title": "hey",
+   "excerpt": "",
+   "category": "Conseils",
+   "cover": "",
+   "status": "draft",
+   "date": "2026-11-06",
+   "updated": "",
+   "seoTitle": "",
+   "seoDesc": "",
+   "body": "<p>ghjk</p>"
+  }
+ ]
 }
