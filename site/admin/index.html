@@ -1033,9 +1033,15 @@ const BLOG_CATEGORIES = ["Électricité", "Chauffage", "Plomberie", "Rénovation
     const files = Object.entries(pending).filter(([id]) => draft.media.some(m => m.id === id)).map(([id, p]) => ({ id, sha: p.sha }));
     try {
       const n = changes();
-      const { commit } = await call("publish", { data: draft, base: baseSha, files, message: `${n} modification${n > 1 ? "s" : ""}` });
-      localStorage.removeItem(DRAFT_KEY);
-      watchDeploy(commit);
+      const sent = JSON.stringify(draft);
+      const out = await call("publish", { data: draft, base: baseSha, files, message: `${n} modification${n > 1 ? "s" : ""}` });
+      // Le brouillon est recalé tout de suite sur la version publiée : ce qui est modifié pendant la mise en ligne
+      // (une suppression, un texte…) reste en attente au lieu d'être perdu au rechargement.
+      published = out.data; published.posts = published.posts || []; baseSha = out.sha;
+      files.forEach(f => delete pending[f.id]);
+      if (JSON.stringify(draft) === sent) { draft = JSON.parse(JSON.stringify(out.data)); for (const k of ["media", "images", "texts", "posts"]) draft[k] = draft[k] || (k === "media" || k === "posts" ? [] : {}); }
+      saveDraft();
+      watchDeploy(out.commit);
     } catch (e) {
       setPub("error", "Échec");
       toast(e.message === "conflict" ? "Le site a été modifié entre-temps. Rechargez la page avant de publier." : "La publication a échoué. Réessayez dans un instant.", true);

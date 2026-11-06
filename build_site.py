@@ -1153,7 +1153,9 @@ def shell(path,title,desc,body,jl,active):
             + '<script src="/assets/js/site.js?v=2" defer></script></body></html>')
 
 _INTERNAL=re.compile(r'href="(/[a-z0-9-]+(?:/[a-z0-9-]+)*)(?=["#?])')
+WRITTEN=set()  # pages écrites par ce build (les autres, ex. un article supprimé, sont retirées à la fin)
 def write(path,h):
+    WRITTEN.add(path.strip("/"))
     if path.startswith("blog/"):
         h=h.replace('<meta property="og:type" content="website">','<meta property="og:type" content="article">',1)
     else:
@@ -2234,3 +2236,13 @@ _items="".join(
     f"<title>Blog ARélec</title><link>{DOMAIN}/blog/</link><language>fr-FR</language>"
     "<description>Conseils d'artisan sur l'électricité, le chauffage et la plomberie, par ARélec (Plouzané).</description>"
     f"{_items}</channel></rss>\n")
+
+# ---------- ménage : pages qui ne sont plus générées (article supprimé, page retirée) ----------
+import shutil
+for f in sorted(SITE.rglob("index.html"), reverse=True):
+    rel=f.parent.relative_to(SITE).as_posix()
+    rel="" if rel=="." else rel
+    if rel in WRITTEN or rel.split("/")[0] in ("admin","assets"): continue
+    f.unlink()
+    if not any(f.parent.iterdir()): shutil.rmtree(f.parent)
+    print("page retirée :", "/"+rel)

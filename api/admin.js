@@ -102,6 +102,7 @@ async function publish(body) {
   const files = (Array.isArray(body.files) ? body.files : []).filter(f => ID.test(f.id) && /^[0-9a-f]{40}$/.test(f.sha));
   // Photos retirées de la médiathèque : on supprime aussi le fichier du dépôt
   const removed = current.media.map(m => m.id).filter(id => !next.media.some(m => m.id === id));
+  const content = JSON.stringify(next, null, 1) + "\n";
   const ref = await gh(`/git/ref/heads/${BRANCH}`);
   const head = await gh(`/git/commits/${ref.object.sha}`);
   const tree = await gh("/git/trees", {
@@ -109,7 +110,7 @@ async function publish(body) {
     body: JSON.stringify({
       base_tree: head.tree.sha,
       tree: [
-        { path: DATA_PATH, mode: "100644", type: "blob", content: JSON.stringify(next, null, 1) + "\n" },
+        { path: DATA_PATH, mode: "100644", type: "blob", content },
         ...files.map(f => ({ path: `assets/uploads/${f.id}.jpg`, mode: "100644", type: "blob", sha: f.sha })),
         ...removed.map(id => ({ path: `assets/uploads/${id}.jpg`, mode: "100644", type: "blob", sha: null }))
       ]
@@ -124,7 +125,9 @@ async function publish(body) {
     })
   });
   await gh(`/git/refs/heads/${BRANCH}`, { method: "PATCH", body: JSON.stringify({ sha: commit.sha, force: false }) });
-  return { commit: commit.sha };
+  // Empreinte Git du nouveau content/admin.json : l'admin se recale dessus sans attendre la fin du build
+  const dataSha = crypto.createHash("sha1").update(`blob ${Buffer.byteLength(content)}\0`).update(content).digest("hex");
+  return { commit: commit.sha, sha: dataSha, data: next };
 }
 
 module.exports = async (req, res) => {
