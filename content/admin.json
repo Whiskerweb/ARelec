@@ -90,20 +90,5 @@
   "/|123c9bbb47": "Réalisation",
   "/entreprise/|94dee4ae69": "Installés à Plouzané, on s'occupe de l'électricité, du chauffage et de la plomberie dans le bassin brestois. En neuf, en rénovation, en dépannage. Un seul interlocuteur de bout en bout"
  },
- "posts": [
-  {
-   "id": "2026-11-06-rbioxn",
-   "slug": "lalala",
-   "title": "lalala",
-   "excerpt": "",
-   "category": "Conseils",
-   "cover": "site:confort.jpg",
-   "status": "published",
-   "date": "2026-11-06",
-   "updated": "",
-   "seoTitle": "",
-   "seoDesc": "",
-   "body": "<p>eeee</p><h2>eee</h2><h3>eeee</h3><p>eee</p><p><i>edzdzdzd</i></p><p><i><br></i></p><p><i><b>dzdd\"d</b></i></p><blockquote><i><b>\"d\"d\"d</b></i></blockquote><p><i><b>d\"d\"d</b></i></p>"
-  }
- ]
+ "posts": []
 }
