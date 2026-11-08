@@ -28,7 +28,7 @@ Le numéro **06 78 02 04 24** reste sur l'app WhatsApp Business d'Arnaud. Il est
 | Variable | Obligatoire | Rôle |
 |---|---|---|
 | `OPENROUTER_API_KEY` | oui | IA du site et de WhatsApp |
-| `OPENROUTER_MODEL` | non | modèle, `anthropic/claude-haiku-4.5` par défaut |
+| `OPENROUTER_MODEL` | non | modèle, `anthropic/claude-haiku-5.5` par défaut (réflexion désactivée) |
 | `D360_API_KEY` | oui | clé API 360dialog du numéro |
 | `WHATSAPP_WEBHOOK_KEY` | oui | longue phrase secrète au choix (ex. 40 caractères aléatoires) ; 360dialog la renvoie à chaque message pour prouver que c'est lui |
 | `ARELEC_NOTIFY_WA` | non | n° perso d'Arnaud pour la fiche, format `336XXXXXXXX` |

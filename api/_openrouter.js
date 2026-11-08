@@ -1,7 +1,8 @@
 // Appel OpenRouter partagé par l'assistant du site (chat.js) et l'agent WhatsApp (whatsapp.js).
 const { CONTEXT } = require("./_context.js");
 
-const MODEL = process.env.OPENROUTER_MODEL || "anthropic/claude-haiku-4.5";
+// Claude Haiku 5.5 : même qualité que Haiku 4.5 pour 10 fois moins cher (0,10 $ / 0,50 $ par million de jetons)
+const MODEL = process.env.OPENROUTER_MODEL || "anthropic/claude-haiku-5.5";
 
 // Faits communs aux deux agents ; chaque agent ajoute ses propres consignes devant.
 const COMMON = `Règles communes :
@@ -28,7 +29,7 @@ function request(instructions, messages, maxTokens, extra) {
       "HTTP-Referer": "https://www.entreprise-arelec.fr",
       "X-Title": "ARelec - assistant"
     },
-    body: JSON.stringify({ model: MODEL, messages: [{ role: "system", content: instructions + "\n\n" + COMMON }, ...messages], max_tokens: maxTokens, temperature: 0.5, ...extra }),
+    body: JSON.stringify({ model: MODEL, messages: [{ role: "system", content: instructions + "\n\n" + COMMON }, ...messages], max_tokens: maxTokens, temperature: 0.5, reasoning: { enabled: false }, ...extra }),
     signal: AbortSignal.timeout(25000)
   });
 }
